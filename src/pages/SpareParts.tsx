@@ -42,8 +42,8 @@ export default function SpareParts() {
 
   const config: EntityListConfig<SparePart> = {
     fields: [
-      { key: "name", label: "Наименование", type: "text", sortable: true, searchable: true, editable: true },
-      { key: "internalArticle", label: "Внутренний артикул", type: "text", sortable: true, searchable: true, editable: true },
+      { key: "name", label: "Наименование материала", type: "text", sortable: true, searchable: true, editable: true },
+      { key: "internalArticle", label: "Артикул", type: "text", sortable: true, searchable: true, editable: true },
       { 
         key: "currentStock", 
         label: "Остаток", 
