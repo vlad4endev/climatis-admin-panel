@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Clients from "./pages/Clients";
+import ServiceObjects from "./pages/ServiceObjects";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/clients" replace />} />
           <Route path="/clients" element={<AppLayout><Clients /></AppLayout>} />
+          <Route path="/service-objects" element={<AppLayout><ServiceObjects /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
