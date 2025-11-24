@@ -47,8 +47,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    {open ? (
+                  {open ? (
+                    <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
                         className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
@@ -57,9 +57,11 @@ export function AppSidebar() {
                         <item.icon className="h-5 w-5 flex-shrink-0" />
                         <span>{item.title}</span>
                       </NavLink>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
+                    </SidebarMenuButton>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton asChild>
                           <NavLink
                             to={item.url}
                             className="flex items-center justify-center w-full py-2 rounded-md transition-colors hover:bg-sidebar-accent"
@@ -67,13 +69,13 @@ export function AppSidebar() {
                           >
                             <item.icon className="h-5 w-5" />
                           </NavLink>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          {item.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </SidebarMenuButton>
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        {item.title}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
