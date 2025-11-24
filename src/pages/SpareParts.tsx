@@ -45,6 +45,21 @@ export default function SpareParts() {
       { key: "name", label: "Наименование", type: "text", sortable: true, searchable: true, editable: true },
       { key: "internalArticle", label: "Внутренний артикул", type: "text", sortable: true, searchable: true, editable: true },
       { 
+        key: "currentStock", 
+        label: "Остаток", 
+        type: "text", 
+        sortable: true,
+        editable: true,
+        render: (value, item) => {
+          const isLow = item.currentStock <= item.minStock;
+          return (
+            <span className={isLow ? "text-destructive font-semibold" : ""}>
+              {value}
+            </span>
+          );
+        }
+      },
+      { 
         key: "unit", 
         label: "Ед. изм.", 
         type: "select", 
@@ -59,21 +74,6 @@ export default function SpareParts() {
           { value: "м²", label: "м²" },
           { value: "м³", label: "м³" },
         ]
-      },
-      { 
-        key: "currentStock", 
-        label: "Остаток", 
-        type: "text", 
-        sortable: true,
-        editable: true,
-        render: (value, item) => {
-          const isLow = item.currentStock <= item.minStock;
-          return (
-            <span className={isLow ? "text-destructive font-semibold" : ""}>
-              {value}
-            </span>
-          );
-        }
       },
       { 
         key: "minStock", 
