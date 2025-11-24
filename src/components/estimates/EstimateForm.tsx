@@ -191,16 +191,8 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
-          <div className="flex justify-between items-center">
-            <Label>Список работ</Label>
-            <Button type="button" onClick={addWork} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Добавить работу
-            </Button>
-          </div>
-
           {works.length > 0 && (
-            <div className="grid grid-cols-[1fr_120px_120px_40px] gap-3 text-sm font-medium text-muted-foreground">
+            <div className="grid grid-cols-[1fr_120px_120px_80px] gap-3 text-sm font-medium text-muted-foreground">
               <div>Описание работы</div>
               <div>Часов</div>
               <div>Цена/час</div>
@@ -209,10 +201,10 @@ export function EstimateForm({
           )}
 
           <div className="space-y-2">
-            {works.map((work) => (
+            {works.map((work, index) => (
               <div
                 key={work.id}
-                className="grid grid-cols-[1fr_120px_120px_40px] gap-3 items-center"
+                className="grid grid-cols-[1fr_120px_120px_80px] gap-3 items-center"
               >
                 <Input
                   value={work.description}
@@ -241,17 +233,36 @@ export function EstimateForm({
                   }
                   placeholder="0"
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeWork(work.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeWork(work.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={addWork}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
+
+          {works.length === 0 && (
+            <div className="text-center py-8">
+              <Button type="button" onClick={addWork} variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Добавить первую работу
+              </Button>
+            </div>
+          )}
 
           {works.length > 0 && (
             <div className="flex justify-end items-center gap-2 pt-4 border-t">
