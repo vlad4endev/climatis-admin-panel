@@ -38,6 +38,17 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Table colors */
+    --table-header: 210 40% 96%;
+    --table-header-foreground: 215 25% 27%;
+    --table-row-hover: 210 30% 94%;
+    --table-row-even: 0 0% 100%;
+    --table-row-odd: 210 20% 99%;
+
+    /* Form section colors */
+    --form-section: 210 40% 97%;
+    --form-label: 215 25% 27%;
+
     --sidebar-background: 215 28% 17%;
     --sidebar-foreground: 210 20% 98%;
     --sidebar-primary: 210 100% 50%;
@@ -76,6 +87,17 @@ All colors MUST be HSL.
     --border: 215 25% 22%;
     --input: 215 25% 22%;
     --ring: 210 100% 50%;
+
+    /* Table colors */
+    --table-header: 215 25% 22%;
+    --table-header-foreground: 210 20% 98%;
+    --table-row-hover: 215 25% 24%;
+    --table-row-even: 215 25% 20%;
+    --table-row-odd: 215 28% 19%;
+
+    /* Form section colors */
+    --form-section: 215 25% 22%;
+    --form-label: 210 20% 98%;
 
     --sidebar-background: 215 30% 14%;
     --sidebar-foreground: 210 20% 98%;

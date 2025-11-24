@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        table: {
+          header: "hsl(var(--table-header))",
+          "header-foreground": "hsl(var(--table-header-foreground))",
+          "row-hover": "hsl(var(--table-row-hover))",
+          "row-even": "hsl(var(--table-row-even))",
+          "row-odd": "hsl(var(--table-row-odd))",
+        },
+        form: {
+          section: "hsl(var(--form-section))",
+          label: "hsl(var(--form-label))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
