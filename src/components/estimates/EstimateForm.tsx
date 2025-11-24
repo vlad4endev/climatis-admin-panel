@@ -199,48 +199,48 @@ export function EstimateForm({
             </Button>
           </div>
 
+          {works.length > 0 && (
+            <div className="grid grid-cols-[1fr_120px_120px_40px] gap-3 text-sm font-medium text-muted-foreground px-3">
+              <div>Описание работы</div>
+              <div>Часов</div>
+              <div>Цена/час</div>
+              <div></div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {works.map((work) => (
               <div
                 key={work.id}
-                className="grid grid-cols-[1fr_120px_120px_40px] gap-3 items-end p-3 border rounded-lg"
+                className="grid grid-cols-[1fr_120px_120px_40px] gap-3 items-center p-3 border rounded-lg"
               >
-                <div>
-                  <Label>Описание работы</Label>
-                  <Input
-                    value={work.description}
-                    onChange={(e) =>
-                      updateWork(work.id, "description", e.target.value)
-                    }
-                    placeholder="Название работы"
-                  />
-                </div>
-                <div>
-                  <Label>Часов</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={work.hours}
-                    onChange={(e) =>
-                      updateWork(work.id, "hours", parseFloat(e.target.value) || 0)
-                    }
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <Label>Цена/час</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={work.pricePerHour}
-                    onChange={(e) =>
-                      updateWork(work.id, "pricePerHour", parseFloat(e.target.value) || 0)
-                    }
-                    placeholder="0"
-                  />
-                </div>
+                <Input
+                  value={work.description}
+                  onChange={(e) =>
+                    updateWork(work.id, "description", e.target.value)
+                  }
+                  placeholder="Название работы"
+                />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={work.hours}
+                  onChange={(e) =>
+                    updateWork(work.id, "hours", parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={work.pricePerHour}
+                  onChange={(e) =>
+                    updateWork(work.id, "pricePerHour", parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0"
+                />
                 <Button
                   type="button"
                   variant="ghost"
