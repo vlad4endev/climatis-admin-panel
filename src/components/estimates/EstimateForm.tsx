@@ -200,7 +200,7 @@ export function EstimateForm({
           </div>
 
           {works.length > 0 && (
-            <div className="grid grid-cols-[1fr_120px_120px_40px] gap-3 text-sm font-medium text-muted-foreground px-3">
+            <div className="grid grid-cols-[1fr_120px_120px_40px] gap-3 text-sm font-medium text-muted-foreground">
               <div>Описание работы</div>
               <div>Часов</div>
               <div>Цена/час</div>
@@ -208,11 +208,11 @@ export function EstimateForm({
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {works.map((work) => (
               <div
                 key={work.id}
-                className="grid grid-cols-[1fr_120px_120px_40px] gap-3 items-center p-3 border rounded-lg"
+                className="grid grid-cols-[1fr_120px_120px_40px] gap-3 items-center"
               >
                 <Input
                   value={work.description}
