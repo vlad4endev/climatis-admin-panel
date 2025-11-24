@@ -21,6 +21,15 @@ const mockRequests = [
   { id: "3", name: "Заявка #003 - Замена насоса", createdAt: "2024-01-25" },
 ];
 
+const mockMaterials = [
+  { id: "1", name: "Теплообменник", price: 25000 },
+  { id: "2", name: "Насос циркуляционный", price: 8500 },
+  { id: "3", name: "Расширительный бак", price: 3200 },
+  { id: "4", name: "Термостат", price: 1500 },
+  { id: "5", name: "Манометр", price: 450 },
+  { id: "6", name: "Прокладка фланцевая", price: 120 },
+];
+
 const mockEstimates: Estimate[] = [
   {
     id: "1",
@@ -224,6 +233,7 @@ export default function Estimates() {
               setEditingEstimate(undefined);
             }}
             requests={mockRequests}
+            availableMaterials={mockMaterials}
           />
         </DialogContent>
       </Dialog>

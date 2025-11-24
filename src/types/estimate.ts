@@ -5,6 +5,14 @@ export interface Work {
   pricePerHour: number;
 }
 
+export interface Material {
+  id: string;
+  materialId?: string;
+  materialName: string;
+  quantity: number;
+  pricePerUnit: number;
+}
+
 export interface Estimate {
   id: string;
   name: string;
@@ -16,6 +24,7 @@ export interface Estimate {
   type: "простой ремонт" | "сложный ремонт" | "по договору ТО";
   engineerComment?: string;
   works?: Work[];
+  materials?: Material[];
 }
 
 export const ESTIMATE_STATUSES = [
