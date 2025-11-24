@@ -131,7 +131,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
 
   return (
     <div className="rounded-md border">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
             {config.fields.map(field => (
