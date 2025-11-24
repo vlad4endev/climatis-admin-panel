@@ -54,26 +54,10 @@ export default function SpareParts() {
           const isLow = item.currentStock <= item.minStock;
           return (
             <span className={isLow ? "text-destructive font-semibold" : ""}>
-              {value}
+              {value} {item.unit}
             </span>
           );
         }
-      },
-      { 
-        key: "unit", 
-        label: "Ед. изм.", 
-        type: "select", 
-        sortable: true, 
-        filterable: true,
-        editable: true,
-        options: [
-          { value: "шт", label: "шт" },
-          { value: "м", label: "м" },
-          { value: "кг", label: "кг" },
-          { value: "л", label: "л" },
-          { value: "м²", label: "м²" },
-          { value: "м³", label: "м³" },
-        ]
       },
       { 
         key: "minStock", 
@@ -81,7 +65,7 @@ export default function SpareParts() {
         type: "text", 
         sortable: true,
         editable: true,
-        render: (value) => `${value}`
+        render: (value, item) => `${value} ${item.unit}`
       },
       { 
         key: "purchasePrice", 
