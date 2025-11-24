@@ -17,15 +17,21 @@ interface EntityFiltersProps {
 }
 
 export function EntityFilters({ fields, filters, onFilterChange }: EntityFiltersProps) {
+  // Показываем только select поля
+  const selectFields = fields.filter(f => f.type === 'select' && f.options);
   const activeFilters = filters.filter(f => f.value);
+
+  if (selectFields.length === 0) {
+    return null;
+  }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3 flex-wrap">
-        {fields.map(field => {
+        {selectFields.map(field => {
           const currentValue = filters.find(f => f.field === field.key)?.value || '';
 
-          if (field.type === 'select' && field.options) {
+          if (field.options) {
             return (
               <div key={field.key} className="min-w-[150px]">
                 <Select
@@ -48,15 +54,7 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
             );
           }
 
-          return (
-            <Input
-              key={field.key}
-              placeholder={`Фильтр: ${field.label}`}
-              value={currentValue}
-              onChange={(e) => onFilterChange(field.key, e.target.value)}
-              className="h-9 w-[200px]"
-            />
-          );
+          return null;
         })}
       </div>
 
@@ -64,11 +62,11 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Активные фильтры:</span>
           {activeFilters.map(filter => {
-            const field = fields.find(f => f.key === filter.field);
+            const field = selectFields.find(f => f.key === filter.field);
             if (!field) return null;
 
             let displayValue = filter.value;
-            if (field.type === 'select' && field.options) {
+            if (field.options) {
               const option = field.options.find(o => o.value === filter.value);
               if (option) displayValue = option.label;
             }
