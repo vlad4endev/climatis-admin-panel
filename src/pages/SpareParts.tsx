@@ -70,7 +70,7 @@ export default function SpareParts() {
           const isLow = item.currentStock <= item.minStock;
           return (
             <span className={isLow ? "text-destructive font-semibold" : ""}>
-              {value} {item.unit}
+              {value}
             </span>
           );
         }
@@ -81,11 +81,11 @@ export default function SpareParts() {
         type: "text", 
         sortable: true,
         editable: true,
-        render: (value, item) => `${value} ${item.unit}`
+        render: (value) => `${value}`
       },
       { 
         key: "purchasePrice", 
-        label: "Закупочная цена", 
+        label: "Закупка", 
         type: "text", 
         sortable: true,
         editable: true,
