@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Clients from "./pages/Clients";
 import ServiceObjects from "./pages/ServiceObjects";
+import Documents from "./pages/Documents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Navigate to="/clients" replace />} />
           <Route path="/clients" element={<AppLayout><Clients /></AppLayout>} />
           <Route path="/service-objects" element={<AppLayout><ServiceObjects /></AppLayout>} />
+          <Route path="/documents" element={<AppLayout><Documents /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
