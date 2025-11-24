@@ -131,11 +131,11 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
 
   return (
     <div className="rounded-md border">
-      <Table className="table-fixed">
+      <Table>
         <TableHeader>
           <TableRow>
             {config.fields.map(field => (
-              <TableHead key={field.key} className={field.width}>
+              <TableHead key={field.key}>
                 <div className="flex items-center gap-2">
                   <span>{field.label}</span>
                   {field.sortable !== false && (
@@ -160,7 +160,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
             return (
               <TableRow key={id}>
                 {config.fields.map(field => (
-                  <TableCell key={field.key} className={field.width}>
+                  <TableCell key={field.key}>
                     {renderCell(item, field)}
                   </TableCell>
                 ))}
