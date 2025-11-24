@@ -76,10 +76,13 @@ export default function Documents() {
         render: (value) => CONTRACT_TYPES.find(t => t.value === value)?.label || value,
       },
       {
-        key: 'clientName',
+        key: 'clientId',
         label: 'Контрагент',
-        type: 'text',
+        type: 'select',
+        options: mockClients.map(c => ({ value: c.id, label: c.companyName })),
         sortable: true,
+        filterable: true,
+        render: (value) => mockClients.find(c => c.id === value)?.companyName || '—',
       },
       {
         key: 'objectName',
