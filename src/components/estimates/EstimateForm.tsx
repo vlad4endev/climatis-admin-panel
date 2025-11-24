@@ -192,7 +192,7 @@ export function EstimateForm({
 
         <TabsContent value="works" className="space-y-4 mt-4">
           {works.length > 0 && (
-            <div className="grid grid-cols-[1fr_120px_120px_80px] gap-3 text-sm font-medium text-muted-foreground">
+            <div className="grid grid-cols-[1fr_80px_80px_80px] gap-3 text-sm font-medium text-muted-foreground">
               <div>Описание работы</div>
               <div>Часов</div>
               <div>Цена/час</div>
@@ -204,7 +204,7 @@ export function EstimateForm({
             {works.map((work, index) => (
               <div
                 key={work.id}
-                className="grid grid-cols-[1fr_120px_120px_80px] gap-3 items-center"
+                className="grid grid-cols-[1fr_80px_80px_80px] gap-3 items-center"
               >
                 <Input
                   value={work.description}
