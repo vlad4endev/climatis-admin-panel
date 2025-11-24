@@ -47,8 +47,8 @@ export default function StockMovements() {
 
   // Mock data for requests
   const requests = [
-    { id: "1", name: "Заявка #001" },
-    { id: "2", name: "Заявка #002" },
+    { id: "1", name: "Заявка #001", createdAt: "2024-01-15T10:00:00Z" },
+    { id: "2", name: "Заявка #002", createdAt: "2024-01-16T14:30:00Z" },
   ];
 
   const [isFormOpen, setIsFormOpen] = useState(false);

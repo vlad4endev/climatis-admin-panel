@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { StockMovement } from "@/types/stockMovement";
 
 interface StockMovementFormProps {
@@ -17,7 +33,7 @@ interface StockMovementFormProps {
   onSubmit: (data: Partial<StockMovement>) => void;
   onCancel: () => void;
   spareParts: Array<{ id: string; name: string }>;
-  requests: Array<{ id: string; name: string }>;
+  requests: Array<{ id: string; name: string; createdAt: string }>;
 }
 
 export function StockMovementForm({
@@ -27,6 +43,7 @@ export function StockMovementForm({
   spareParts,
   requests,
 }: StockMovementFormProps) {
+  const [openMaterial, setOpenMaterial] = useState(false);
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       operationDate: stockMovement?.operationDate || new Date().toISOString().split('T')[0],
@@ -39,37 +56,15 @@ export function StockMovementForm({
   });
 
   const operationType = watch("operationType");
+  const materialId = watch("materialId");
+
+  // Sort requests by creation date (newest first)
+  const sortedRequests = [...requests].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <Label htmlFor="operationDate">Дата операции</Label>
-        <Input
-          id="operationDate"
-          type="date"
-          {...register("operationDate")}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="materialId">Материал</Label>
-        <Select
-          defaultValue={stockMovement?.materialId}
-          onValueChange={(value) => setValue("materialId", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Выберите материал" />
-          </SelectTrigger>
-          <SelectContent>
-            {spareParts.map((part) => (
-              <SelectItem key={part.id} value={part.id}>
-                {part.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div>
         <Label htmlFor="operationType">Тип операции</Label>
         <Select
@@ -85,6 +80,62 @@ export function StockMovementForm({
             <SelectItem value="возврат">Возврат</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="operationDate">Дата операции</Label>
+        <Input
+          id="operationDate"
+          type="date"
+          {...register("operationDate")}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="materialId">Материал</Label>
+        <Popover open={openMaterial} onOpenChange={setOpenMaterial}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={openMaterial}
+              className="w-full justify-between"
+            >
+              {materialId
+                ? spareParts.find((part) => part.id === materialId)?.name
+                : "Выберите материал..."}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput placeholder="Поиск материала..." />
+              <CommandList>
+                <CommandEmpty>Материал не найден.</CommandEmpty>
+                <CommandGroup>
+                  {spareParts.map((part) => (
+                    <CommandItem
+                      key={part.id}
+                      value={part.name}
+                      onSelect={() => {
+                        setValue("materialId", part.id);
+                        setOpenMaterial(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          materialId === part.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {part.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div>
@@ -106,7 +157,7 @@ export function StockMovementForm({
             <SelectValue placeholder="Выберите заявку (необязательно)" />
           </SelectTrigger>
           <SelectContent>
-            {requests.map((request) => (
+            {sortedRequests.map((request) => (
               <SelectItem key={request.id} value={request.id}>
                 {request.name}
               </SelectItem>
