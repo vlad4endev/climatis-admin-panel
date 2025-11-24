@@ -182,6 +182,7 @@ export default function StockMovements() {
         items={stockMovements}
         config={config}
         emptyMessage="Нет операций"
+        defaultViewMode="table"
       />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

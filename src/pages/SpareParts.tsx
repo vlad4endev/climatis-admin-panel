@@ -146,6 +146,7 @@ export default function SpareParts() {
         items={spareParts}
         config={config}
         emptyMessage="Нет комплектующих"
+        defaultViewMode="table"
       />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
