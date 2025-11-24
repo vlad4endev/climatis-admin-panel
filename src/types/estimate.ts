@@ -1,3 +1,10 @@
+export interface Work {
+  id: string;
+  description: string;
+  hours: number;
+  pricePerHour: number;
+}
+
 export interface Estimate {
   id: string;
   name: string;
@@ -8,6 +15,7 @@ export interface Estimate {
   status: "черновик" | "готов" | "согласован с заказчиком";
   type: "простой ремонт" | "сложный ремонт" | "по договору ТО";
   engineerComment?: string;
+  works?: Work[];
 }
 
 export const ESTIMATE_STATUSES = [
