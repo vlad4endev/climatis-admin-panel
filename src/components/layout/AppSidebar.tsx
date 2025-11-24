@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { Users, Building } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 const menuItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Объекты", url: "/service-objects", icon: Building },
 ];
 
 export function AppSidebar() {
