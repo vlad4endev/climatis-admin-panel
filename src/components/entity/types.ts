@@ -19,7 +19,7 @@ export interface EntityListConfig<T = any> {
   onEdit?: (item: T) => void;
 }
 
-export type ViewMode = 'table' | 'card';
+export type ViewMode = 'table' | 'card' | 'kanban';
 
 export interface FilterValue {
   field: string;

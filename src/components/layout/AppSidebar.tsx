@@ -1,4 +1,4 @@
-import { Users, Building, FileText, UserCircle, UsersRound } from "lucide-react";
+import { Users, Building, FileText, UserCircle, UsersRound, ClipboardList } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const menuItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
   { title: "Объекты", url: "/service-objects", icon: Building },
   { title: "Документы", url: "/documents", icon: FileText },
+  { title: "Заявки", url: "/requests", icon: ClipboardList },
   { title: "Сотрудники", url: "/employees", icon: UserCircle },
   { title: "Бригады", url: "/teams", icon: UsersRound },
 ];

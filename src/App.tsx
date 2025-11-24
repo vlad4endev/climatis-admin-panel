@@ -9,6 +9,7 @@ import ServiceObjects from "./pages/ServiceObjects";
 import Documents from "./pages/Documents";
 import Employees from "./pages/Employees";
 import Teams from "./pages/Teams";
+import Requests from "./pages/Requests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/documents" element={<AppLayout><Documents /></AppLayout>} />
           <Route path="/employees" element={<AppLayout><Employees /></AppLayout>} />
           <Route path="/teams" element={<AppLayout><Teams /></AppLayout>} />
+          <Route path="/requests" element={<AppLayout><Requests /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

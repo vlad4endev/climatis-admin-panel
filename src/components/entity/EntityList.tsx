@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutGrid, Table2 } from "lucide-react";
+import { Search, LayoutGrid, Table2, Kanban } from "lucide-react";
 import { EntityTableView } from "./EntityTableView";
 import { EntityCardView } from "./EntityCardView";
+import { EntityKanbanView } from "./EntityKanbanView";
 import { EntityFilters } from "./EntityFilters";
 import { EntityListConfig, ViewMode, FilterValue } from "./types";
 
@@ -11,9 +12,11 @@ interface EntityListProps<T> {
   items: T[];
   config: EntityListConfig<T>;
   emptyMessage?: string;
+  kanbanGroupField?: string;
+  kanbanColumns?: { value: string; label: string }[];
 }
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных" }: EntityListProps<T>) {
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns }: EntityListProps<T>) {
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterValue[]>([]);
@@ -119,6 +122,15 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           >
             <Table2 className="h-4 w-4" />
           </Button>
+          {kanbanGroupField && kanbanColumns && (
+            <Button
+              variant={viewMode === 'kanban' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setViewMode('kanban')}
+            >
+              <Kanban className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -143,6 +155,13 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
+        />
+      ) : viewMode === 'kanban' && kanbanGroupField && kanbanColumns ? (
+        <EntityKanbanView
+          items={filteredItems}
+          config={config}
+          groupByField={kanbanGroupField}
+          columns={kanbanColumns}
         />
       ) : (
         <EntityCardView
