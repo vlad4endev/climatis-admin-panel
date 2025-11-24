@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES, Work } from "@/types/estimate";
-import { Plus, Trash2 } from "lucide-react";
+import { EntityListEditor, EntityListEditorConfig } from "@/components/entity/EntityListEditor";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -51,34 +51,48 @@ export function EstimateForm({
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const addWork = () => {
-    setWorks([
-      ...works,
+  const worksConfig: EntityListEditorConfig<Work> = {
+    fields: [
       {
-        id: Date.now().toString(),
-        description: "",
-        hours: 0,
-        pricePerHour: 0,
+        key: "description",
+        label: "Описание работы",
+        type: "text",
+        placeholder: "Название работы",
+        width: "1fr",
       },
-    ]);
+      {
+        key: "hours",
+        label: "Часов",
+        type: "number",
+        placeholder: "0",
+        width: "80px",
+        step: "0.5",
+        min: "0",
+      },
+      {
+        key: "pricePerHour",
+        label: "Цена/час",
+        type: "number",
+        placeholder: "0",
+        width: "80px",
+        step: "0.01",
+        min: "0",
+      },
+    ],
+    createEmpty: () => ({
+      id: Date.now().toString(),
+      description: "",
+      hours: 0,
+      pricePerHour: 0,
+    }),
+    getValue: (work, key) => work[key as keyof Work] as string | number,
+    setValue: (work, key, value) => ({ ...work, [key]: value }),
+    getId: (work) => work.id,
+    calculateTotal: (items) =>
+      items.reduce((sum, work) => sum + work.hours * work.pricePerHour, 0),
+    totalLabel: "Итого:",
+    emptyMessage: "Добавить первую работу",
   };
-
-  const removeWork = (id: string) => {
-    setWorks(works.filter((work) => work.id !== id));
-  };
-
-  const updateWork = (id: string, field: keyof Work, value: string | number) => {
-    setWorks(
-      works.map((work) =>
-        work.id === id ? { ...work, [field]: value } : work
-      )
-    );
-  };
-
-  const totalAmount = works.reduce(
-    (sum, work) => sum + work.hours * work.pricePerHour,
-    0
-  );
 
   const handleFormSubmit = (data: any) => {
     onSubmit({ ...data, works });
@@ -191,87 +205,11 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
-          {works.length > 0 && (
-            <div className="grid grid-cols-[1fr_80px_80px_80px] gap-3 text-sm font-medium text-muted-foreground">
-              <div>Описание работы</div>
-              <div>Часов</div>
-              <div>Цена/час</div>
-              <div></div>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            {works.map((work, index) => (
-              <div
-                key={work.id}
-                className="grid grid-cols-[1fr_80px_80px_80px] gap-3 items-center"
-              >
-                <Input
-                  value={work.description}
-                  onChange={(e) =>
-                    updateWork(work.id, "description", e.target.value)
-                  }
-                  placeholder="Название работы"
-                />
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={work.hours || ""}
-                  onChange={(e) =>
-                    updateWork(work.id, "hours", parseFloat(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                />
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={work.pricePerHour || ""}
-                  onChange={(e) =>
-                    updateWork(work.id, "pricePerHour", parseFloat(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                />
-                <div className="flex gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeWork(work.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={addWork}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {works.length === 0 && (
-            <div className="text-center py-8">
-              <Button type="button" onClick={addWork} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Добавить первую работу
-              </Button>
-            </div>
-          )}
-
-          {works.length > 0 && (
-            <div className="flex justify-end items-center gap-2 pt-4 border-t">
-              <span className="text-sm font-semibold">Итого:</span>
-              <span className="text-lg font-bold">
-                {Math.round(totalAmount).toLocaleString('ru-RU')} ₽
-              </span>
-            </div>
-          )}
+          <EntityListEditor
+            items={works}
+            onChange={setWorks}
+            config={worksConfig}
+          />
         </TabsContent>
       </Tabs>
 
