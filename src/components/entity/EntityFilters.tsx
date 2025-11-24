@@ -29,14 +29,14 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
             return (
               <div key={field.key} className="min-w-[150px]">
                 <Select
-                  value={currentValue}
-                  onValueChange={(value) => onFilterChange(field.key, value)}
+                  value={currentValue || "__all__"}
+                  onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
                 >
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder={field.label} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Все {field.label}</SelectItem>
+                    <SelectItem value="__all__">Все {field.label}</SelectItem>
                     {field.options.map(opt => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
