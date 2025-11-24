@@ -257,7 +257,7 @@ export function EstimateForm({
             <div className="flex justify-end items-center gap-2 pt-4 border-t">
               <span className="text-lg font-semibold">Итого:</span>
               <span className="text-2xl font-bold">
-                {totalAmount.toFixed(2)} ₽
+                {Math.round(totalAmount).toLocaleString('ru-RU')} ₽
               </span>
             </div>
           )}
