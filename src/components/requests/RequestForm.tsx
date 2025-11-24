@@ -150,7 +150,6 @@ export function RequestForm({
             <SelectValue placeholder="Выберите договор" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Не выбрано</SelectItem>
             {documents.map(doc => (
               <SelectItem key={doc.id} value={doc.id}>
                 {doc.contractNumber}
