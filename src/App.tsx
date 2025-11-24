@@ -11,6 +11,7 @@ import Employees from "./pages/Employees";
 import Teams from "./pages/Teams";
 import Requests from "./pages/Requests";
 import SpareParts from "./pages/SpareParts";
+import StockMovements from "./pages/StockMovements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/teams" element={<AppLayout><Teams /></AppLayout>} />
           <Route path="/requests" element={<AppLayout><Requests /></AppLayout>} />
           <Route path="/spare-parts" element={<AppLayout><SpareParts /></AppLayout>} />
+          <Route path="/stock-movements" element={<AppLayout><StockMovements /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
