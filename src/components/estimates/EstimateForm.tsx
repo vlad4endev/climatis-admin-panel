@@ -12,14 +12,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES, Work } from "@/types/estimate";
+import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES, Work, Material } from "@/types/estimate";
 import { EntityListEditor, EntityListEditorConfig } from "@/components/entity/EntityListEditor";
+import { MaterialListEditor } from "./MaterialListEditor";
 
 interface EstimateFormProps {
   estimate?: Estimate;
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string }>;
+  availableMaterials?: Array<{ id: string; name: string; price?: number }>;
 }
 
 export function EstimateForm({
@@ -27,6 +29,7 @@ export function EstimateForm({
   onSubmit,
   onCancel,
   requests,
+  availableMaterials = [],
 }: EstimateFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
@@ -41,6 +44,7 @@ export function EstimateForm({
   });
 
   const [works, setWorks] = useState<Work[]>(estimate?.works || []);
+  const [materials, setMaterials] = useState<Material[]>(estimate?.materials || []);
 
   const status = watch("status");
   const type = watch("type");
@@ -95,15 +99,16 @@ export function EstimateForm({
   };
 
   const handleFormSubmit = (data: any) => {
-    onSubmit({ ...data, works });
+    onSubmit({ ...data, works, materials });
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">Основная информация</TabsTrigger>
           <TabsTrigger value="works">Работы</TabsTrigger>
+          <TabsTrigger value="materials">Материалы</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4 mt-4">
@@ -209,6 +214,14 @@ export function EstimateForm({
             items={works}
             onChange={setWorks}
             config={worksConfig}
+          />
+        </TabsContent>
+
+        <TabsContent value="materials" className="space-y-4 mt-4">
+          <MaterialListEditor
+            materials={materials}
+            onChange={setMaterials}
+            availableMaterials={availableMaterials}
           />
         </TabsContent>
       </Tabs>
