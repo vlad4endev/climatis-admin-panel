@@ -61,15 +61,17 @@ export function AppSidebar() {
                   ) : (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <SidebarMenuButton asChild>
-                          <NavLink
-                            to={item.url}
-                            className="flex items-center justify-center w-full py-2 rounded-md transition-colors hover:bg-sidebar-accent"
-                            activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                          >
-                            <item.icon className="h-5 w-5" />
-                          </NavLink>
-                        </SidebarMenuButton>
+                        <div>
+                          <SidebarMenuButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className="flex items-center justify-center w-full py-2 rounded-md transition-colors hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            >
+                              <item.icon className="h-5 w-5" />
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </div>
                       </TooltipTrigger>
                       <TooltipContent side="right">
                         {item.title}
