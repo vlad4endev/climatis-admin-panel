@@ -6,6 +6,7 @@ export interface EntityField<T = any> {
   filterable?: boolean;
   editable?: boolean;
   searchable?: boolean;
+  width?: string;
   options?: { value: string; label: string }[];
   render?: (value: any, item: T) => React.ReactNode;
   getValue?: (item: T) => any;

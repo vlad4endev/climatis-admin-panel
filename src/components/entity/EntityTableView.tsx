@@ -135,7 +135,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
         <TableHeader>
           <TableRow>
             {config.fields.map(field => (
-              <TableHead key={field.key}>
+              <TableHead key={field.key} className={field.width}>
                 <div className="flex items-center gap-2">
                   <span>{field.label}</span>
                   {field.sortable !== false && (
@@ -160,7 +160,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
             return (
               <TableRow key={id}>
                 {config.fields.map(field => (
-                  <TableCell key={field.key}>
+                  <TableCell key={field.key} className={field.width}>
                     {renderCell(item, field)}
                   </TableCell>
                 ))}
