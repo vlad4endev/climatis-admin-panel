@@ -98,6 +98,18 @@ export function EstimateForm({
     emptyMessage: "Добавить первую работу",
   };
 
+  const worksTotal = works.reduce(
+    (sum, work) => sum + work.hours * work.pricePerHour,
+    0
+  );
+
+  const materialsTotal = materials.reduce(
+    (sum, material) => sum + material.quantity * material.pricePerUnit,
+    0
+  );
+
+  const grandTotal = worksTotal + materialsTotal;
+
   const handleFormSubmit = (data: any) => {
     onSubmit({ ...data, works, materials });
   };
@@ -206,6 +218,33 @@ export function EstimateForm({
               rows={3}
               placeholder="Дополнительные комментарии..."
             />
+          </div>
+
+          <div className="space-y-3 pt-4 border-t">
+            <h3 className="font-semibold text-lg">Итоги по расчёту</h3>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-muted-foreground">Итог по работам:</span>
+                <span className="font-medium">
+                  {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center py-2">
+                <span className="text-muted-foreground">Итог по материалам:</span>
+                <span className="font-medium">
+                  {Math.round(materialsTotal).toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center py-3 border-t">
+                <span className="text-lg font-semibold">Общая сумма:</span>
+                <span className="text-xl font-bold">
+                  {Math.round(grandTotal).toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+            </div>
           </div>
         </TabsContent>
 
