@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,11 @@ export function RequestForm({
   employees,
   teams
 }: RequestFormProps) {
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const clientInputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: initialData || {},
   });
@@ -40,6 +46,37 @@ export function RequestForm({
   const selectedManagerId = watch("responsibleManagerId");
   const selectedTeamId = watch("assignedTeamId");
   const selectedEngineerId = watch("assignedEngineerId");
+
+  // Filter clients by search query
+  const filteredClients = clients.filter((client) =>
+    client.companyName.toLowerCase().includes(clientSearch.toLowerCase())
+  );
+
+  // Get selected client name
+  const selectedClient = clients.find((client) => client.id === selectedClientId);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !clientInputRef.current?.contains(event.target as Node)
+      ) {
+        setShowClientDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Initialize search with selected client name
+  useEffect(() => {
+    if (selectedClient && !showClientDropdown) {
+      setClientSearch(selectedClient.companyName);
+    }
+  }, [selectedClient, showClientDropdown]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -99,24 +136,50 @@ export function RequestForm({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="clientId">Контрагент *</Label>
-          <Select value={selectedClientId} onValueChange={(value) => {
-            const client = clients.find(c => c.id === value);
-            setValue("clientId", value);
-            setValue("clientName", client?.companyName || "");
-          }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Выберите контрагента" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients.map(client => (
-                <SelectItem key={client.id} value={client.id}>
+        <div className="relative">
+          <Label htmlFor="clientSearch">Контрагент *</Label>
+          <Input
+            ref={clientInputRef}
+            id="clientSearch"
+            type="text"
+            value={clientSearch}
+            onChange={(e) => {
+              setClientSearch(e.target.value);
+              setShowClientDropdown(true);
+            }}
+            onFocus={() => setShowClientDropdown(true)}
+            placeholder="Начните вводить название контрагента..."
+            autoComplete="off"
+          />
+          {showClientDropdown && filteredClients.length > 0 && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md max-h-60 overflow-auto"
+            >
+              {filteredClients.map((client) => (
+                <div
+                  key={client.id}
+                  className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                  onClick={() => {
+                    setValue("clientId", client.id);
+                    setValue("clientName", client.companyName);
+                    setClientSearch(client.companyName);
+                    setShowClientDropdown(false);
+                  }}
+                >
                   {client.companyName}
-                </SelectItem>
+                </div>
               ))}
-            </SelectContent>
-          </Select>
+            </div>
+          )}
+          {showClientDropdown && clientSearch && filteredClients.length === 0 && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md px-3 py-2 text-muted-foreground text-sm"
+            >
+              Контрагент не найден
+            </div>
+          )}
         </div>
         <div>
           <Label htmlFor="objectId">Объект *</Label>
