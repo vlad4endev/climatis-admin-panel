@@ -99,14 +99,13 @@ export function StockMovementForm({
       <div>
         <Label htmlFor="relatedRequestId">Связанная заявка</Label>
         <Select
-          defaultValue={stockMovement?.relatedRequestId}
+          defaultValue={stockMovement?.relatedRequestId || undefined}
           onValueChange={(value) => setValue("relatedRequestId", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Выберите заявку (необязательно)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Нет</SelectItem>
             {requests.map((request) => (
               <SelectItem key={request.id} value={request.id}>
                 {request.name}
