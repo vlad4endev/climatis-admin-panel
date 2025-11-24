@@ -87,7 +87,8 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
     });
   };
 
-  const filterableFields = config.fields.filter(f => f.filterable !== false);
+  // Фильтрация только для select полей
+  const filterableFields = config.fields.filter(f => f.filterable !== false && f.type === 'select' && f.options);
 
   return (
     <div className="space-y-4">
