@@ -225,7 +225,7 @@ export function EstimateForm({
                   type="number"
                   min="0"
                   step="0.5"
-                  value={work.hours}
+                  value={work.hours || ""}
                   onChange={(e) =>
                     updateWork(work.id, "hours", parseFloat(e.target.value) || 0)
                   }
@@ -235,7 +235,7 @@ export function EstimateForm({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={work.pricePerHour}
+                  value={work.pricePerHour || ""}
                   onChange={(e) =>
                     updateWork(work.id, "pricePerHour", parseFloat(e.target.value) || 0)
                   }
@@ -255,8 +255,8 @@ export function EstimateForm({
 
           {works.length > 0 && (
             <div className="flex justify-end items-center gap-2 pt-4 border-t">
-              <span className="text-lg font-semibold">Итого:</span>
-              <span className="text-2xl font-bold">
+              <span className="text-sm font-semibold">Итого:</span>
+              <span className="text-lg font-bold">
                 {Math.round(totalAmount).toLocaleString('ru-RU')} ₽
               </span>
             </div>
