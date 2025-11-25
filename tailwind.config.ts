@@ -68,6 +68,18 @@ export default {
           section: "hsl(var(--form-section))",
           label: "hsl(var(--form-label))",
         },
+        status: {
+          draft: "hsl(var(--status-draft))",
+          "draft-foreground": "hsl(var(--status-draft-foreground))",
+          ready: "hsl(var(--status-ready))",
+          "ready-foreground": "hsl(var(--status-ready-foreground))",
+          approved: "hsl(var(--status-approved))",
+          "approved-foreground": "hsl(var(--status-approved-foreground))",
+          info: "hsl(var(--status-info))",
+          "info-foreground": "hsl(var(--status-info-foreground))",
+          warning: "hsl(var(--status-warning))",
+          "warning-foreground": "hsl(var(--status-warning-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
