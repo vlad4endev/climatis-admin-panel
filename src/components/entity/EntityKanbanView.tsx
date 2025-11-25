@@ -35,6 +35,19 @@ export function EntityKanbanView<T>({ items, config, groupByField, columns }: En
     }
   };
 
+  const getColumnColor = (value: string) => {
+    const colorMap: Record<string, string> = {
+      new: "border-l-4 border-l-blue-500 bg-blue-50/50",
+      needs_calculation: "border-l-4 border-l-purple-500 bg-purple-50/50",
+      awaiting_materials: "border-l-4 border-l-orange-500 bg-orange-50/50",
+      in_progress: "border-l-4 border-l-cyan-500 bg-cyan-50/50",
+      partially_completed: "border-l-4 border-l-yellow-500 bg-yellow-50/50",
+      completed: "border-l-4 border-l-green-500 bg-green-50/50",
+      closed: "border-l-4 border-l-gray-400 bg-gray-50/50",
+    };
+    return colorMap[value] || "bg-muted/30";
+  };
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
       {columns.map(column => {
@@ -42,7 +55,7 @@ export function EntityKanbanView<T>({ items, config, groupByField, columns }: En
         return (
           <div
             key={column.value}
-            className="flex-shrink-0 w-80 bg-muted/30 rounded-lg p-4"
+            className={`flex-shrink-0 w-80 rounded-lg p-4 ${getColumnColor(column.value)}`}
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(column.value)}
           >
