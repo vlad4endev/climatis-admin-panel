@@ -8,105 +8,105 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 27%;
+    --background: 0 0% 100%;
+    --foreground: 196 30% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
+    --card-foreground: 196 30% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
+    --popover-foreground: 196 30% 25%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 196 30% 25%;
+    --primary-foreground: 38 53% 91%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 25% 27%;
+    --secondary: 184 16% 39%;
+    --secondary-foreground: 38 53% 91%;
 
-    --muted: 210 30% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 162 6% 58%;
+    --muted-foreground: 196 30% 25%;
 
-    --accent: 195 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 184 16% 39%;
+    --accent-foreground: 38 53% 91%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 210 100% 50%;
+    --border: 162 6% 78%;
+    --input: 162 6% 78%;
+    --ring: 196 30% 25%;
 
     --radius: 0.5rem;
 
     /* Table colors */
-    --table-header: 210 40% 96%;
-    --table-header-foreground: 215 25% 27%;
-    --table-row-hover: 210 30% 94%;
+    --table-header: 162 6% 58%;
+    --table-header-foreground: 196 30% 25%;
+    --table-row-hover: 38 53% 96%;
     --table-row-even: 0 0% 100%;
-    --table-row-odd: 210 20% 99%;
+    --table-row-odd: 38 53% 98%;
 
     /* Form section colors */
-    --form-section: 210 40% 97%;
-    --form-label: 215 25% 27%;
+    --form-section: 38 53% 95%;
+    --form-label: 196 30% 25%;
 
-    --sidebar-background: 215 28% 17%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 210 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 22%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 25% 22%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-background: 196 30% 25%;
+    --sidebar-foreground: 38 53% 91%;
+    --sidebar-primary: 184 16% 39%;
+    --sidebar-primary-foreground: 38 53% 91%;
+    --sidebar-accent: 196 30% 30%;
+    --sidebar-accent-foreground: 38 53% 91%;
+    --sidebar-border: 196 30% 20%;
+    --sidebar-ring: 184 16% 39%;
   }
 
   .dark {
-    --background: 215 28% 17%;
-    --foreground: 210 20% 98%;
+    --background: 196 30% 10%;
+    --foreground: 38 53% 91%;
 
-    --card: 215 25% 20%;
-    --card-foreground: 210 20% 98%;
+    --card: 196 30% 15%;
+    --card-foreground: 38 53% 91%;
 
-    --popover: 215 25% 20%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 196 30% 15%;
+    --popover-foreground: 38 53% 91%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 184 16% 39%;
+    --primary-foreground: 38 53% 91%;
 
-    --secondary: 215 25% 22%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 196 30% 25%;
+    --secondary-foreground: 38 53% 91%;
 
-    --muted: 215 25% 22%;
-    --muted-foreground: 215 16% 65%;
+    --muted: 162 6% 58%;
+    --muted-foreground: 38 53% 91%;
 
-    --accent: 195 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 184 16% 39%;
+    --accent-foreground: 38 53% 91%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 38 53% 91%;
 
-    --border: 215 25% 22%;
-    --input: 215 25% 22%;
-    --ring: 210 100% 50%;
+    --border: 196 30% 25%;
+    --input: 196 30% 25%;
+    --ring: 184 16% 39%;
 
     /* Table colors */
-    --table-header: 215 25% 22%;
-    --table-header-foreground: 210 20% 98%;
-    --table-row-hover: 215 25% 24%;
-    --table-row-even: 215 25% 20%;
-    --table-row-odd: 215 28% 19%;
+    --table-header: 196 30% 20%;
+    --table-header-foreground: 38 53% 91%;
+    --table-row-hover: 196 30% 18%;
+    --table-row-even: 196 30% 15%;
+    --table-row-odd: 196 30% 13%;
 
     /* Form section colors */
-    --form-section: 215 25% 22%;
-    --form-label: 210 20% 98%;
+    --form-section: 162 6% 48%;
+    --form-label: 38 53% 91%;
 
-    --sidebar-background: 215 30% 14%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 210 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 28% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 28% 18%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-background: 196 30% 25%;
+    --sidebar-foreground: 38 53% 91%;
+    --sidebar-primary: 184 16% 39%;
+    --sidebar-primary-foreground: 38 53% 91%;
+    --sidebar-accent: 196 30% 30%;
+    --sidebar-accent-foreground: 38 53% 91%;
+    --sidebar-border: 196 30% 20%;
+    --sidebar-ring: 184 16% 39%;
   }
 }
 
