@@ -14,10 +14,10 @@ export default function StockMovements() {
     {
       id: "1",
       operationDate: "2024-01-15",
-      materialId: "1",
-      materialName: "Подшипник 6205",
       operationType: "приход",
-      quantity: 100,
+      materials: [
+        { materialId: "1", materialName: "Подшипник 6205", quantity: 100 }
+      ],
       relatedRequestId: "1",
       relatedRequestName: "Заявка #001",
       comment: "Закупка со склада поставщика",
@@ -27,10 +27,10 @@ export default function StockMovements() {
     {
       id: "2",
       operationDate: "2024-01-16",
-      materialId: "1",
-      materialName: "Подшипник 6205",
       operationType: "расход",
-      quantity: -20,
+      materials: [
+        { materialId: "1", materialName: "Подшипник 6205", quantity: 20 }
+      ],
       relatedRequestId: "2",
       relatedRequestName: "Заявка #002",
       comment: "Использовано на ремонт насоса",
@@ -64,7 +64,20 @@ export default function StockMovements() {
         editable: true,
         render: (value) => new Date(value).toLocaleDateString('ru-RU')
       },
-      { key: "materialName", label: "Материал", type: "text", sortable: true, searchable: true },
+      { 
+        key: "materials", 
+        label: "Материалы", 
+        type: "text", 
+        searchable: true,
+        render: (value: any) => {
+          const materials = value as Array<{ materialName: string; quantity: number }>;
+          return materials.map((m, i) => (
+            <div key={i} className="text-sm">
+              {m.materialName}: <span className="font-semibold">{m.quantity}</span>
+            </div>
+          ));
+        }
+      },
       { 
         key: "operationType", 
         label: "Тип операции", 
@@ -83,23 +96,6 @@ export default function StockMovements() {
             возврат: "Возврат",
           };
           return labels[value as keyof typeof labels];
-        }
-      },
-      { 
-        key: "quantity", 
-        label: "Количество", 
-        type: "text", 
-        sortable: true,
-        editable: true,
-        render: (value) => {
-          const num = Number(value);
-          const isPositive = num > 0;
-          const color = isPositive ? "text-green-600" : "text-blue-600";
-          return (
-            <span className={`font-semibold ${color}`}>
-              {isPositive ? "+" : ""}{num}
-            </span>
-          );
         }
       },
       { key: "relatedRequestName", label: "Связанная заявка", type: "text", searchable: true },
@@ -138,7 +134,6 @@ export default function StockMovements() {
             ? { 
                 ...sm, 
                 ...data,
-                materialName: spareParts.find(p => p.id === data.materialId)?.name || sm.materialName,
                 relatedRequestName: data.relatedRequestId ? requests.find(r => r.id === data.relatedRequestId)?.name : undefined,
                 updatedAt: new Date().toISOString() 
               }
@@ -152,7 +147,6 @@ export default function StockMovements() {
     } else {
       const newMovement: StockMovement = {
         id: Date.now().toString(),
-        materialName: spareParts.find(p => p.id === data.materialId)?.name || "",
         relatedRequestName: data.relatedRequestId ? requests.find(r => r.id === data.relatedRequestId)?.name : undefined,
         ...data as StockMovement,
         createdAt: new Date().toISOString(),
