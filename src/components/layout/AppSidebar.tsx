@@ -1,4 +1,4 @@
-import { Users, Building, FileText, UserCircle, UsersRound, ClipboardList, Calculator, Receipt, Package, ArrowLeftRight } from "lucide-react";
+import { Users, Building, FileText, UserCircle, UsersRound, ClipboardList, Calculator, Receipt, Package, ArrowLeftRight, Layers } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -37,6 +37,7 @@ const staffItems = [
 ];
 
 const warehouseItems = [
+  { title: "Разделы в складе", url: "/warehouse-categories", icon: Layers },
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];

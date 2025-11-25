@@ -17,6 +17,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
     defaultValues: sparePart || {
       name: "",
       internalArticle: "",
+      category: "Кондиционирование",
       unit: "шт" as const,
       currentStock: 0,
       minStock: 0,
@@ -26,6 +27,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
   });
 
   const unit = watch("unit");
+  const category = watch("category");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -40,6 +42,20 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
       </div>
 
       <div>
+        <Label htmlFor="category">Раздел *</Label>
+        <Select value={category} onValueChange={(value) => setValue("category", value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Выберите раздел" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Кондиционирование">Кондиционирование</SelectItem>
+            <SelectItem value="Кабельная продукция">Кабельная продукция</SelectItem>
+            <SelectItem value="Вентиляция">Вентиляция</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
         <Label htmlFor="unit">Единица измерения *</Label>
         <Select value={unit} onValueChange={(value) => setValue("unit", value as SparePart['unit'])}>
           <SelectTrigger>
@@ -48,10 +64,16 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
           <SelectContent>
             <SelectItem value="шт">шт</SelectItem>
             <SelectItem value="м">м</SelectItem>
+            <SelectItem value="мп">мп</SelectItem>
             <SelectItem value="кг">кг</SelectItem>
             <SelectItem value="л">л</SelectItem>
             <SelectItem value="м²">м²</SelectItem>
             <SelectItem value="м³">м³</SelectItem>
+            <SelectItem value="пара">пара</SelectItem>
+            <SelectItem value="к-т">к-т</SelectItem>
+            <SelectItem value="баллон">баллон</SelectItem>
+            <SelectItem value="уп">уп</SelectItem>
+            <SelectItem value="кор">кор</SelectItem>
           </SelectContent>
         </Select>
       </div>
