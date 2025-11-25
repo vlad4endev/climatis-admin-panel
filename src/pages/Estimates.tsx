@@ -49,7 +49,7 @@ const mockEstimates: Estimate[] = [
     requestName: "Заявка #002 - ТО системы",
     estimateNumber: "РС-2024-002",
     estimateDate: "2024-01-21",
-    status: "согласован с заказчиком",
+    status: "согласован",
     type: "по договору ТО",
     engineerComment: "Плановое обслуживание",
   },
@@ -77,7 +77,7 @@ export default function Estimates() {
         return "secondary";
       case "готов":
         return "default";
-      case "согласован с заказчиком":
+      case "согласован":
         return "default";
       default:
         return "secondary";
