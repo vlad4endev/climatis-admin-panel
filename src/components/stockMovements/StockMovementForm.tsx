@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StockMovement } from "@/types/stockMovement";
+import { StockMovement, StockMovementMaterial } from "@/types/stockMovement";
+import { MaterialListEditor } from "./MaterialListEditor";
 
 interface StockMovementFormProps {
   stockMovement?: StockMovement;
@@ -28,63 +29,33 @@ export function StockMovementForm({
   spareParts,
   requests,
 }: StockMovementFormProps) {
-  const [materialSearch, setMaterialSearch] = useState("");
-  const [showMaterialDropdown, setShowMaterialDropdown] = useState(false);
-  const materialInputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [materials, setMaterials] = useState<StockMovementMaterial[]>(
+    stockMovement?.materials || [{ materialId: "", materialName: "", quantity: 0 }]
+  );
 
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       operationDate: stockMovement?.operationDate || new Date().toISOString().split('T')[0],
-      materialId: stockMovement?.materialId || "",
       operationType: stockMovement?.operationType || "приход",
-      quantity: stockMovement?.quantity || 0,
       relatedRequestId: stockMovement?.relatedRequestId || "",
       comment: stockMovement?.comment || "",
     },
   });
-
-  const operationType = watch("operationType");
-  const materialId = watch("materialId");
 
   // Sort requests by creation date (newest first)
   const sortedRequests = [...requests].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  // Filter materials by search query
-  const filteredMaterials = spareParts.filter((part) =>
-    part.name.toLowerCase().includes(materialSearch.toLowerCase())
-  );
-
-  // Get selected material name
-  const selectedMaterial = spareParts.find((part) => part.id === materialId);
-
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        !materialInputRef.current?.contains(event.target as Node)
-      ) {
-        setShowMaterialDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Initialize search with selected material name
-  useEffect(() => {
-    if (selectedMaterial && !showMaterialDropdown) {
-      setMaterialSearch(selectedMaterial.name);
-    }
-  }, [selectedMaterial, showMaterialDropdown]);
+  const handleFormSubmit = (data: any) => {
+    onSubmit({
+      ...data,
+      materials,
+    });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="operationType">Тип операции</Label>
         <Select
@@ -111,60 +82,6 @@ export function StockMovementForm({
         />
       </div>
 
-      <div className="relative">
-        <Label htmlFor="materialSearch">Материал</Label>
-        <Input
-          ref={materialInputRef}
-          id="materialSearch"
-          type="text"
-          value={materialSearch}
-          onChange={(e) => {
-            setMaterialSearch(e.target.value);
-            setShowMaterialDropdown(true);
-          }}
-          onFocus={() => setShowMaterialDropdown(true)}
-          placeholder="Начните вводить название материала..."
-          autoComplete="off"
-        />
-        {showMaterialDropdown && filteredMaterials.length > 0 && (
-          <div
-            ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md max-h-60 overflow-auto"
-          >
-            {filteredMaterials.map((part) => (
-              <div
-                key={part.id}
-                className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-                onClick={() => {
-                  setValue("materialId", part.id);
-                  setMaterialSearch(part.name);
-                  setShowMaterialDropdown(false);
-                }}
-              >
-                {part.name}
-              </div>
-            ))}
-          </div>
-        )}
-        {showMaterialDropdown && materialSearch && filteredMaterials.length === 0 && (
-          <div
-            ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md px-3 py-2 text-muted-foreground text-sm"
-          >
-            Материал не найден
-          </div>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="quantity">Количество</Label>
-        <Input
-          id="quantity"
-          type="number"
-          {...register("quantity", { valueAsNumber: true })}
-        />
-      </div>
-
       <div>
         <Label htmlFor="relatedRequestId">Связанная заявка</Label>
         <Select
@@ -182,6 +99,15 @@ export function StockMovementForm({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label>Материалы</Label>
+        <MaterialListEditor
+          materials={materials}
+          onChange={setMaterials}
+          spareParts={spareParts}
+        />
       </div>
 
       <div>
