@@ -81,19 +81,14 @@ export default function Invoices() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
   const { toast } = useToast();
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "подготовлен":
-        return "secondary";
-      case "выставлен":
-        return "default";
-      case "оплачен":
-        return "default";
-      case "отменён":
-        return "secondary";
-      default:
-        return "secondary";
-    }
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, { bg: string; text: string }> = {
+      "подготовлен": { bg: "bg-blue-500", text: "text-white" },
+      "выставлен": { bg: "bg-orange-500", text: "text-white" },
+      "оплачен": { bg: "bg-green-500", text: "text-white" },
+      "отменён": { bg: "bg-gray-400", text: "text-white" },
+    };
+    return colorMap[status] || { bg: "bg-gray-400", text: "text-white" };
   };
 
   const config: EntityListConfig<Invoice> = {
@@ -147,11 +142,14 @@ export default function Invoices() {
         type: "select",
         options: INVOICE_STATUSES,
         filterable: true,
-        render: (value) => (
-          <Badge variant={getStatusBadgeVariant(value)}>
-            {INVOICE_STATUSES.find((s) => s.value === value)?.label || value}
-          </Badge>
-        ),
+        render: (value) => {
+          const colors = getStatusColor(value);
+          return (
+            <Badge className={`${colors.bg} ${colors.text} border-transparent px-2`}>
+              {INVOICE_STATUSES.find((s) => s.value === value)?.label || value}
+            </Badge>
+          );
+        },
       },
     ],
     onUpdate: (id, field, value) => {
