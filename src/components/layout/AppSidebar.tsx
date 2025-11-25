@@ -19,13 +19,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronRight } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-const menuItems = [
+const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
   { title: "Объекты", url: "/service-objects", icon: Building },
-  { title: "Документы", url: "/documents", icon: FileText },
+];
+
+const requestsItems = [
   { title: "Заявки", url: "/requests", icon: ClipboardList },
+  { title: "Документы", url: "/documents", icon: FileText },
   { title: "Расчеты", url: "/estimates", icon: Calculator },
   { title: "Счета", url: "/invoices", icon: Receipt },
+];
+
+const staffItems = [
   { title: "Сотрудники", url: "/employees", icon: UserCircle },
   { title: "Бригады", url: "/teams", icon: UsersRound },
 ];
@@ -34,6 +40,42 @@ const warehouseItems = [
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];
+
+const MenuItemComponent = ({ item, open }: { item: typeof clientsItems[0], open: boolean }) => (
+  <SidebarMenuItem>
+    {open ? (
+      <SidebarMenuButton asChild>
+        <NavLink
+          to={item.url}
+          className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
+          activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+        >
+          <item.icon className="h-5 w-5 flex-shrink-0" />
+          <span>{item.title}</span>
+        </NavLink>
+      </SidebarMenuButton>
+    ) : (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <SidebarMenuButton asChild>
+              <NavLink
+                to={item.url}
+                className="flex items-center justify-center w-full py-2 rounded-md transition-colors hover:bg-sidebar-accent"
+                activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              >
+                <item.icon className="h-5 w-5" />
+              </NavLink>
+            </SidebarMenuButton>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          {item.title}
+        </TooltipContent>
+      </Tooltip>
+    )}
+  </SidebarMenuItem>
+);
 
 export function AppSidebar() {
   const { open } = useSidebar();
@@ -61,47 +103,47 @@ export function AppSidebar() {
           </div>
         )}
 
+        {/* Клиенты и объекты */}
         <SidebarGroup>
-          {open && <SidebarGroupLabel>Управление</SidebarGroupLabel>}
+          {open && <SidebarGroupLabel>Клиенты</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  {open ? (
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
-                        activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      >
-                        <item.icon className="h-5 w-5 flex-shrink-0" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <SidebarMenuButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="flex items-center justify-center w-full py-2 rounded-md transition-colors hover:bg-sidebar-accent"
-                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            >
-                              <item.icon className="h-5 w-5" />
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        {item.title}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </SidebarMenuItem>
+              {clientsItems.map((item) => (
+                <MenuItemComponent key={item.title} item={item} open={open} />
               ))}
-              
-              {/* Warehouse Section */}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Заявки и документы */}
+        <SidebarGroup>
+          {open && <SidebarGroupLabel>Работа</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {requestsItems.map((item) => (
+                <MenuItemComponent key={item.title} item={item} open={open} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Сотрудники и бригады */}
+        <SidebarGroup>
+          {open && <SidebarGroupLabel>Персонал</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {staffItems.map((item) => (
+                <MenuItemComponent key={item.title} item={item} open={open} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Склад */}
+        <SidebarGroup>
+          {open && <SidebarGroupLabel>Склад</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
               <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
                 <SidebarMenuItem>
                   {open ? (
