@@ -5,7 +5,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -18,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
 const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
@@ -104,8 +104,7 @@ export function AppSidebar() {
         )}
 
         {/* Клиенты и объекты */}
-        <SidebarGroup>
-          {open && <SidebarGroupLabel>Клиенты</SidebarGroupLabel>}
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu>
               {clientsItems.map((item) => (
@@ -115,9 +114,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <Separator className="my-2 bg-sidebar-border" />
+
         {/* Заявки и документы */}
-        <SidebarGroup>
-          {open && <SidebarGroupLabel>Работа</SidebarGroupLabel>}
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu>
               {requestsItems.map((item) => (
@@ -127,9 +127,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <Separator className="my-2 bg-sidebar-border" />
+
         {/* Сотрудники и бригады */}
-        <SidebarGroup>
-          {open && <SidebarGroupLabel>Персонал</SidebarGroupLabel>}
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu>
               {staffItems.map((item) => (
@@ -139,9 +140,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <Separator className="my-2 bg-sidebar-border" />
+
         {/* Склад */}
-        <SidebarGroup>
-          {open && <SidebarGroupLabel>Склад</SidebarGroupLabel>}
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu>
               <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
