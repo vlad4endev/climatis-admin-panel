@@ -20,7 +20,7 @@ export interface Estimate {
   requestName?: string;
   estimateNumber: string;
   estimateDate: string;
-  status: "черновик" | "готов" | "согласован с заказчиком";
+  status: "черновик" | "готов" | "согласован";
   type: "простой ремонт" | "сложный ремонт" | "по договору ТО";
   engineerComment?: string;
   works?: Work[];
@@ -30,7 +30,7 @@ export interface Estimate {
 export const ESTIMATE_STATUSES = [
   { value: "черновик", label: "Черновик" },
   { value: "готов", label: "Готов" },
-  { value: "согласован с заказчиком", label: "Согласован с заказчиком" },
+  { value: "согласован", label: "Согласован" },
 ];
 
 export const ESTIMATE_TYPES = [
