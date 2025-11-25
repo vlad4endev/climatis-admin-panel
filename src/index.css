@@ -32,6 +32,18 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Status badge colors */
+    --status-draft: 162 6% 58%;
+    --status-draft-foreground: 196 30% 25%;
+    --status-ready: 200 70% 50%;
+    --status-ready-foreground: 0 0% 100%;
+    --status-approved: 142 70% 45%;
+    --status-approved-foreground: 0 0% 100%;
+    --status-info: 195 85% 55%;
+    --status-info-foreground: 0 0% 100%;
+    --status-warning: 38 90% 50%;
+    --status-warning-foreground: 0 0% 100%;
+
     --border: 162 6% 78%;
     --input: 162 6% 78%;
     --ring: 196 30% 25%;
@@ -83,6 +95,18 @@ All colors MUST be HSL.
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 38 53% 91%;
+
+    /* Status badge colors */
+    --status-draft: 162 6% 58%;
+    --status-draft-foreground: 196 30% 25%;
+    --status-ready: 200 70% 50%;
+    --status-ready-foreground: 0 0% 100%;
+    --status-approved: 142 70% 45%;
+    --status-approved-foreground: 0 0% 100%;
+    --status-info: 195 85% 55%;
+    --status-info-foreground: 0 0% 100%;
+    --status-warning: 38 90% 50%;
+    --status-warning-foreground: 0 0% 100%;
 
     --border: 196 30% 25%;
     --input: 196 30% 25%;

@@ -71,16 +71,16 @@ export default function Estimates() {
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
   const { toast } = useToast();
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
     switch (status) {
       case "черновик":
-        return "secondary";
+        return "draft";
       case "готов":
-        return "default";
+        return "ready";
       case "согласован":
-        return "default";
+        return "approved";
       default:
-        return "secondary";
+        return "default";
     }
   };
 
