@@ -69,33 +69,30 @@ export default function StockMovements() {
         label: "Материалы", 
         type: "text", 
         searchable: true,
-        render: (value: any) => {
+        render: (value: any, item: StockMovement) => {
           const materials = value as Array<{ materialName: string; quantity: number }>;
+          const isIncoming = item.operationType === "приход" || item.operationType === "возврат";
           return materials.map((m, i) => (
             <div key={i} className="text-sm">
-              {m.materialName}: <span className="font-semibold">{m.quantity}</span>
+              {m.materialName}
             </div>
           ));
         }
       },
       { 
-        key: "operationType", 
-        label: "Тип операции", 
-        type: "select",
+        key: "materials", 
+        label: "Количество", 
+        type: "text", 
         sortable: true,
-        editable: true,
-        options: [
-          { value: "приход", label: "Приход" },
-          { value: "расход", label: "Расход" },
-          { value: "возврат", label: "Возврат" },
-        ],
-        render: (value) => {
-          const labels = {
-            приход: "Приход",
-            расход: "Расход",
-            возврат: "Возврат",
-          };
-          return labels[value as keyof typeof labels];
+        render: (value: any, item: StockMovement) => {
+          const materials = value as Array<{ materialName: string; quantity: number }>;
+          const isIncoming = item.operationType === "приход" || item.operationType === "возврат";
+          const color = isIncoming ? "text-green-600" : "text-blue-600";
+          return materials.map((m, i) => (
+            <div key={i} className={`font-semibold ${color}`}>
+              {isIncoming ? "+" : "−"}{m.quantity}
+            </div>
+          ));
         }
       },
       { key: "relatedRequestName", label: "Связанная заявка", type: "text", searchable: true },
