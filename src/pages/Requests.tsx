@@ -108,7 +108,21 @@ export default function Requests() {
         editable: true,
         render: (value) => {
           const status = REQUEST_STATUSES.find(s => s.value === value);
-          return <Badge variant="outline">{status?.label}</Badge>;
+          const variantMap: Record<string, any> = {
+            new: { bg: "bg-blue-500", text: "text-white" },
+            needs_calculation: { bg: "bg-purple-500", text: "text-white" },
+            awaiting_materials: { bg: "bg-orange-500", text: "text-white" },
+            in_progress: { bg: "bg-cyan-500", text: "text-white" },
+            partially_completed: { bg: "bg-yellow-500", text: "text-white" },
+            completed: { bg: "bg-green-500", text: "text-white" },
+            closed: { bg: "bg-gray-400", text: "text-white" },
+          };
+          const variant = variantMap[value as string];
+          return (
+            <Badge className={`${variant?.bg} ${variant?.text} border-transparent px-2`}>
+              {status?.label}
+            </Badge>
+          );
         }
       },
       { 
