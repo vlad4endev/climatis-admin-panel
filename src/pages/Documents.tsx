@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import {
   Dialog,
@@ -13,6 +12,7 @@ import { Document, CONTRACT_TYPES } from "@/types/document";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { Client } from "@/types/client";
 import { ServiceObject } from "@/types/serviceObject";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockClients: Client[] = [
   { id: '1', companyName: 'ООО "Рога и Копыта"', type: 'legal_entity', division: '', mainContactName: 'Иванов И.И.', phone: '+7 (999) 123-45-67', email: 'info@example.com', additionalContacts: [], notes: '', createdAt: new Date() },
@@ -138,19 +138,13 @@ export default function Documents() {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Документы</h1>
-            <p className="text-muted-foreground mt-1">
-              Управление договорами и документами
-            </p>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить документ
-          </Button>
-        </div>
+      <div className="container mx-auto py-6">
+        <PageHeader
+          title="Документы"
+          description="Управление договорами и документами"
+          buttonLabel="Добавить документ"
+          onButtonClick={() => setIsDialogOpen(true)}
+        />
 
         <EntityList
           items={documents}

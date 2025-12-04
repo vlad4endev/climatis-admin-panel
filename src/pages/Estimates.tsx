@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 // Mock data
 const mockRequests = [
@@ -266,19 +267,15 @@ export default function Estimates() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Расчеты</h1>
-        <Button
-          onClick={() => {
-            setEditingEstimate(undefined);
-            setIsFormOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Создать расчёт
-        </Button>
-      </div>
+    <div className="container mx-auto py-6">
+      <PageHeader
+        title="Расчеты"
+        buttonLabel="Создать расчёт"
+        onButtonClick={() => {
+          setEditingEstimate(undefined);
+          setIsFormOpen(true);
+        }}
+      />
 
       <EntityList
         items={estimates}

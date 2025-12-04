@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, LayoutGrid, Table2, Kanban } from "lucide-react";
@@ -7,6 +7,7 @@ import { EntityCardView } from "./EntityCardView";
 import { EntityKanbanView } from "./EntityKanbanView";
 import { EntityFilters } from "./EntityFilters";
 import { EntityListConfig, ViewMode, FilterValue } from "./types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EntityListProps<T> {
   items: T[];
@@ -19,11 +20,19 @@ interface EntityListProps<T> {
 }
 
 export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [] }: EntityListProps<T>) {
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterValue[]>(initialFilters);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // На мобильных по умолчанию карточный вид
+  useEffect(() => {
+    if (isMobile && viewMode === 'table') {
+      setViewMode('card');
+    }
+  }, [isMobile]);
 
   // Фильтрация и поиск
   const filteredItems = useMemo(() => {
