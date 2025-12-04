@@ -15,12 +15,13 @@ interface EntityListProps<T> {
   kanbanGroupField?: string;
   kanbanColumns?: { value: string; label: string }[];
   defaultViewMode?: ViewMode;
+  initialFilters?: FilterValue[];
 }
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card' }: EntityListProps<T>) {
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [] }: EntityListProps<T>) {
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterValue[]>([]);
+  const [filters, setFilters] = useState<FilterValue[]>(initialFilters);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
