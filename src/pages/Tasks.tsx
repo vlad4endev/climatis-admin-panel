@@ -66,8 +66,6 @@ const mockTasks: Task[] = [
     description: "Монтаж приточно-вытяжной вентиляции",
     assigneeId: "2",
     assigneeName: "Петров Петр",
-    requestId: "2",
-    requestNumber: "ЗАЯ-002",
     proposedDeadline: "2024-12-15",
     agreedDeadline: "",
     status: "новая",
