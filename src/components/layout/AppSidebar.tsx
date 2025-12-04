@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -102,7 +102,7 @@ export function AppSidebar() {
               className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
               title="Свернуть меню"
             >
-              <PanelLeftClose className="h-5 w-5 text-sidebar-foreground/60" />
+              <ChevronsLeft className="h-5 w-5 text-sidebar-foreground/60" />
             </button>
           </div>
         ) : (
@@ -115,7 +115,7 @@ export function AppSidebar() {
               className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
               title="Развернуть меню"
             >
-              <PanelLeft className="h-5 w-5 text-sidebar-foreground/60" />
+              <ChevronsRight className="h-5 w-5 text-sidebar-foreground/60" />
             </button>
           </div>
         )}
