@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useReactToPrint } from "react-to-print";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockTeams = [
   { id: "1", teamName: "Бригада №1" },
@@ -255,10 +256,11 @@ export default function Assignments() {
   const isNewAssignment = !!newAssignmentData;
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Задания</h1>
-      </div>
+    <div className="container mx-auto py-6">
+      <PageHeader
+        title="Задания"
+        description="Управление заданиями для бригад"
+      />
 
       <EntityList
         items={assignments}

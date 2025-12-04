@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { StockMovement } from "@/types/stockMovement";
 import { StockMovementForm } from "@/components/stockMovements/StockMovementForm";
 import { useToast } from "@/hooks/use-toast";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function StockMovements() {
   const { toast } = useToast();
@@ -161,13 +160,11 @@ export default function StockMovements() {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Расход/Приход</h1>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Добавить операцию
-        </Button>
-      </div>
+      <PageHeader
+        title="Расход/Приход"
+        buttonLabel="Добавить операцию"
+        onButtonClick={() => setIsFormOpen(true)}
+      />
 
       <EntityList
         items={stockMovements}

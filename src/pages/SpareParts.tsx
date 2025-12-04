@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { SparePart } from "@/types/sparePart";
 import { SparePartForm } from "@/components/spareParts/SparePartForm";
 import { useToast } from "@/hooks/use-toast";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SpareParts() {
   const { toast } = useToast();
@@ -251,13 +250,11 @@ export default function SpareParts() {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Комплектующие</h1>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Добавить комплектующее
-        </Button>
-      </div>
+      <PageHeader
+        title="Комплектующие"
+        buttonLabel="Добавить комплектующее"
+        onButtonClick={() => setIsFormOpen(true)}
+      />
 
       <EntityList
         items={spareParts}
