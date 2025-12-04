@@ -20,8 +20,8 @@ const mockObjects = [
 ];
 
 const mockDocuments = [
-  { id: "1", contractNumber: "Д-001/2024", responseConditions: "Время реагирования: 4 часа. Время устранения неисправности: 24 часа." },
-  { id: "2", contractNumber: "Д-002/2024", responseConditions: "Время реагирования: 8 часов. Плановое ТО: ежеквартально." },
+  { id: "1", contractNumber: "Д-001/2024", clientId: "1", responseConditions: "Время реагирования: 4 часа. Время устранения неисправности: 24 часа." },
+  { id: "2", contractNumber: "Д-002/2024", clientId: "2", responseConditions: "Время реагирования: 8 часов. Плановое ТО: ежеквартально." },
 ];
 
 const mockEmployees = [

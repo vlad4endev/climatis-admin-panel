@@ -13,7 +13,7 @@ interface RequestFormProps {
   onCancel: () => void;
   clients: { id: string; companyName: string }[];
   serviceObjects: { id: string; objectName: string }[];
-  documents: { id: string; contractNumber: string; responseConditions?: string }[];
+  documents: { id: string; contractNumber: string; clientId?: string; responseConditions?: string }[];
   employees: { id: string; fullName: string }[];
   teams: { id: string; teamName: string }[];
 }
@@ -77,6 +77,19 @@ export function RequestForm({
       setClientSearch(selectedClient.companyName);
     }
   }, [selectedClient, showClientDropdown]);
+
+  // Clear contract when client changes
+  const [prevClientId, setPrevClientId] = useState(selectedClientId);
+  useEffect(() => {
+    if (selectedClientId !== prevClientId) {
+      setPrevClientId(selectedClientId);
+      if (prevClientId) {
+        setValue("contractId", "");
+        setValue("contractNumber", "");
+        setValue("contractConditions", "");
+      }
+    }
+  }, [selectedClientId, prevClientId, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -204,21 +217,27 @@ export function RequestForm({
 
       <div>
         <Label htmlFor="contractId">Договор (опционально)</Label>
-        <Select value={selectedContractId} onValueChange={(value) => {
-          const contract = documents.find(d => d.id === value);
-          setValue("contractId", value);
-          setValue("contractNumber", contract?.contractNumber || "");
-          setValue("contractConditions", contract?.responseConditions || "");
-        }}>
+        <Select 
+          value={selectedContractId} 
+          onValueChange={(value) => {
+            const contract = documents.find(d => d.id === value);
+            setValue("contractId", value);
+            setValue("contractNumber", contract?.contractNumber || "");
+            setValue("contractConditions", contract?.responseConditions || "");
+          }}
+          disabled={!selectedClientId}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="Выберите договор" />
+            <SelectValue placeholder={selectedClientId ? "Выберите договор" : "Сначала выберите контрагента"} />
           </SelectTrigger>
           <SelectContent>
-            {documents.map(doc => (
-              <SelectItem key={doc.id} value={doc.id}>
-                {doc.contractNumber}
-              </SelectItem>
-            ))}
+            {documents
+              .filter(doc => doc.clientId === selectedClientId)
+              .map(doc => (
+                <SelectItem key={doc.id} value={doc.id}>
+                  {doc.contractNumber}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>
