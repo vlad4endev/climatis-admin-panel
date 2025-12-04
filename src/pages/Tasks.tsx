@@ -45,8 +45,8 @@ const mockTasks: Task[] = [
     assigneeName: "Иванов Иван",
     requestId: "1",
     requestNumber: "ЗАЯ-001",
-    proposedDeadline: "2024-12-10",
-    agreedDeadline: "2024-12-12",
+    proposedDeadline: "2025-12-01",
+    agreedDeadline: "2025-12-03",
     status: "в работе",
     checklist: [
       { id: "1", text: "Проверить компрессор", completed: true },
@@ -55,9 +55,9 @@ const mockTasks: Task[] = [
       { id: "4", text: "Проверить дренаж", completed: false },
     ],
     comments: [
-      { id: "1", text: "Начал работу, компрессор в норме", authorId: "1", authorName: "Иванов Иван", createdAt: "2024-12-05T10:30:00" },
+      { id: "1", text: "Начал работу, компрессор в норме", authorId: "1", authorName: "Иванов Иван", createdAt: "2025-12-02T10:30:00" },
     ],
-    createdAt: "2024-12-01",
+    createdAt: "2025-11-28",
     createdBy: "admin"
   },
   {
@@ -66,12 +66,12 @@ const mockTasks: Task[] = [
     description: "Монтаж приточно-вытяжной вентиляции",
     assigneeId: "2",
     assigneeName: "Петров Петр",
-    proposedDeadline: "2024-12-15",
+    proposedDeadline: "2025-12-10",
     agreedDeadline: "",
     status: "новая",
     checklist: [],
     comments: [],
-    createdAt: "2024-12-02",
+    createdAt: "2025-12-01",
     createdBy: "admin"
   },
   {
@@ -82,8 +82,8 @@ const mockTasks: Task[] = [
     assigneeName: "Сидоров Сидор",
     requestId: "3",
     requestNumber: "ЗАЯ-003",
-    proposedDeadline: "2024-12-08",
-    agreedDeadline: "2024-12-08",
+    proposedDeadline: "2025-12-01",
+    agreedDeadline: "2025-12-01",
     status: "выполнена",
     checklist: [
       { id: "1", text: "Демонтаж старого теплообменника", completed: true },
@@ -91,9 +91,9 @@ const mockTasks: Task[] = [
       { id: "3", text: "Тестирование", completed: true },
     ],
     comments: [
-      { id: "1", text: "Работа выполнена в срок", authorId: "3", authorName: "Сидоров Сидор", createdAt: "2024-12-08T16:00:00" },
+      { id: "1", text: "Работа выполнена в срок", authorId: "3", authorName: "Сидоров Сидор", createdAt: "2025-12-01T16:00:00" },
     ],
-    createdAt: "2024-12-03",
+    createdAt: "2025-11-25",
     createdBy: "admin"
   },
 ];
