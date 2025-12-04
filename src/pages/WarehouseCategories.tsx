@@ -139,17 +139,17 @@ export default function WarehouseCategories() {
         {categories.map((category) => (
           <Card key={category.id} className="hover:shadow-lg transition-shadow group">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                     <Package className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
-                    <CardTitle className="text-xl">{category.name}</CardTitle>
+                  <div className="min-w-0">
+                    <CardTitle className="text-xl truncate" title={category.name}>{category.name}</CardTitle>
                     <CardDescription>Раздел склада</CardDescription>
                   </div>
                 </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
