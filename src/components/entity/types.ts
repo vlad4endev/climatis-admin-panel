@@ -17,6 +17,7 @@ export interface EntityListConfig<T = any> {
   onUpdate?: (id: string, field: string, value: any) => void;
   onDelete?: (id: string) => void;
   onEdit?: (item: T) => void;
+  customActions?: (item: T) => React.ReactNode;
 }
 
 export type ViewMode = 'table' | 'card' | 'kanban';
