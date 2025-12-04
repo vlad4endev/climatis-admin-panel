@@ -5,10 +5,10 @@ import { Request } from "@/types/request";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { TaskForm } from "@/components/tasks/TaskForm";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockEmployees: Employee[] = [
   { id: "1", fullName: "Иванов Иван", phone: "+7 (999) 123-45-67", position: "Инженер", createdAt: new Date() },
@@ -246,17 +246,13 @@ export default function Tasks() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Задачи</h1>
-          <p className="text-muted-foreground">Управление задачами сотрудников</p>
-        </div>
-        <Button onClick={() => { setEditingTask(undefined); setIsDialogOpen(true); }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Добавить задачу
-        </Button>
-      </div>
+    <div className="container mx-auto py-6">
+      <PageHeader
+        title="Задачи"
+        description="Управление задачами сотрудников"
+        buttonLabel="Добавить задачу"
+        onButtonClick={() => { setEditingTask(undefined); setIsDialogOpen(true); }}
+      />
 
       <EntityList
         items={tasks}

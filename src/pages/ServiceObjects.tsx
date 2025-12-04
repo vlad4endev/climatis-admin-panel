@@ -2,12 +2,13 @@ import { useState } from "react";
 import { ServiceObject } from "@/types/serviceObject";
 import { Client } from "@/types/client";
 import { ServiceObjectForm } from "@/components/serviceObjects/ServiceObjectForm";
-import { Button } from "@/components/ui/button";
-import { Plus, MapPin, Building2, User } from "lucide-react";
+import { MapPin, Building2, User } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 // Мок данные клиентов (в реальном приложении будут из базы)
 const mockClients: Client[] = [
@@ -196,39 +197,41 @@ export default function ServiceObjects() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Объекты обслуживания</h1>
-          <p className="text-muted-foreground mt-1">
-            Управление объектами клиентов
-          </p>
-        </div>
-        {!isFormVisible && (
-          <Button onClick={() => setIsFormVisible(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить объект
-          </Button>
-        )}
-      </div>
+    <div className="container mx-auto py-6">
+      <PageHeader
+        title="Объекты обслуживания"
+        description="Управление объектами клиентов"
+        buttonLabel="Добавить объект"
+        onButtonClick={() => setIsFormVisible(true)}
+      />
 
-      {isFormVisible ? (
-        <ServiceObjectForm
-          clients={mockClients}
-          onSubmit={handleCreateObject}
-          onCancel={() => {
-            setIsFormVisible(false);
-            setEditingObject(null);
-          }}
-          initialData={editingObject || undefined}
-        />
-      ) : (
-        <EntityList
-          items={objects}
-          config={objectsConfig}
-          emptyMessage="Нет объектов обслуживания. Создайте первый объект."
-        />
-      )}
+      <EntityList
+        items={objects}
+        config={objectsConfig}
+        emptyMessage="Нет объектов обслуживания. Создайте первый объект."
+      />
+
+      <Dialog open={isFormVisible} onOpenChange={(open) => {
+        setIsFormVisible(open);
+        if (!open) setEditingObject(null);
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingObject ? "Редактировать объект" : "Добавить объект"}
+            </DialogTitle>
+          </DialogHeader>
+          <ServiceObjectForm
+            clients={mockClients}
+            onSubmit={handleCreateObject}
+            onCancel={() => {
+              setIsFormVisible(false);
+              setEditingObject(null);
+            }}
+            initialData={editingObject || undefined}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

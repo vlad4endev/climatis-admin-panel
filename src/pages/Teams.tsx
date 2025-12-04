@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +10,7 @@ import { EntityListConfig } from "@/components/entity/types";
 import { Team } from "@/types/team";
 import { Employee } from "@/types/employee";
 import { TeamForm } from "@/components/teams/TeamForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockEmployees: Employee[] = [
   {
@@ -134,19 +133,13 @@ export default function Teams() {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Бригады</h1>
-            <p className="text-muted-foreground mt-1">
-              Управление рабочими бригадами
-            </p>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить бригаду
-          </Button>
-        </div>
+      <div className="container mx-auto py-6">
+        <PageHeader
+          title="Бригады"
+          description="Управление рабочими бригадами"
+          buttonLabel="Добавить бригаду"
+          onButtonClick={() => setIsDialogOpen(true)}
+        />
 
         <EntityList
           items={teams}

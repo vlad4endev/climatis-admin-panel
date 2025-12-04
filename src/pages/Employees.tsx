@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +9,7 @@ import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Employee } from "@/types/employee";
 import { EmployeeForm } from "@/components/employees/EmployeeForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([
@@ -94,19 +93,13 @@ export default function Employees() {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Сотрудники</h1>
-            <p className="text-muted-foreground mt-1">
-              Управление сотрудниками компании
-            </p>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить сотрудника
-          </Button>
-        </div>
+      <div className="container mx-auto py-6">
+        <PageHeader
+          title="Сотрудники"
+          description="Управление сотрудниками компании"
+          buttonLabel="Добавить сотрудника"
+          onButtonClick={() => setIsDialogOpen(true)}
+        />
 
         <EntityList
           items={employees}
