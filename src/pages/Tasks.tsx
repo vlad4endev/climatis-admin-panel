@@ -6,7 +6,7 @@ import { EntityListConfig } from "@/components/entity/types";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const mockEmployees: Employee[] = [
@@ -102,7 +102,14 @@ export default function Tasks() {
         type: "text",
         searchable: true,
         editable: true,
-        render: (value) => <span className="font-medium">{value}</span>
+        render: (value, item) => (
+          <div className="flex items-center gap-2">
+            {item.status === "выполнена" && (
+              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+            )}
+            <span className="font-medium">{value}</span>
+          </div>
+        )
       },
       {
         key: "assigneeName",
