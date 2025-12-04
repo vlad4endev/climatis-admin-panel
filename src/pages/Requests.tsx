@@ -15,8 +15,8 @@ const mockClients = [
 ];
 
 const mockObjects = [
-  { id: "1", objectName: "Офис на Ленина 15" },
-  { id: "2", objectName: "Склад на Гагарина 20" },
+  { id: "1", objectName: "Офис на Ленина 15", clientId: "1" },
+  { id: "2", objectName: "Склад на Гагарина 20", clientId: "2" },
 ];
 
 const mockDocuments = [

@@ -12,7 +12,7 @@ interface RequestFormProps {
   onSubmit: (data: Partial<Request>) => void;
   onCancel: () => void;
   clients: { id: string; companyName: string }[];
-  serviceObjects: { id: string; objectName: string }[];
+  serviceObjects: { id: string; objectName: string; clientId?: string }[];
   documents: { id: string; contractNumber: string; clientId?: string; responseConditions?: string }[];
   employees: { id: string; fullName: string }[];
   teams: { id: string; teamName: string }[];
@@ -78,12 +78,14 @@ export function RequestForm({
     }
   }, [selectedClient, showClientDropdown]);
 
-  // Clear contract when client changes
+  // Clear object and contract when client changes
   const [prevClientId, setPrevClientId] = useState(selectedClientId);
   useEffect(() => {
     if (selectedClientId !== prevClientId) {
       setPrevClientId(selectedClientId);
       if (prevClientId) {
+        setValue("objectId", "");
+        setValue("objectName", "");
         setValue("contractId", "");
         setValue("contractNumber", "");
         setValue("contractConditions", "");
@@ -196,20 +198,26 @@ export function RequestForm({
         </div>
         <div>
           <Label htmlFor="objectId">Объект *</Label>
-          <Select value={selectedObjectId} onValueChange={(value) => {
-            const obj = serviceObjects.find(o => o.id === value);
-            setValue("objectId", value);
-            setValue("objectName", obj?.objectName || "");
-          }}>
+          <Select 
+            value={selectedObjectId} 
+            onValueChange={(value) => {
+              const obj = serviceObjects.find(o => o.id === value);
+              setValue("objectId", value);
+              setValue("objectName", obj?.objectName || "");
+            }}
+            disabled={!selectedClientId}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Выберите объект" />
+              <SelectValue placeholder={selectedClientId ? "Выберите объект" : "Сначала выберите контрагента"} />
             </SelectTrigger>
             <SelectContent>
-              {serviceObjects.map(obj => (
-                <SelectItem key={obj.id} value={obj.id}>
-                  {obj.objectName}
-                </SelectItem>
-              ))}
+              {serviceObjects
+                .filter(obj => obj.clientId === selectedClientId)
+                .map(obj => (
+                  <SelectItem key={obj.id} value={obj.id}>
+                    {obj.objectName}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
