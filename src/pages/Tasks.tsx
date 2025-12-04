@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Task } from "@/types/task";
 import { Employee } from "@/types/employee";
+import { Request } from "@/types/request";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { TaskForm } from "@/components/tasks/TaskForm";
@@ -13,6 +14,12 @@ const mockEmployees: Employee[] = [
   { id: "1", fullName: "Иванов Иван", phone: "+7 (999) 123-45-67", position: "Инженер", createdAt: new Date() },
   { id: "2", fullName: "Петров Петр", phone: "+7 (999) 234-56-78", position: "Техник", createdAt: new Date() },
   { id: "3", fullName: "Сидоров Сидор", phone: "+7 (999) 345-67-89", position: "Мастер", createdAt: new Date() },
+];
+
+const mockRequests: Request[] = [
+  { id: "1", requestNumber: "ЗАЯ-001", createdAt: new Date(), status: "in_progress", type: "repair", priority: "urgent", clientId: "1", clientName: "ООО Альфа", objectId: "1", objectName: "Офис на Ленина", problemDescription: "Не работает кондиционер", comments: "" },
+  { id: "2", requestNumber: "ЗАЯ-002", createdAt: new Date(), status: "new", type: "maintenance", priority: "normal", clientId: "2", clientName: "ИП Бета", objectId: "2", objectName: "Склад №3", problemDescription: "Плановое ТО вентиляции", comments: "" },
+  { id: "3", requestNumber: "ЗАЯ-003", createdAt: new Date(), status: "completed", type: "repair", priority: "normal", clientId: "1", clientName: "ООО Альфа", objectId: "3", objectName: "Цех №1", problemDescription: "Ремонт чиллера", comments: "" },
 ];
 
 const statusOptions = [
@@ -36,6 +43,8 @@ const mockTasks: Task[] = [
     description: "Провести полную диагностику системы кондиционирования в офисе клиента",
     assigneeId: "1",
     assigneeName: "Иванов Иван",
+    requestId: "1",
+    requestNumber: "ЗАЯ-001",
     proposedDeadline: "2024-12-10",
     agreedDeadline: "2024-12-12",
     status: "в работе",
@@ -57,6 +66,8 @@ const mockTasks: Task[] = [
     description: "Монтаж приточно-вытяжной вентиляции",
     assigneeId: "2",
     assigneeName: "Петров Петр",
+    requestId: "2",
+    requestNumber: "ЗАЯ-002",
     proposedDeadline: "2024-12-15",
     agreedDeadline: "",
     status: "новая",
@@ -71,6 +82,8 @@ const mockTasks: Task[] = [
     description: "Замена теплообменника",
     assigneeId: "3",
     assigneeName: "Сидоров Сидор",
+    requestId: "3",
+    requestNumber: "ЗАЯ-003",
     proposedDeadline: "2024-12-08",
     agreedDeadline: "2024-12-08",
     status: "выполнена",
@@ -134,6 +147,17 @@ export default function Tasks() {
         options: assigneeOptions,
         searchable: true,
         filterable: true,
+      },
+      {
+        key: "requestNumber",
+        label: "Заявка",
+        type: "text",
+        searchable: true,
+        render: (value) => value ? (
+          <span className="text-primary font-medium">{value}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )
       },
       {
         key: "agreedDeadline",
@@ -255,6 +279,7 @@ export default function Tasks() {
           <TaskForm
             task={editingTask}
             employees={mockEmployees}
+            requests={mockRequests}
             onSubmit={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
           />
