@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
-import { Plus } from "lucide-react";
+import { Plus, ClipboardCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -49,6 +50,14 @@ const mockEstimates: Estimate[] = [
     createdById: "1",
     createdByName: "Иванов Иван Иванович",
     engineerComment: "Требуется замена теплообменника",
+    works: [
+      { id: "1", description: "Диагностика котла", hours: 2, pricePerHour: 1500 },
+      { id: "2", description: "Замена теплообменника", hours: 4, pricePerHour: 2000 },
+    ],
+    materials: [
+      { id: "1", materialName: "Теплообменник", quantity: 1, pricePerUnit: 25000 },
+      { id: "2", materialName: "Прокладка фланцевая", quantity: 2, pricePerUnit: 120 },
+    ],
   },
   {
     id: "2",
@@ -62,6 +71,11 @@ const mockEstimates: Estimate[] = [
     createdById: "2",
     createdByName: "Петров Петр Петрович",
     engineerComment: "Плановое обслуживание",
+    works: [
+      { id: "1", description: "Профилактический осмотр", hours: 1, pricePerHour: 1200 },
+      { id: "2", description: "Чистка фильтров", hours: 2, pricePerHour: 1000 },
+    ],
+    materials: [],
   },
   {
     id: "3",
@@ -78,6 +92,7 @@ const mockEstimates: Estimate[] = [
 ];
 
 export default function Estimates() {
+  const navigate = useNavigate();
   const [estimates, setEstimates] = useState<Estimate[]>(mockEstimates);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
@@ -178,6 +193,39 @@ export default function Estimates() {
       setEditingEstimate(estimate);
       setIsFormOpen(true);
     },
+    customActions: (estimate) => (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCreateAssignment(estimate);
+        }}
+        title="Создать задание"
+        disabled={estimate.status === "черновик"}
+      >
+        <ClipboardCheck className="h-4 w-4" />
+      </Button>
+    ),
+  };
+
+  const handleCreateAssignment = (estimate: Estimate) => {
+    // Store estimate data in sessionStorage to pass to Assignments page
+    const assignmentData = {
+      requestId: estimate.requestId,
+      requestNumber: estimate.requestName?.split(' - ')[0] || "",
+      estimateId: estimate.id,
+      estimateName: estimate.name,
+      works: estimate.works || [],
+      materials: estimate.materials || [],
+      comments: estimate.engineerComment || "",
+    };
+    sessionStorage.setItem('newAssignmentFromEstimate', JSON.stringify(assignmentData));
+    navigate('/assignments?create=true');
+    toast({
+      title: "Переход к созданию задания",
+      description: `На основе расчёта "${estimate.name}"`,
+    });
   };
 
   const handleSubmit = (data: Partial<Estimate>) => {

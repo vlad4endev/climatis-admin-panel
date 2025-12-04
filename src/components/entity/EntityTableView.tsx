@@ -166,6 +166,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
                 ))}
                 <TableCell>
                   <div className="flex items-center gap-2">
+                    {config.customActions && config.customActions(item)}
                     {config.onEdit && (
                       <Button
                         variant="ghost"
