@@ -15,8 +15,8 @@ import { Client } from "@/types/client";
 import { ServiceObject } from "@/types/serviceObject";
 
 const mockClients: Client[] = [
-  { id: '1', companyName: 'ООО "Рога и Копыта"', type: 'legal_entity', mainContactName: 'Иванов И.И.', phone: '+7 (999) 123-45-67', email: 'info@example.com', additionalContacts: [], notes: '', createdAt: new Date() },
-  { id: '2', companyName: 'ИП Сидоров', type: 'individual_entrepreneur', mainContactName: 'Сидоров П.П.', phone: '+7 (999) 765-43-21', email: 'sidorov@example.com', additionalContacts: [], notes: '', createdAt: new Date() },
+  { id: '1', companyName: 'ООО "Рога и Копыта"', type: 'legal_entity', division: '', mainContactName: 'Иванов И.И.', phone: '+7 (999) 123-45-67', email: 'info@example.com', additionalContacts: [], notes: '', createdAt: new Date() },
+  { id: '2', companyName: 'ИП Сидоров', type: 'individual_entrepreneur', division: '', mainContactName: 'Сидоров П.П.', phone: '+7 (999) 765-43-21', email: 'sidorov@example.com', additionalContacts: [], notes: '', createdAt: new Date() },
 ];
 
 const mockServiceObjects: ServiceObject[] = [

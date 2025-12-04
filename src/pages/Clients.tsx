@@ -13,6 +13,7 @@ const mockClients: Client[] = [
     id: "1",
     companyName: "ООО 'Торговый дом Север'",
     type: "legal_entity",
+    division: "Центральный офис",
     mainContactName: "Петров Петр Петрович",
     phone: "+7 (495) 123-45-67",
     email: "p.petrov@sever-td.ru",
@@ -31,6 +32,7 @@ const mockClients: Client[] = [
     id: "2",
     companyName: "ИП Иванов Иван Иванович",
     type: "individual_entrepreneur",
+    division: "",
     mainContactName: "Иванов Иван Иванович",
     phone: "+7 (916) 234-56-78",
     email: "ivanov.ip@gmail.com",
@@ -42,6 +44,7 @@ const mockClients: Client[] = [
     id: "3",
     companyName: "ООО 'МедЦентр Здоровье'",
     type: "legal_entity",
+    division: "Филиал №2",
     mainContactName: "Смирнова Елена Александровна",
     phone: "+7 (499) 987-65-43",
     email: "info@medcentr-zdorovie.ru",
@@ -127,6 +130,14 @@ export default function Clients() {
         render: (value) => (
           <Badge variant="secondary">{getTypeLabel(value)}</Badge>
         ),
+      },
+      {
+        key: 'division',
+        label: 'Подразделение',
+        type: 'text',
+        searchable: true,
+        editable: true,
+        render: (value) => value ? <span className="text-sm">{value}</span> : <span className="text-muted-foreground text-sm">—</span>,
       },
       {
         key: 'mainContactName',

@@ -17,6 +17,7 @@ interface ClientFormProps {
 export function ClientForm({ onSubmit, onCancel }: ClientFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [type, setType] = useState<ClientType>("legal_entity");
+  const [division, setDivision] = useState("");
   const [mainContactName, setMainContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -51,6 +52,7 @@ export function ClientForm({ onSubmit, onCancel }: ClientFormProps) {
     onSubmit({
       companyName,
       type,
+      division,
       mainContactName,
       phone,
       email,
@@ -88,6 +90,16 @@ export function ClientForm({ onSubmit, onCancel }: ClientFormProps) {
                 <SelectItem value="individual_entrepreneur">Индивидуальный предприниматель</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="division">Подразделение</Label>
+            <Input
+              id="division"
+              value={division}
+              onChange={(e) => setDivision(e.target.value)}
+              placeholder="Филиал / цех / предприятие"
+            />
           </div>
 
           <div className="space-y-2">
