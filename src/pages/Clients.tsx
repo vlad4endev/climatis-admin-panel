@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Client } from "@/types/client";
 import { ClientForm } from "@/components/clients/ClientForm";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Mail, Phone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
@@ -73,18 +74,30 @@ const getTypeLabel = (type: string) => {
 
 export default function Clients() {
   const [clients, setClients] = useState<Client[]>(mockClients);
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
-  const handleCreateClient = (clientData: Omit<Client, "id" | "createdAt">) => {
-    const newClient: Client = {
-      ...clientData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setClients([newClient, ...clients]);
-    setIsFormVisible(false);
-    toast.success("Клиент успешно создан");
+  const handleSubmit = (clientData: Omit<Client, "id" | "createdAt">) => {
+    if (editingClient) {
+      setClients(prev =>
+        prev.map(client =>
+          client.id === editingClient.id
+            ? { ...client, ...clientData }
+            : client
+        )
+      );
+      toast.success("Клиент обновлён");
+    } else {
+      const newClient: Client = {
+        ...clientData,
+        id: Date.now().toString(),
+        createdAt: new Date(),
+      };
+      setClients([newClient, ...clients]);
+      toast.success("Клиент успешно создан");
+    }
+    setIsFormOpen(false);
+    setEditingClient(null);
   };
 
   const handleUpdateField = (id: string, field: string, value: any) => {
@@ -103,7 +116,7 @@ export default function Clients() {
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
-    setIsFormVisible(true);
+    setIsFormOpen(true);
   };
 
   const clientsConfig: EntityListConfig<Client> = {
@@ -184,37 +197,47 @@ export default function Clients() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto py-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Клиенты</h1>
           <p className="text-muted-foreground mt-1">
             Управление базой клиентов компании
           </p>
         </div>
-        {!isFormVisible && (
-          <Button onClick={() => setIsFormVisible(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Добавить клиента
-          </Button>
-        )}
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Добавить клиента
+        </Button>
       </div>
 
-      {isFormVisible ? (
-        <ClientForm
-          onSubmit={handleCreateClient}
-          onCancel={() => {
-            setIsFormVisible(false);
-            setEditingClient(null);
-          }}
-        />
-      ) : (
-        <EntityList
-          items={clients}
-          config={clientsConfig}
-          emptyMessage="Нет клиентов. Создайте первого клиента."
-        />
-      )}
+      <EntityList
+        items={clients}
+        config={clientsConfig}
+        emptyMessage="Нет клиентов. Создайте первого клиента."
+        defaultViewMode="table"
+      />
+
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        setIsFormOpen(open);
+        if (!open) setEditingClient(null);
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingClient ? "Редактировать клиента" : "Добавить клиента"}
+            </DialogTitle>
+          </DialogHeader>
+          <ClientForm
+            client={editingClient}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingClient(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
