@@ -9,6 +9,7 @@ export interface EntityField<T = any> {
   options?: { value: string; label: string }[];
   render?: (value: any, item: T) => React.ReactNode;
   getValue?: (item: T) => any;
+  cellClassName?: (item: T) => string;
 }
 
 export interface EntityListConfig<T = any> {
