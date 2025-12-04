@@ -1,4 +1,4 @@
-import { Users, Building, FileText, UserCircle, UsersRound, ClipboardList, Calculator, ClipboardCheck, Package, ArrowLeftRight, Layers, CheckSquare } from "lucide-react";
+import { Users, MapPin, FileText, UserCircle, UsersRound, Inbox, Calculator, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -21,11 +21,11 @@ import { Separator } from "@/components/ui/separator";
 
 const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
-  { title: "Объекты", url: "/service-objects", icon: Building },
+  { title: "Объекты", url: "/service-objects", icon: MapPin },
 ];
 
 const requestsItems = [
-  { title: "Заявки", url: "/requests", icon: ClipboardList },
+  { title: "Заявки", url: "/requests", icon: Inbox },
   { title: "Документы", url: "/documents", icon: FileText },
   { title: "Расчеты", url: "/estimates", icon: Calculator },
   { title: "Задания", url: "/assignments", icon: ClipboardCheck },
@@ -34,11 +34,11 @@ const requestsItems = [
 const staffItems = [
   { title: "Сотрудники", url: "/employees", icon: UserCircle },
   { title: "Бригады", url: "/teams", icon: UsersRound },
-  { title: "Задачи", url: "/tasks", icon: CheckSquare },
+  { title: "Задачи", url: "/tasks", icon: ListTodo },
 ];
 
 const warehouseItems = [
-  { title: "Разделы в складе", url: "/warehouse-categories", icon: Layers },
+  { title: "Разделы в складе", url: "/warehouse-categories", icon: FolderTree },
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];
