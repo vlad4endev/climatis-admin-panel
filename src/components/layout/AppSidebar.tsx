@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, PanelLeftClose, PanelLeft } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -80,7 +80,7 @@ const MenuItemComponent = ({ item, open }: { item: typeof clientsItems[0], open:
 );
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
   const isWarehouseActive = warehouseItems.some(item => location.pathname === item.url);
 
@@ -90,18 +90,32 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarContent>
-        {open && (
-          <div className="px-6 py-5">
-            <h2 className="text-xl font-bold text-sidebar-foreground">Климатис</h2>
-            <p className="text-xs text-sidebar-foreground/60 mt-1">Административная панель</p>
+        {open ? (
+          <div className="px-6 py-5 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-sidebar-foreground">Климатис</h2>
+              <p className="text-xs text-sidebar-foreground/60 mt-1">Административная панель</p>
+            </div>
+            <button
+              onClick={() => toggleSidebar()}
+              className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
+              title="Свернуть меню"
+            >
+              <PanelLeftClose className="h-5 w-5 text-sidebar-foreground/60" />
+            </button>
           </div>
-        )}
-        
-        {!open && (
-          <div className="py-5 flex items-center justify-center">
+        ) : (
+          <div className="py-5 flex flex-col items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <span className="text-primary font-bold text-lg">К</span>
             </div>
+            <button
+              onClick={() => toggleSidebar()}
+              className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
+              title="Развернуть меню"
+            >
+              <PanelLeft className="h-5 w-5 text-sidebar-foreground/60" />
+            </button>
           </div>
         )}
 
