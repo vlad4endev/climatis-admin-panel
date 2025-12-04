@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Client } from "@/types/client";
 import { ClientForm } from "@/components/clients/ClientForm";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Mail, Phone, Building2 } from "lucide-react";
+import { Mail, Phone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockClients: Client[] = [
   {
@@ -198,18 +198,12 @@ export default function Clients() {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Клиенты</h1>
-          <p className="text-muted-foreground mt-1">
-            Управление базой клиентов компании
-          </p>
-        </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Добавить клиента
-        </Button>
-      </div>
+      <PageHeader
+        title="Клиенты"
+        description="Управление базой клиентов компании"
+        buttonLabel="Добавить клиента"
+        onButtonClick={() => setIsFormOpen(true)}
+      />
 
       <EntityList
         items={clients}

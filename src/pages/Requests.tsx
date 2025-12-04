@@ -8,6 +8,7 @@ import { RequestForm } from "@/components/requests/RequestForm";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockClients = [
   { id: "1", companyName: "ООО Ромашка" },
@@ -215,17 +216,13 @@ export default function Requests() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Заявки</h1>
-          <p className="text-muted-foreground">Управление заявками на обслуживание</p>
-        </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Создать заявку
-        </Button>
-      </div>
+    <div className="container mx-auto py-6">
+      <PageHeader
+        title="Заявки"
+        description="Управление заявками на обслуживание"
+        buttonLabel="Создать заявку"
+        onButtonClick={() => setIsFormOpen(true)}
+      />
 
       <EntityList
         items={requests}

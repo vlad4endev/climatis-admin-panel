@@ -19,13 +19,13 @@ export function EntityCardView<T>({ items, config }: EntityCardViewProps<T>) {
           : (item as any)[titleField.key];
 
         return (
-          <Card key={id} className="relative">
+          <Card key={id} className="relative overflow-hidden">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-start justify-between">
-                <span className="flex-1">
+              <CardTitle className="text-lg flex items-start justify-between gap-2">
+                <span className="flex-1 min-w-0 break-words">
                   {titleField.render ? titleField.render(titleValue, item) : String(titleValue)}
                 </span>
-                <div className="flex items-center gap-1 ml-2">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   {config.onEdit && (
                     <Button
                       variant="ghost"
@@ -55,7 +55,7 @@ export function EntityCardView<T>({ items, config }: EntityCardViewProps<T>) {
                 if (!value) return null;
 
                 return (
-                  <div key={field.key} className="text-sm">
+                  <div key={field.key} className="text-sm break-words">
                     <span className="text-muted-foreground font-medium">{field.label}: </span>
                     <span className="text-foreground">
                       {field.render ? field.render(value, item) : String(value)}
