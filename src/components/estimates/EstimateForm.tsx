@@ -21,6 +21,7 @@ interface EstimateFormProps {
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string }>;
+  employees: Array<{ id: string; fullName: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
 }
 
@@ -29,6 +30,7 @@ export function EstimateForm({
   onSubmit,
   onCancel,
   requests,
+  employees,
   availableMaterials = [],
 }: EstimateFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm({
@@ -39,6 +41,7 @@ export function EstimateForm({
       estimateDate: estimate?.estimateDate || new Date().toISOString().split('T')[0],
       status: estimate?.status || "черновик",
       type: estimate?.type || "простой ремонт",
+      createdById: estimate?.createdById || "",
       engineerComment: estimate?.engineerComment || "",
     },
   });
@@ -49,6 +52,7 @@ export function EstimateForm({
   const status = watch("status");
   const type = watch("type");
   const requestId = watch("requestId");
+  const createdById = watch("createdById");
 
   // Sort requests by creation date (newest first)
   const sortedRequests = [...requests].sort((a, b) => 
@@ -111,7 +115,13 @@ export function EstimateForm({
   const grandTotal = worksTotal + materialsTotal;
 
   const handleFormSubmit = (data: any) => {
-    onSubmit({ ...data, works, materials });
+    const employee = employees.find(e => e.id === data.createdById);
+    onSubmit({ 
+      ...data, 
+      createdByName: employee?.fullName || "",
+      works, 
+      materials 
+    });
   };
 
   return (
@@ -198,24 +208,44 @@ export function EstimateForm({
           </div>
 
           <div className="bg-form-section p-4 rounded-lg space-y-4">
-            <h3 className="font-semibold text-form-label">Связи</h3>
-            <div>
-              <Label htmlFor="requestId">Связанная заявка</Label>
-              <Select
-                value={requestId}
-                onValueChange={(value) => setValue("requestId", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите заявку (необязательно)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortedRequests.map((request) => (
-                    <SelectItem key={request.id} value={request.id}>
-                      {request.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <h3 className="font-semibold text-form-label">Связи и автор</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="requestId">Связанная заявка</Label>
+                <Select
+                  value={requestId}
+                  onValueChange={(value) => setValue("requestId", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите заявку (необязательно)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortedRequests.map((request) => (
+                      <SelectItem key={request.id} value={request.id}>
+                        {request.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="createdById">Расчёт составил *</Label>
+                <Select
+                  value={createdById}
+                  onValueChange={(value) => setValue("createdById", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите сотрудника" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.fullName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div>

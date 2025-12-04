@@ -30,6 +30,12 @@ const mockMaterials = [
   { id: "6", name: "Прокладка фланцевая", price: 120 },
 ];
 
+const mockEmployees = [
+  { id: "1", fullName: "Иванов Иван Иванович" },
+  { id: "2", fullName: "Петров Петр Петрович" },
+  { id: "3", fullName: "Сидоров Сидор Сидорович" },
+];
+
 const mockEstimates: Estimate[] = [
   {
     id: "1",
@@ -40,6 +46,8 @@ const mockEstimates: Estimate[] = [
     estimateDate: "2024-01-16",
     status: "готов",
     type: "сложный ремонт",
+    createdById: "1",
+    createdByName: "Иванов Иван Иванович",
     engineerComment: "Требуется замена теплообменника",
   },
   {
@@ -51,6 +59,8 @@ const mockEstimates: Estimate[] = [
     estimateDate: "2024-01-21",
     status: "согласован",
     type: "по договору ТО",
+    createdById: "2",
+    createdByName: "Петров Петр Петрович",
     engineerComment: "Плановое обслуживание",
   },
   {
@@ -62,6 +72,8 @@ const mockEstimates: Estimate[] = [
     estimateDate: "2024-01-26",
     status: "черновик",
     type: "простой ремонт",
+    createdById: "3",
+    createdByName: "Сидоров Сидор Сидорович",
   },
 ];
 
@@ -126,6 +138,12 @@ export default function Estimates() {
         filterable: true,
       },
       {
+        key: "createdByName",
+        label: "Расчёт составил",
+        type: "text",
+        searchable: true,
+      },
+      {
         key: "requestName",
         label: "Заявка",
         type: "text",
@@ -185,6 +203,8 @@ export default function Estimates() {
         estimateDate: data.estimateDate || new Date().toISOString().split('T')[0],
         status: data.status || "черновик",
         type: data.type || "простой ремонт",
+        createdById: data.createdById || "",
+        createdByName: data.createdByName || "",
         engineerComment: data.engineerComment,
       };
       setEstimates((prev) => [newEstimate, ...prev]);
@@ -233,6 +253,7 @@ export default function Estimates() {
               setEditingEstimate(undefined);
             }}
             requests={mockRequests}
+            employees={mockEmployees}
             availableMaterials={mockMaterials}
           />
         </DialogContent>

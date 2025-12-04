@@ -22,6 +22,8 @@ export interface Estimate {
   estimateDate: string;
   status: "черновик" | "готов" | "согласован";
   type: "простой ремонт" | "сложный ремонт" | "по договору ТО";
+  createdById: string;
+  createdByName: string;
   engineerComment?: string;
   works?: Work[];
   materials?: Material[];
