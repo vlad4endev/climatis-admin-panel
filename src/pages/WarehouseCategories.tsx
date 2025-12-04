@@ -139,37 +139,17 @@ export default function WarehouseCategories() {
         {categories.map((category) => (
           <Card key={category.id} className="hover:shadow-lg transition-shadow group">
             <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
-                    <Package className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <CardTitle className="text-xl truncate" title={category.name}>{category.name}</CardTitle>
-                    <CardDescription>Раздел склада</CardDescription>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Package className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(category)}
-                    className="h-8 w-8"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteClick(category)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-xl truncate" title={category.name}>{category.name}</CardTitle>
+                  <CardDescription>Раздел склада</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Наименований:</span>
@@ -185,6 +165,26 @@ export default function WarehouseCategories() {
                     {category.lowStockItems}
                   </span>
                 </div>
+              </div>
+              <div className="flex gap-2 pt-2 border-t opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(category)}
+                  className="flex-1 gap-2"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Редактировать
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteClick(category)}
+                  className="flex-1 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Удалить
+                </Button>
               </div>
             </CardContent>
           </Card>
