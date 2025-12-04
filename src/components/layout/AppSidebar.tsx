@@ -1,4 +1,4 @@
-import { Users, MapPin, FileText, UserCircle, UsersRound, Inbox, Calculator, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -26,8 +26,8 @@ const clientsItems = [
 
 const requestsItems = [
   { title: "Заявки", url: "/requests", icon: Inbox },
-  { title: "Документы", url: "/documents", icon: FileText },
-  { title: "Расчеты", url: "/estimates", icon: Calculator },
+  { title: "Документы", url: "/documents", icon: ScrollText },
+  { title: "Расчеты", url: "/estimates", icon: Coins },
   { title: "Задания", url: "/assignments", icon: ClipboardCheck },
 ];
 
