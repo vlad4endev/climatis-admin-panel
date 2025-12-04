@@ -43,6 +43,7 @@ export interface Request {
   objectName: string;
   contractId?: string;
   contractNumber?: string;
+  contractConditions?: string;
   problemDescription: string;
   comments: string;
   desiredDate?: string;

@@ -13,7 +13,7 @@ interface RequestFormProps {
   onCancel: () => void;
   clients: { id: string; companyName: string }[];
   serviceObjects: { id: string; objectName: string }[];
-  documents: { id: string; contractNumber: string }[];
+  documents: { id: string; contractNumber: string; responseConditions?: string }[];
   employees: { id: string; fullName: string }[];
   teams: { id: string; teamName: string }[];
 }
@@ -208,6 +208,7 @@ export function RequestForm({
           const contract = documents.find(d => d.id === value);
           setValue("contractId", value);
           setValue("contractNumber", contract?.contractNumber || "");
+          setValue("contractConditions", contract?.responseConditions || "");
         }}>
           <SelectTrigger>
             <SelectValue placeholder="Выберите договор" />
@@ -221,6 +222,19 @@ export function RequestForm({
           </SelectContent>
         </Select>
       </div>
+
+      {selectedContractId && (
+        <div>
+          <Label htmlFor="contractConditions">Условия по договору</Label>
+          <Textarea 
+            id="contractConditions" 
+            {...register("contractConditions")} 
+            rows={2} 
+            readOnly 
+            className="bg-muted/50 cursor-default"
+          />
+        </div>
+      )}
 
       <div>
         <Label htmlFor="problemDescription">Описание проблемы *</Label>
