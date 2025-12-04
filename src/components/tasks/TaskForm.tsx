@@ -8,20 +8,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Task, TaskChecklistItem, TaskComment } from "@/types/task";
 import { Employee } from "@/types/employee";
+import { Request } from "@/types/request";
 import { Plus, Trash2, Send } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface TaskFormProps {
   task?: Task;
   employees: Employee[];
+  requests: Request[];
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => void;
   onCancel: () => void;
 }
 
-export function TaskForm({ task, employees, onSubmit, onCancel }: TaskFormProps) {
+export function TaskForm({ task, employees, requests, onSubmit, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [assigneeId, setAssigneeId] = useState(task?.assigneeId || "");
+  const [requestId, setRequestId] = useState(task?.requestId || "");
   const [proposedDeadline, setProposedDeadline] = useState(task?.proposedDeadline || "");
   const [agreedDeadline, setAgreedDeadline] = useState(task?.agreedDeadline || "");
   const [status, setStatus] = useState<Task['status']>(task?.status || "новая");
@@ -31,6 +34,7 @@ export function TaskForm({ task, employees, onSubmit, onCancel }: TaskFormProps)
   const [newComment, setNewComment] = useState("");
 
   const selectedEmployee = employees.find(e => e.id === assigneeId);
+  const selectedRequest = requests.find(r => r.id === requestId);
   const getEmployeeName = (emp: Employee | undefined) => emp?.fullName || "";
 
   const completedItems = checklist.filter(item => item.completed).length;
@@ -75,6 +79,8 @@ export function TaskForm({ task, employees, onSubmit, onCancel }: TaskFormProps)
       description,
       assigneeId,
       assigneeName: getEmployeeName(selectedEmployee),
+      requestId: requestId || undefined,
+      requestNumber: selectedRequest?.requestNumber,
       proposedDeadline,
       agreedDeadline,
       status,
@@ -129,6 +135,23 @@ export function TaskForm({ task, employees, onSubmit, onCancel }: TaskFormProps)
                 {employees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.fullName} — {employee.position}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="request">Связанная заявка</Label>
+            <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите заявку (необязательно)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Без заявки</SelectItem>
+                {requests.map((request) => (
+                  <SelectItem key={request.id} value={request.id}>
+                    {request.requestNumber} — {request.clientName}
                   </SelectItem>
                 ))}
               </SelectContent>

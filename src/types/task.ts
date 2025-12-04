@@ -18,6 +18,8 @@ export interface Task {
   description: string;
   assigneeId: string;
   assigneeName: string;
+  requestId?: string;
+  requestNumber?: string;
   proposedDeadline: string;
   agreedDeadline: string;
   status: 'новая' | 'в работе' | 'частично выполнена' | 'выполнена';
