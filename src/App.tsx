@@ -15,6 +15,7 @@ import Invoices from "./pages/Invoices";
 import SpareParts from "./pages/SpareParts";
 import StockMovements from "./pages/StockMovements";
 import WarehouseCategories from "./pages/WarehouseCategories";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/spare-parts" element={<AppLayout><SpareParts /></AppLayout>} />
           <Route path="/stock-movements" element={<AppLayout><StockMovements /></AppLayout>} />
           <Route path="/warehouse-categories" element={<AppLayout><WarehouseCategories /></AppLayout>} />
+          <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
