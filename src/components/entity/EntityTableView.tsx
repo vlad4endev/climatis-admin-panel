@@ -160,7 +160,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
             return (
               <TableRow key={id}>
                 {config.fields.map(field => (
-                  <TableCell key={field.key}>
+                  <TableCell key={field.key} className={field.cellClassName?.(item)}>
                     {renderCell(item, field)}
                   </TableCell>
                 ))}

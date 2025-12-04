@@ -90,14 +90,8 @@ export default function Requests() {
         type: "text", 
         sortable: true, 
         searchable: true,
-        render: (value, item) => (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{value}</span>
-            {item.priority === "urgent" && (
-              <Badge variant="destructive" className="text-xs">Срочно</Badge>
-            )}
-          </div>
-        )
+        render: (value) => <span className="font-medium">{value}</span>,
+        cellClassName: (item) => item.priority === "urgent" ? "ring-2 ring-inset ring-red-500 rounded" : ""
       },
       { 
         key: "status", 
@@ -120,7 +114,7 @@ export default function Requests() {
           };
           const variant = variantMap[value as string];
           return (
-            <Badge className={`${variant?.bg} ${variant?.text} border-transparent px-2`}>
+            <Badge className={`${variant?.bg} ${variant?.text} border-transparent px-2 text-xs`}>
               {status?.label}
             </Badge>
           );
@@ -138,44 +132,45 @@ export default function Requests() {
         }
       },
       { 
-        key: "clientName", 
-        label: "Контрагент", 
+        key: "clientObject", 
+        label: "Контрагент / Объект", 
         type: "text",
-        searchable: true
-      },
-      { 
-        key: "objectName", 
-        label: "Объект", 
-        type: "text",
-        searchable: true
+        searchable: true,
+        getValue: (item) => `${item.clientName} / ${item.objectName}`,
+        render: (_, item) => (
+          <div className="text-sm">
+            <div className="font-medium">{item.clientName}</div>
+            <div className="text-muted-foreground text-xs">{item.objectName}</div>
+          </div>
+        )
       },
       { 
         key: "problemDescription", 
         label: "Проблема", 
         type: "textarea",
-        searchable: true
+        searchable: true,
+        render: (value) => (
+          <div className="max-w-[200px] truncate" title={value}>
+            {value}
+          </div>
+        )
       },
       { 
         key: "createdAt", 
-        label: "Дата создания", 
+        label: "Созд.", 
         type: "date",
         sortable: true,
-        render: (value) => new Date(value).toLocaleString("ru-RU")
+        render: (value) => new Date(value).toLocaleDateString("ru-RU")
       },
       { 
         key: "desiredDate", 
-        label: "Желаемая дата", 
+        label: "Срок", 
         type: "date",
         render: (value) => value ? new Date(value).toLocaleDateString("ru-RU") : "-"
       },
       { 
         key: "assignedTeamName", 
         label: "Бригада", 
-        type: "text"
-      },
-      { 
-        key: "responsibleManagerName", 
-        label: "Менеджер", 
         type: "text"
       },
     ],
