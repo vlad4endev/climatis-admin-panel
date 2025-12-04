@@ -15,6 +15,20 @@ const mockEmployees: Employee[] = [
   { id: "3", fullName: "Сидоров Сидор", phone: "+7 (999) 345-67-89", position: "Мастер", createdAt: new Date() },
 ];
 
+const statusOptions = [
+  { value: "новая", label: "Новая" },
+  { value: "в работе", label: "В работе" },
+  { value: "частично выполнена", label: "Частично выполнена" },
+  { value: "выполнена", label: "Выполнена" },
+];
+
+const kanbanColumns = [
+  { value: "новая", label: "Новая" },
+  { value: "в работе", label: "В работе" },
+  { value: "частично выполнена", label: "Частично" },
+  { value: "выполнена", label: "Выполнена" },
+];
+
 const mockTasks: Task[] = [
   {
     id: "1",
@@ -94,6 +108,8 @@ export default function Tasks() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
 
+  const assigneeOptions = mockEmployees.map(e => ({ value: e.fullName, label: e.fullName }));
+
   const config: EntityListConfig<Task> = {
     fields: [
       {
@@ -114,8 +130,10 @@ export default function Tasks() {
       {
         key: "assigneeName",
         label: "Исполнитель",
-        type: "text",
+        type: "select",
+        options: assigneeOptions,
         searchable: true,
+        filterable: true,
       },
       {
         key: "agreedDeadline",
@@ -139,12 +157,7 @@ export default function Tasks() {
         key: "status",
         label: "Статус",
         type: "select",
-        options: [
-          { value: "новая", label: "Новая" },
-          { value: "в работе", label: "В работе" },
-          { value: "частично выполнена", label: "Частично выполнена" },
-          { value: "выполнена", label: "Выполнена" },
-        ],
+        options: statusOptions,
         filterable: true,
         editable: true,
         render: (value) => (
@@ -227,6 +240,8 @@ export default function Tasks() {
         items={tasks}
         config={config}
         defaultViewMode="table"
+        kanbanGroupField="status"
+        kanbanColumns={kanbanColumns}
         emptyMessage="Задачи не найдены"
       />
 
