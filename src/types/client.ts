@@ -11,6 +11,7 @@ export interface Client {
   id: string;
   companyName: string;
   type: ClientType;
+  division: string;
   mainContactName: string;
   phone: string;
   email: string;
