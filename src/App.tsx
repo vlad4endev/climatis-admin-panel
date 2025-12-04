@@ -11,7 +11,6 @@ import Employees from "./pages/Employees";
 import Teams from "./pages/Teams";
 import Requests from "./pages/Requests";
 import Estimates from "./pages/Estimates";
-import Invoices from "./pages/Invoices";
 import SpareParts from "./pages/SpareParts";
 import StockMovements from "./pages/StockMovements";
 import WarehouseCategories from "./pages/WarehouseCategories";
@@ -35,7 +34,6 @@ const App = () => (
           <Route path="/teams" element={<AppLayout><Teams /></AppLayout>} />
           <Route path="/requests" element={<AppLayout><Requests /></AppLayout>} />
           <Route path="/estimates" element={<AppLayout><Estimates /></AppLayout>} />
-          <Route path="/invoices" element={<AppLayout><Invoices /></AppLayout>} />
           <Route path="/spare-parts" element={<AppLayout><SpareParts /></AppLayout>} />
           <Route path="/stock-movements" element={<AppLayout><StockMovements /></AppLayout>} />
           <Route path="/warehouse-categories" element={<AppLayout><WarehouseCategories /></AppLayout>} />
