@@ -5,6 +5,7 @@ import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
+import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +81,7 @@ export default function Requests() {
   const [requests, setRequests] = useState<Request[]>(mockRequests);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
+  const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
   const { toast } = useToast();
 
   const config: EntityListConfig<Request> = {
@@ -90,6 +92,7 @@ export default function Requests() {
         type: "text", 
         sortable: true, 
         searchable: true,
+        editable: false,
         render: (value) => <span className="font-medium">{value}</span>,
         cellClassName: (item) => item.priority === "urgent" ? "ring-2 ring-inset ring-red-500 rounded" : ""
       },
@@ -100,7 +103,7 @@ export default function Requests() {
         options: REQUEST_STATUSES,
         sortable: true,
         filterable: true,
-        editable: true,
+        editable: false,
         render: (value) => {
           const status = REQUEST_STATUSES.find(s => s.value === value);
           const variantMap: Record<string, any> = {
@@ -126,6 +129,7 @@ export default function Requests() {
         type: "select",
         options: REQUEST_TYPES,
         filterable: true,
+        editable: false,
         render: (value) => {
           const type = REQUEST_TYPES.find(t => t.value === value);
           return type?.label;
@@ -136,6 +140,7 @@ export default function Requests() {
         label: "Контрагент / Объект", 
         type: "text",
         searchable: true,
+        editable: false,
         getValue: (item) => `${item.clientName} / ${item.objectName}`,
         render: (_, item) => (
           <div className="text-sm">
@@ -149,6 +154,7 @@ export default function Requests() {
         label: "Проблема", 
         type: "textarea",
         searchable: true,
+        editable: false,
         render: (value) => (
           <div className="max-w-[200px] truncate" title={value}>
             {value}
@@ -160,27 +166,25 @@ export default function Requests() {
         label: "Созд.", 
         type: "date",
         sortable: true,
+        editable: false,
         render: (value) => new Date(value).toLocaleDateString("ru-RU")
       },
       { 
         key: "desiredDate", 
         label: "Срок", 
         type: "date",
+        editable: false,
         render: (value) => value ? new Date(value).toLocaleDateString("ru-RU") : "-"
       },
       { 
         key: "assignedTeamName", 
         label: "Бригада", 
-        type: "text"
+        type: "text",
+        editable: false
       },
     ],
     getItemId: (item) => item.id,
-    onUpdate: (id, field, value) => {
-      setRequests(prev =>
-        prev.map(req => (req.id === id ? { ...req, [field]: value } : req))
-      );
-      toast({ title: "Заявка обновлена" });
-    },
+    onRowClick: (item) => setViewingRequest(item),
     onDelete: (id) => {
       setRequests(prev => prev.filter(req => req.id !== id));
       toast({ title: "Заявка удалена" });
@@ -252,6 +256,12 @@ export default function Requests() {
           />
         </DialogContent>
       </Dialog>
+
+      <RequestViewDialog
+        request={viewingRequest}
+        open={!!viewingRequest}
+        onOpenChange={(open) => !open && setViewingRequest(null)}
+      />
     </div>
   );
 }
