@@ -21,7 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Package, Plus, Pencil, Trash2 } from "lucide-react";
+import { Package, Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface WarehouseCategory {
@@ -57,12 +58,17 @@ const initialCategories: WarehouseCategory[] = [
 ];
 
 export default function WarehouseCategories() {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<WarehouseCategory[]>(initialCategories);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<WarehouseCategory | null>(null);
   const [deletingCategory, setDeletingCategory] = useState<WarehouseCategory | null>(null);
   const [formName, setFormName] = useState("");
+
+  const handleView = (category: WarehouseCategory) => {
+    navigate(`/spare-parts?category=${encodeURIComponent(category.name)}`);
+  };
 
   const handleAdd = () => {
     setEditingCategory(null);
@@ -166,24 +172,33 @@ export default function WarehouseCategories() {
                   </span>
                 </div>
               </div>
-              <div className="flex gap-2 pt-2 border-t opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex justify-center gap-2 pt-2 border-t opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(category)}
-                  className="flex-1 gap-2"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleView(category)}
+                  title="Просмотреть комплектующие"
+                  className="h-8 w-8"
                 >
-                  <Pencil className="h-4 w-4" />
-                  Редактировать
+                  <Eye className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(category)}
+                  title="Редактировать"
+                  className="h-8 w-8"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleDeleteClick(category)}
-                  className="flex-1 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  title="Удалить"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Удалить
                 </Button>
               </div>
             </CardContent>

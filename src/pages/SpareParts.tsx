@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
@@ -10,6 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function SpareParts() {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+  
   const [spareParts, setSpareParts] = useState<SparePart[]>([
     // Кондиционирование
     { id: "1", name: "Кронштейн 600х600 РМТ", internalArticle: "KR-600-600-RMT", category: "Кондиционирование", unit: "пара", currentStock: 20, minStock: 5, purchasePrice: 1200, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -260,6 +264,7 @@ export default function SpareParts() {
         config={config}
         emptyMessage="Нет комплектующих"
         defaultViewMode="table"
+        initialFilters={categoryFromUrl ? [{ field: 'category', value: categoryFromUrl }] : []}
       />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
