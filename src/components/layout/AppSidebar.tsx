@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -162,9 +163,9 @@ export function AppSidebar() {
         <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu>
-              <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
-                <SidebarMenuItem>
-                  {open ? (
+              {open ? (
+                <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
+                  <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton className="flex items-center gap-3 px-3 py-2">
                         <Package className="h-5 w-5 flex-shrink-0" />
@@ -172,26 +173,11 @@ export function AppSidebar() {
                         <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton className="flex items-center justify-center w-full py-2">
-                            <Package className="h-5 w-5" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        Склад
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </SidebarMenuItem>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {warehouseItems.map((item) => (
-                      <SidebarMenuSubItem key={item.title}>
-                        {open ? (
+                  </SidebarMenuItem>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {warehouseItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
                           <SidebarMenuSubButton asChild>
                             <NavLink
                               to={item.url}
@@ -202,31 +188,38 @@ export function AppSidebar() {
                               <span>{item.title}</span>
                             </NavLink>
                           </SidebarMenuSubButton>
-                        ) : (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <SidebarMenuSubButton asChild>
-                                  <NavLink
-                                    to={item.url}
-                                    className="flex items-center justify-center w-full py-1 rounded-md transition-colors hover:bg-sidebar-accent"
-                                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                  >
-                                    <item.icon className="h-4 w-4" />
-                                  </NavLink>
-                                </SidebarMenuSubButton>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                              {item.title}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              ) : (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton className="flex items-center justify-center w-full py-2">
+                        <Package className="h-5 w-5" />
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" align="start" className="w-48 p-2">
+                    <div className="text-sm font-medium text-muted-foreground mb-2 px-2">Склад</div>
+                    <div className="space-y-1">
+                      {warehouseItems.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors hover:bg-accent"
+                          activeClassName="bg-accent text-accent-foreground font-medium"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
