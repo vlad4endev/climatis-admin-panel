@@ -158,13 +158,17 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
           {items.map(item => {
             const id = config.getItemId(item);
             return (
-              <TableRow key={id}>
+              <TableRow 
+                key={id} 
+                className={config.onRowClick ? "cursor-pointer" : ""}
+                onClick={() => config.onRowClick?.(item)}
+              >
                 {config.fields.map(field => (
                   <TableCell key={field.key} className={field.cellClassName?.(item)}>
                     {renderCell(item, field)}
                   </TableCell>
                 ))}
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-2">
                     {config.customActions && config.customActions(item)}
                     {config.onEdit && (
