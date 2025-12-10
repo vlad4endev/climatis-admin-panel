@@ -287,6 +287,11 @@ export function EstimateForm({
                   {Math.round(grandTotal).toLocaleString("ru-RU")} ₽
                 </span>
               </div>
+
+              <div className="flex justify-between items-center py-1 px-3 text-xs text-muted-foreground">
+                <span>Стоимость для заказчика:</span>
+                <span>{Math.round(customerGrandTotal).toLocaleString("ru-RU")} ₽</span>
+              </div>
             </div>
           </div>
         </TabsContent>
