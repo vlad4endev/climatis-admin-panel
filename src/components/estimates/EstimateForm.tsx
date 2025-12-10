@@ -2,8 +2,14 @@ import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
-import { FileDown } from "lucide-react";
+import { FileDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -120,6 +126,65 @@ export function EstimateForm({
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
+  const getDocumentContent = () => {
+    const estimateName = watch("name");
+    const estimateNumber = watch("estimateNumber");
+    const estimateDate = watch("estimateDate");
+
+    return `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><meta charset="utf-8"><title>Расчёт стоимости</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 12pt; }
+        h1 { text-align: center; font-size: 16pt; margin-bottom: 20px; }
+        h2 { font-size: 14pt; border-bottom: 1px solid #000; padding-bottom: 5px; margin-top: 20px; }
+        .info { margin-bottom: 15px; }
+        .info p { margin: 3px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        td { padding: 5px 0; }
+        .right { text-align: right; }
+        .bold { font-weight: bold; }
+        .border-top { border-top: 1px solid #000; padding-top: 5px; }
+        .total { font-size: 14pt; font-weight: bold; border-top: 2px solid #000; margin-top: 20px; padding-top: 10px; }
+      </style></head><body>
+      <h1>РАСЧЁТ СТОИМОСТИ</h1>
+      <div class="info">
+        <p><strong>Расчёт:</strong> ${estimateName || "—"}</p>
+        <p><strong>Номер:</strong> ${estimateNumber || "—"}</p>
+        <p><strong>Дата:</strong> ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}</p>
+        ${selectedRequest?.clientName ? `<p><strong>Заказчик:</strong> ${selectedRequest.clientName}</p>` : ""}
+        ${selectedRequest?.serviceObjectName ? `<p><strong>Объект:</strong> ${selectedRequest.serviceObjectName}</p>` : ""}
+        ${selectedEmployee ? `<p><strong>Составил:</strong> ${selectedEmployee.fullName}</p>` : ""}
+      </div>
+      <h2>РАБОТЫ</h2>
+      <table>
+        ${workBlocks.map((block, index) => {
+          const blockBase = calculateWorkBlockTotal(block);
+          const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+          return `<tr><td>${index + 1}. ${block.description || "Работа без названия"}</td><td class="right">${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</td></tr>`;
+        }).join("")}
+        <tr class="border-top bold"><td>Итого по работам:</td><td class="right">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+      </table>
+      <h2>МАТЕРИАЛЫ</h2>
+      <table>
+        ${materials.map((material, index) => 
+          `<tr><td>${index + 1}. ${material.materialName} (${material.quantity} шт.)</td><td class="right">${Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</td></tr>`
+        ).join("")}
+        <tr><td>Базовая стоимость материалов:</td><td class="right">${Math.round(materialsTotal).toLocaleString("ru-RU")} р.</td></tr>
+        <tr><td>+ Транспортные расходы (${customerCalc.transportPercent}%):</td><td class="right">${Math.round(materialsTransport).toLocaleString("ru-RU")} р.</td></tr>
+        <tr><td>+ Заготовительно-складские (${customerCalc.warehousePercent}%):</td><td class="right">${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</td></tr>
+        <tr class="border-top bold"><td>Итого по материалам:</td><td class="right">${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+      </table>
+      ${customerCalc.otherPercent && customerCalc.otherPercent > 0 ? `
+        <table><tr><td>+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%):</td><td class="right">${Math.round(otherAmount).toLocaleString("ru-RU")} р.</td></tr></table>
+      ` : ""}
+      <div class="total">
+        <table><tr><td>ИТОГО:</td><td class="right">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr></table>
+      </div>
+      </body></html>
+    `;
+  };
+
   const generateCustomerPDF = async () => {
     if (!pdfContentRef.current) return;
 
@@ -145,6 +210,21 @@ export function EstimateForm({
     const estimateNumber = watch("estimateNumber");
     const fileName = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.pdf`;
     pdf.save(fileName);
+  };
+
+  const generateCustomerDOCX = () => {
+    const content = getDocumentContent();
+    const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const estimateName = watch("name");
+    const estimateNumber = watch("estimateNumber");
+    link.href = url;
+    link.download = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -512,15 +592,24 @@ export function EstimateForm({
           </div>
 
           <div className="flex justify-end">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={generateCustomerPDF}
-              className="gap-2"
-            >
-              <FileDown className="h-4 w-4" />
-              Скачать PDF для заказчика
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" className="gap-2">
+                  <FileDown className="h-4 w-4" />
+                  Скачать для заказчика
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={generateCustomerPDF} className="gap-2 cursor-pointer">
+                  <FileDown className="h-4 w-4" />
+                  Скачать PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={generateCustomerDOCX} className="gap-2 cursor-pointer">
+                  <FileText className="h-4 w-4" />
+                  Скачать DOC (Word)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </TabsContent>
       </Tabs>
