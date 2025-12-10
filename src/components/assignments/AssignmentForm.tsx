@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
+import { calculateWorkBlockTotal, calculateAllBlocksTotal, calculateWorkRowTotal } from "@/types/estimate";
 
 interface AssignmentFormProps {
   assignment?: Assignment;
@@ -47,10 +48,7 @@ export function AssignmentForm({
     });
   };
 
-  const worksTotal = assignment?.works?.reduce(
-    (sum, work) => sum + work.hours * work.pricePerHour,
-    0
-  ) || 0;
+  const worksTotal = assignment?.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
 
   const materialsTotal = assignment?.materials?.reduce(
     (sum, material) => sum + material.quantity * material.pricePerUnit,
@@ -142,16 +140,28 @@ export function AssignmentForm({
             </div>
           </div>
 
-          {assignment.works && assignment.works.length > 0 && (
+          {assignment.workBlocks && assignment.workBlocks.length > 0 && (
             <div className="bg-form-section p-4 rounded-lg space-y-3">
               <h3 className="font-semibold text-form-label">Работы</h3>
-              <div className="space-y-2">
-                {assignment.works.map((work, index) => (
-                  <div key={work.id || index} className="flex justify-between items-center py-2 px-3 bg-background/50 rounded text-sm">
-                    <span>{work.description}</span>
-                    <span className="text-muted-foreground">
-                      {work.hours} ч × {Math.round(work.pricePerHour).toLocaleString('ru-RU')} ₽
-                    </span>
+              <div className="space-y-4">
+                {assignment.workBlocks.map((block, blockIndex) => (
+                  <div key={block.id} className="border border-border/50 rounded-lg p-3 space-y-2">
+                    <div className="font-medium text-sm">
+                      {blockIndex + 1}. {block.description || "Без описания"}
+                    </div>
+                    <div className="space-y-1">
+                      {block.rows.filter(row => row.planHours > 0 || row.quantity > 0).map((row) => (
+                        <div key={row.category} className="flex justify-between items-center py-1 px-2 bg-background/50 rounded text-sm">
+                          <span className="text-muted-foreground">{row.category}</span>
+                          <span>
+                            {row.planHours}ч × {row.quantity}чел × {row.rate.toLocaleString('ru-RU')}₽ = {Math.round(calculateWorkRowTotal(row)).toLocaleString('ru-RU')} ₽
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-end text-sm font-medium pt-1 border-t border-border/30">
+                      Итого по блоку: {Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')} ₽
+                    </div>
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-2 border-t">

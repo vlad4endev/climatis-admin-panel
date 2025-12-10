@@ -38,9 +38,27 @@ const mockAssignments: Assignment[] = [
     teamName: "Бригада №1",
     clientName: "ООО Ромашка",
     objectName: "Офис на Ленина 15",
-    works: [
-      { id: "1", description: "Диагностика котла", hours: 2, pricePerHour: 1500 },
-      { id: "2", description: "Замена теплообменника", hours: 4, pricePerHour: 2000 },
+    workBlocks: [
+      {
+        id: "1",
+        description: "Диагностика котла",
+        rows: [
+          { category: "Инженер", planHours: 2, quantity: 1, rate: 1500 },
+          { category: "Мастер", planHours: 0, quantity: 0, rate: 0 },
+          { category: "Монтажник 6 разр.", planHours: 0, quantity: 0, rate: 0 },
+          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
+        ],
+      },
+      {
+        id: "2",
+        description: "Замена теплообменника",
+        rows: [
+          { category: "Инженер", planHours: 1, quantity: 1, rate: 1500 },
+          { category: "Мастер", planHours: 2, quantity: 1, rate: 1200 },
+          { category: "Монтажник 6 разр.", planHours: 4, quantity: 2, rate: 900 },
+          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
+        ],
+      },
     ],
     materials: [
       { id: "1", materialName: "Теплообменник", quantity: 1, pricePerUnit: 25000 },
@@ -74,7 +92,7 @@ export default function Assignments() {
           requestNumber: data.requestNumber,
           estimateId: data.estimateId,
           estimateName: data.estimateName,
-          works: data.works,
+          workBlocks: data.workBlocks,
           materials: data.materials,
           comments: data.comments,
           teamId: "",
@@ -227,7 +245,7 @@ export default function Assignments() {
         estimateName: newAssignmentData.estimateName || "",
         teamId: data.teamId || "",
         teamName: data.teamName || "",
-        works: newAssignmentData.works || [],
+        workBlocks: newAssignmentData.workBlocks || [],
         materials: newAssignmentData.materials || [],
         comments: data.comments || "",
       };

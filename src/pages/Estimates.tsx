@@ -51,9 +51,27 @@ const mockEstimates: Estimate[] = [
     createdById: "1",
     createdByName: "Иванов Иван Иванович",
     engineerComment: "Требуется замена теплообменника",
-    works: [
-      { id: "1", description: "Диагностика котла", hours: 2, pricePerHour: 1500 },
-      { id: "2", description: "Замена теплообменника", hours: 4, pricePerHour: 2000 },
+    workBlocks: [
+      {
+        id: "1",
+        description: "Диагностика котла",
+        rows: [
+          { category: "Инженер", planHours: 2, quantity: 1, rate: 1500 },
+          { category: "Мастер", planHours: 0, quantity: 0, rate: 0 },
+          { category: "Монтажник 6 разр.", planHours: 0, quantity: 0, rate: 0 },
+          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
+        ],
+      },
+      {
+        id: "2",
+        description: "Замена теплообменника",
+        rows: [
+          { category: "Инженер", planHours: 1, quantity: 1, rate: 1500 },
+          { category: "Мастер", planHours: 2, quantity: 1, rate: 1200 },
+          { category: "Монтажник 6 разр.", planHours: 4, quantity: 2, rate: 900 },
+          { category: "Монтажник 5 разр.", planHours: 4, quantity: 1, rate: 750 },
+        ],
+      },
     ],
     materials: [
       { id: "1", materialName: "Теплообменник", quantity: 1, pricePerUnit: 25000 },
@@ -72,9 +90,17 @@ const mockEstimates: Estimate[] = [
     createdById: "2",
     createdByName: "Петров Петр Петрович",
     engineerComment: "Плановое обслуживание",
-    works: [
-      { id: "1", description: "Профилактический осмотр", hours: 1, pricePerHour: 1200 },
-      { id: "2", description: "Чистка фильтров", hours: 2, pricePerHour: 1000 },
+    workBlocks: [
+      {
+        id: "1",
+        description: "Профилактический осмотр и чистка",
+        rows: [
+          { category: "Инженер", planHours: 1, quantity: 1, rate: 1200 },
+          { category: "Мастер", planHours: 2, quantity: 1, rate: 1000 },
+          { category: "Монтажник 6 разр.", planHours: 0, quantity: 0, rate: 0 },
+          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
+        ],
+      },
     ],
     materials: [],
   },
@@ -217,7 +243,7 @@ export default function Estimates() {
       requestNumber: estimate.requestName?.split(' - ')[0] || "",
       estimateId: estimate.id,
       estimateName: estimate.name,
-      works: estimate.works || [],
+      workBlocks: estimate.workBlocks || [],
       materials: estimate.materials || [],
       comments: estimate.engineerComment || "",
     };

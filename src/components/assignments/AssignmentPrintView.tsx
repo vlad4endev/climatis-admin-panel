@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { Assignment } from "@/types/assignment";
+import { calculateWorkBlockTotal, calculateAllBlocksTotal, calculateWorkRowTotal } from "@/types/estimate";
 
 interface AssignmentPrintViewProps {
   assignment: Assignment;
@@ -7,10 +8,7 @@ interface AssignmentPrintViewProps {
 
 export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintViewProps>(
   ({ assignment }, ref) => {
-    const worksTotal = assignment.works?.reduce(
-      (sum, work) => sum + work.hours * work.pricePerHour,
-      0
-    ) || 0;
+    const worksTotal = assignment.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
 
     const materialsTotal = assignment.materials?.reduce(
       (sum, material) => sum + material.quantity * material.pricePerUnit,
@@ -60,35 +58,45 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
           </table>
         </div>
 
-        {assignment.works && assignment.works.length > 0 && (
+        {assignment.workBlocks && assignment.workBlocks.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3 border-b pb-1">Перечень работ</h2>
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2 text-left">№</th>
-                  <th className="border p-2 text-left">Наименование работы</th>
-                  <th className="border p-2 text-right">Часов</th>
-                  <th className="border p-2 text-right">Цена/час</th>
-                  <th className="border p-2 text-right">Сумма</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignment.works.map((work, index) => (
-                  <tr key={work.id || index}>
-                    <td className="border p-2">{index + 1}</td>
-                    <td className="border p-2">{work.description}</td>
-                    <td className="border p-2 text-right">{work.hours}</td>
-                    <td className="border p-2 text-right">{Math.round(work.pricePerHour).toLocaleString('ru-RU')} ₽</td>
-                    <td className="border p-2 text-right">{Math.round(work.hours * work.pricePerHour).toLocaleString('ru-RU')} ₽</td>
-                  </tr>
-                ))}
-                <tr className="font-bold bg-gray-50">
-                  <td colSpan={4} className="border p-2 text-right">Итого по работам:</td>
-                  <td className="border p-2 text-right">{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</td>
-                </tr>
-              </tbody>
-            </table>
+            {assignment.workBlocks.map((block, blockIndex) => (
+              <div key={block.id} className="mb-4">
+                <h3 className="font-bold text-sm mb-2">
+                  {blockIndex + 1}. {block.description || "Без описания"}
+                </h3>
+                <table className="w-full text-sm border-collapse mb-2">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border p-2 text-left">Категория</th>
+                      <th className="border p-2 text-right">План, час</th>
+                      <th className="border p-2 text-right">Кол-во, чел</th>
+                      <th className="border p-2 text-right">Ставка, руб.</th>
+                      <th className="border p-2 text-right">Всего, руб.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.filter(row => row.planHours > 0 || row.quantity > 0 || row.rate > 0).map((row) => (
+                      <tr key={row.category}>
+                        <td className="border p-2">{row.category}</td>
+                        <td className="border p-2 text-right">{row.planHours}</td>
+                        <td className="border p-2 text-right">{row.quantity}</td>
+                        <td className="border p-2 text-right">{Math.round(row.rate).toLocaleString('ru-RU')}</td>
+                        <td className="border p-2 text-right">{Math.round(calculateWorkRowTotal(row)).toLocaleString('ru-RU')}</td>
+                      </tr>
+                    ))}
+                    <tr className="font-bold bg-gray-50">
+                      <td colSpan={4} className="border p-2 text-right">Итого по блоку:</td>
+                      <td className="border p-2 text-right">{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')} ₽</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ))}
+            <div className="font-bold bg-gray-100 p-2 text-right">
+              Итого по работам: {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
+            </div>
           </div>
         )}
 
