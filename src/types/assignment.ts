@@ -1,4 +1,4 @@
-import { Work, Material } from "./estimate";
+import { WorkBlock, Material } from "./estimate";
 
 export type AssignmentStatus = "new" | "assigned" | "completed";
 
@@ -25,7 +25,7 @@ export interface Assignment {
   teamName: string;
   
   // Данные из расчёта
-  works: Work[];
+  workBlocks: WorkBlock[];
   materials: Material[];
   
   // Дополнительно
