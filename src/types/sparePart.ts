@@ -7,6 +7,7 @@ export interface SparePart {
   currentStock: number;
   minStock: number;
   purchasePrice: number;
+  retailPrice: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;

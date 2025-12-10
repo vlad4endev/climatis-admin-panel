@@ -22,6 +22,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
       currentStock: 0,
       minStock: 0,
       purchasePrice: 0,
+      retailPrice: 0,
       notes: "",
     },
   });
@@ -99,12 +100,22 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
       </div>
 
       <div>
-        <Label htmlFor="purchasePrice">Закупочная цена (₽) *</Label>
+        <Label htmlFor="purchasePrice">Закупка (₽) *</Label>
         <Input 
           id="purchasePrice" 
           type="number" 
           step="0.01"
           {...register("purchasePrice", { required: true, valueAsNumber: true })} 
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="retailPrice">Розница (₽) *</Label>
+        <Input 
+          id="retailPrice" 
+          type="number" 
+          step="0.01"
+          {...register("retailPrice", { required: true, valueAsNumber: true })} 
         />
       </div>
 
