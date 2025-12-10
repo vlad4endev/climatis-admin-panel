@@ -54,33 +54,24 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
         {assignment.workBlocks && assignment.workBlocks.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3 border-b pb-1">Перечень работ</h2>
-            {assignment.workBlocks.map((block, blockIndex) => (
-              <div key={block.id} className="mb-4">
-                <h3 className="font-bold text-sm mb-2">
-                  {blockIndex + 1}. {block.description || "Без описания"}
-                </h3>
-                <table className="w-full text-sm border-collapse mb-2">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left">Категория</th>
-                      <th className="border p-2 text-right">Всего, руб.</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {block.rows.filter(row => row.planHours > 0 || row.quantity > 0).map((row) => (
-                      <tr key={row.category}>
-                        <td className="border p-2">{row.category}</td>
-                        <td className="border p-2 text-right">{Math.round(calculateWorkRowTotal(row)).toLocaleString('ru-RU')}</td>
-                      </tr>
-                    ))}
-                    <tr className="font-bold bg-gray-50">
-                      <td className="border p-2 text-right">Итого по блоку:</td>
-                      <td className="border p-2 text-right">{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')} ₽</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ))}
+            <table className="w-full text-sm border-collapse mb-2">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2 text-left">№</th>
+                  <th className="border p-2 text-left">Описание работ</th>
+                  <th className="border p-2 text-right">Стоимость, руб.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignment.workBlocks.map((block, blockIndex) => (
+                  <tr key={block.id}>
+                    <td className="border p-2">{blockIndex + 1}</td>
+                    <td className="border p-2">{block.description || "Без описания"}</td>
+                    <td className="border p-2 text-right">{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             <div className="font-bold bg-gray-100 p-2 text-right">
               Итого по работам: {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
             </div>
