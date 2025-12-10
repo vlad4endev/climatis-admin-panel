@@ -39,7 +39,7 @@ interface EstimateFormProps {
   estimate?: Estimate;
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
-  requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string }>;
+  requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
   employees: Array<{ id: string; fullName: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
@@ -149,12 +149,11 @@ export function EstimateForm({
       </style></head><body>
       <h1>РАСЧЁТ СТОИМОСТИ</h1>
       <div class="info">
-        <p><strong>Расчёт:</strong> ${estimateName || "—"}</p>
-        <p><strong>Номер:</strong> ${estimateNumber || "—"}</p>
+        <p><strong>Расчёт:</strong> ${estimateName || "—"} № ${estimateNumber || "—"}</p>
         <p><strong>Дата:</strong> ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}</p>
-        ${selectedRequest?.clientName ? `<p><strong>Заказчик:</strong> ${selectedRequest.clientName}</p>` : ""}
-        ${selectedRequest?.serviceObjectName ? `<p><strong>Объект:</strong> ${selectedRequest.serviceObjectName}</p>` : ""}
-        ${selectedEmployee ? `<p><strong>Составил:</strong> ${selectedEmployee.fullName}</p>` : ""}
+        <p><strong>Заказчик:</strong> ${selectedRequest?.clientName || "—"}</p>
+        <p><strong>Объект:</strong> ${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
+        <p><strong>Исполнитель:</strong> ООО «Климатис»</p>
       </div>
       <h2>РАБОТЫ</h2>
       <table>
@@ -632,12 +631,11 @@ export function EstimateForm({
         <h1 className="text-2xl font-bold text-center mb-6">РАСЧЁТ СТОИМОСТИ</h1>
         
         <div className="mb-4 text-sm">
-          <p><strong>Расчёт:</strong> {watch("name") || "—"}</p>
-          <p><strong>Номер:</strong> {watch("estimateNumber") || "—"}</p>
+          <p><strong>Расчёт:</strong> {watch("name") || "—"} № {watch("estimateNumber") || "—"}</p>
           <p><strong>Дата:</strong> {watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : "—"}</p>
-          {selectedRequest?.clientName && <p><strong>Заказчик:</strong> {selectedRequest.clientName}</p>}
-          {selectedRequest?.serviceObjectName && <p><strong>Объект:</strong> {selectedRequest.serviceObjectName}</p>}
-          {selectedEmployee && <p><strong>Составил:</strong> {selectedEmployee.fullName}</p>}
+          <p><strong>Заказчик:</strong> {selectedRequest?.clientName || "—"}</p>
+          <p><strong>Объект:</strong> {selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
+          <p><strong>Исполнитель:</strong> ООО «Климатис»</p>
         </div>
 
         <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">РАБОТЫ</h2>
