@@ -25,6 +25,7 @@ export interface Estimate {
   createdById: string;
   createdByName: string;
   engineerComment?: string;
+  workDescription?: string;
   works?: Work[];
   materials?: Material[];
 }

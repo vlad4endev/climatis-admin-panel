@@ -33,7 +33,7 @@ export function EstimateForm({
   employees,
   availableMaterials = [],
 }: EstimateFormProps) {
-  const { register, handleSubmit, setValue, watch } = useForm({
+const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       name: estimate?.name || "",
       requestId: estimate?.requestId || "",
@@ -43,6 +43,7 @@ export function EstimateForm({
       type: estimate?.type || "простой ремонт",
       createdById: estimate?.createdById || "",
       engineerComment: estimate?.engineerComment || "",
+      workDescription: estimate?.workDescription || "",
     },
   });
 
@@ -288,6 +289,18 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
+          <div className="bg-form-section p-4 rounded-lg space-y-4">
+            <div>
+              <Label htmlFor="workDescription">Описание работы</Label>
+              <Textarea
+                id="workDescription"
+                {...register("workDescription")}
+                rows={3}
+                placeholder="Общее описание выполняемых работ..."
+              />
+            </div>
+          </div>
+          
           <EntityListEditor
             items={works}
             onChange={setWorks}
