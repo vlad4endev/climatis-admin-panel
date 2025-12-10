@@ -377,19 +377,17 @@ export function EstimateForm({
               </div>
             </div>
             <div className="bg-background/50 p-3 rounded space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span>Базовая стоимость работ:</span>
-                <span>{Math.round(worksTotal).toLocaleString("ru-RU")} ₽</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>+ Накладные расходы ({customerCalc.overheadPercent}%):</span>
-                <span>{Math.round(worksOverhead).toLocaleString("ru-RU")} ₽</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>+ Сметная прибыль ({customerCalc.estimatedProfitPercent}%):</span>
-                <span>{Math.round(worksProfit).toLocaleString("ru-RU")} ₽</span>
-              </div>
-              <div className="flex justify-between font-medium border-t pt-1">
+              {workBlocks.map((block, index) => {
+                const blockBase = calculateWorkBlockTotal(block);
+                const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+                return (
+                  <div key={block.id} className="flex justify-between">
+                    <span>{index + 1}. {block.description || "Работа без названия"}</span>
+                    <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} ₽</span>
+                  </div>
+                );
+              })}
+              <div className="flex justify-between font-medium border-t pt-1 mt-2">
                 <span>Итого по работам для заказчика:</span>
                 <span>{Math.round(worksCustomerTotal).toLocaleString("ru-RU")} ₽</span>
               </div>
@@ -500,7 +498,7 @@ export function EstimateForm({
               </div>
               {otherAmount > 0 && (
                 <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
-                  <span className="text-muted-foreground">{customerCalc.otherName || "Другое"}:</span>
+                  <span className="text-muted-foreground">{customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>
                   <span className="font-medium">{Math.round(otherAmount).toLocaleString("ru-RU")} ₽</span>
                 </div>
               )}
@@ -555,18 +553,19 @@ export function EstimateForm({
 
         <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">РАБОТЫ</h2>
         <div className="text-sm space-y-1 mb-4">
-          {workBlocks.map((block, index) => (
-            <div key={block.id} className="flex justify-between">
-              <span>{index + 1}. {block.description || "Работа без названия"}</span>
-              <span>{Math.round(calculateWorkBlockTotal(block)).toLocaleString("ru-RU")} р.</span>
-            </div>
-          ))}
+          {workBlocks.map((block, index) => {
+            const blockBase = calculateWorkBlockTotal(block);
+            const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+            return (
+              <div key={block.id} className="flex justify-between">
+                <span>{index + 1}. {block.description || "Работа без названия"}</span>
+                <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</span>
+              </div>
+            );
+          })}
         </div>
-        <div className="text-sm border-t pt-2 space-y-1">
-          <div className="flex justify-between"><span>Базовая стоимость работ:</span><span>{Math.round(worksTotal).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between text-gray-600"><span>+ Накладные расходы ({customerCalc.overheadPercent}%):</span><span>{Math.round(worksOverhead).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between text-gray-600"><span>+ Сметная прибыль ({customerCalc.estimatedProfitPercent}%):</span><span>{Math.round(worksProfit).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between font-bold border-t pt-1"><span>Итого по работам:</span><span>{Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
+        <div className="text-sm border-t pt-2">
+          <div className="flex justify-between font-bold"><span>Итого по работам:</span><span>{Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
         </div>
 
         <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">МАТЕРИАЛЫ</h2>
