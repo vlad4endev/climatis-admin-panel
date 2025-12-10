@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { jsPDF } from "jspdf";
+import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +23,7 @@ import {
   CustomerCalculation,
   DEFAULT_CUSTOMER_CALCULATION,
   calculateAllBlocksTotal,
+  calculateWorkBlockTotal,
 } from "@/types/estimate";
 import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
@@ -29,7 +32,7 @@ interface EstimateFormProps {
   estimate?: Estimate;
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
-  requests: Array<{ id: string; name: string; createdAt: string }>;
+  requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string }>;
   employees: Array<{ id: string; fullName: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
@@ -109,6 +112,157 @@ export function EstimateForm({
       materials,
       customerCalculation: customerCalc,
     });
+  };
+
+  const selectedRequest = requests.find((r) => r.id === requestId);
+  const selectedEmployee = employees.find((e) => e.id === createdById);
+
+  const generateCustomerPDF = () => {
+    const doc = new jsPDF();
+    const estimateName = watch("name");
+    const estimateNumber = watch("estimateNumber");
+    const estimateDate = watch("estimateDate");
+
+    // Set font for Cyrillic support
+    doc.setFont("helvetica");
+    
+    let yPos = 20;
+    const leftMargin = 20;
+    const rightMargin = 190;
+    const lineHeight = 7;
+
+    // Header
+    doc.setFontSize(16);
+    doc.text("РАСЧЁТ СТОИМОСТИ", 105, yPos, { align: "center" });
+    yPos += lineHeight * 2;
+
+    // Estimate info
+    doc.setFontSize(10);
+    doc.text(`Расчёт: ${estimateName || "—"}`, leftMargin, yPos);
+    yPos += lineHeight;
+    doc.text(`Номер: ${estimateNumber || "—"}`, leftMargin, yPos);
+    doc.text(`Дата: ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}`, 120, yPos);
+    yPos += lineHeight;
+
+    // Client and Object
+    if (selectedRequest?.clientName) {
+      doc.text(`Заказчик: ${selectedRequest.clientName}`, leftMargin, yPos);
+      yPos += lineHeight;
+    }
+    if (selectedRequest?.serviceObjectName) {
+      doc.text(`Объект: ${selectedRequest.serviceObjectName}`, leftMargin, yPos);
+      yPos += lineHeight;
+    }
+    if (selectedEmployee) {
+      doc.text(`Составил: ${selectedEmployee.fullName}`, leftMargin, yPos);
+      yPos += lineHeight;
+    }
+
+    yPos += lineHeight;
+
+    // Works section
+    doc.setFontSize(12);
+    doc.text("РАБОТЫ", leftMargin, yPos);
+    yPos += lineHeight;
+
+    doc.setFontSize(9);
+    workBlocks.forEach((block, index) => {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const blockTotal = calculateWorkBlockTotal(block);
+      doc.text(`${index + 1}. ${block.description || "Работа без названия"}`, leftMargin, yPos);
+      doc.text(`${Math.round(blockTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+      yPos += lineHeight;
+    });
+
+    yPos += lineHeight / 2;
+    doc.setFontSize(10);
+    doc.text(`Базовая стоимость работ:`, leftMargin, yPos);
+    doc.text(`${Math.round(worksTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.setFontSize(9);
+    doc.text(`+ Накладные расходы (${customerCalc.overheadPercent}%):`, leftMargin + 5, yPos);
+    doc.text(`${Math.round(worksOverhead).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.text(`+ Сметная прибыль (${customerCalc.estimatedProfitPercent}%):`, leftMargin + 5, yPos);
+    doc.text(`${Math.round(worksProfit).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.setFontSize(10);
+    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
+    doc.text(`Итого по работам:`, leftMargin, yPos + 2);
+    doc.text(`${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 2, { align: "right" });
+    yPos += lineHeight * 2;
+
+    // Materials section
+    if (yPos > 240) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(12);
+    doc.text("МАТЕРИАЛЫ", leftMargin, yPos);
+    yPos += lineHeight;
+
+    doc.setFontSize(9);
+    materials.forEach((material, index) => {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const materialTotal = material.quantity * material.pricePerUnit;
+      doc.text(`${index + 1}. ${material.materialName} (${material.quantity} шт.)`, leftMargin, yPos);
+      doc.text(`${Math.round(materialTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+      yPos += lineHeight;
+    });
+
+    yPos += lineHeight / 2;
+    doc.setFontSize(10);
+    doc.text(`Базовая стоимость материалов:`, leftMargin, yPos);
+    doc.text(`${Math.round(materialsTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.setFontSize(9);
+    doc.text(`+ Транспортные расходы (${customerCalc.transportPercent}%):`, leftMargin + 5, yPos);
+    doc.text(`${Math.round(materialsTransport).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.text(`+ Заготовительно-складские (${customerCalc.warehousePercent}%):`, leftMargin + 5, yPos);
+    doc.text(`${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+    yPos += lineHeight;
+
+    doc.setFontSize(10);
+    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
+    doc.text(`Итого по материалам:`, leftMargin, yPos + 2);
+    doc.text(`${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 2, { align: "right" });
+    yPos += lineHeight * 2;
+
+    // Other costs
+    if (customerCalc.otherPercent && customerCalc.otherPercent > 0) {
+      doc.setFontSize(9);
+      doc.text(`+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%):`, leftMargin, yPos);
+      doc.text(`${Math.round(otherAmount).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
+      yPos += lineHeight * 1.5;
+    }
+
+    // Grand total
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
+    doc.text(`ИТОГО:`, leftMargin, yPos + 5);
+    doc.text(`${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 5, { align: "right" });
+
+    // Save PDF
+    const fileName = `Расчёт_${estimateNumber || estimateName || "без_номера"}_${new Date().toLocaleDateString("ru-RU")}.pdf`;
+    doc.save(fileName);
   };
 
   return (
@@ -475,6 +629,18 @@ export function EstimateForm({
                 </span>
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={generateCustomerPDF}
+              className="gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              Скачать PDF для заказчика
+            </Button>
           </div>
         </TabsContent>
       </Tabs>
