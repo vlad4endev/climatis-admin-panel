@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,152 +118,33 @@ export function EstimateForm({
   const selectedRequest = requests.find((r) => r.id === requestId);
   const selectedEmployee = employees.find((e) => e.id === createdById);
 
-  const generateCustomerPDF = () => {
-    const doc = new jsPDF();
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+
+  const generateCustomerPDF = async () => {
+    if (!pdfContentRef.current) return;
+
+    const canvas = await html2canvas(pdfContentRef.current, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+    const imgY = 10;
+
+    pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+
     const estimateName = watch("name");
     const estimateNumber = watch("estimateNumber");
-    const estimateDate = watch("estimateDate");
-
-    // Set font for Cyrillic support
-    doc.setFont("helvetica");
-    
-    let yPos = 20;
-    const leftMargin = 20;
-    const rightMargin = 190;
-    const lineHeight = 7;
-
-    // Header
-    doc.setFontSize(16);
-    doc.text("РАСЧЁТ СТОИМОСТИ", 105, yPos, { align: "center" });
-    yPos += lineHeight * 2;
-
-    // Estimate info
-    doc.setFontSize(10);
-    doc.text(`Расчёт: ${estimateName || "—"}`, leftMargin, yPos);
-    yPos += lineHeight;
-    doc.text(`Номер: ${estimateNumber || "—"}`, leftMargin, yPos);
-    doc.text(`Дата: ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}`, 120, yPos);
-    yPos += lineHeight;
-
-    // Client and Object
-    if (selectedRequest?.clientName) {
-      doc.text(`Заказчик: ${selectedRequest.clientName}`, leftMargin, yPos);
-      yPos += lineHeight;
-    }
-    if (selectedRequest?.serviceObjectName) {
-      doc.text(`Объект: ${selectedRequest.serviceObjectName}`, leftMargin, yPos);
-      yPos += lineHeight;
-    }
-    if (selectedEmployee) {
-      doc.text(`Составил: ${selectedEmployee.fullName}`, leftMargin, yPos);
-      yPos += lineHeight;
-    }
-
-    yPos += lineHeight;
-
-    // Works section
-    doc.setFontSize(12);
-    doc.text("РАБОТЫ", leftMargin, yPos);
-    yPos += lineHeight;
-
-    doc.setFontSize(9);
-    workBlocks.forEach((block, index) => {
-      if (yPos > 260) {
-        doc.addPage();
-        yPos = 20;
-      }
-      const blockTotal = calculateWorkBlockTotal(block);
-      doc.text(`${index + 1}. ${block.description || "Работа без названия"}`, leftMargin, yPos);
-      doc.text(`${Math.round(blockTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-      yPos += lineHeight;
-    });
-
-    yPos += lineHeight / 2;
-    doc.setFontSize(10);
-    doc.text(`Базовая стоимость работ:`, leftMargin, yPos);
-    doc.text(`${Math.round(worksTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.setFontSize(9);
-    doc.text(`+ Накладные расходы (${customerCalc.overheadPercent}%):`, leftMargin + 5, yPos);
-    doc.text(`${Math.round(worksOverhead).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.text(`+ Сметная прибыль (${customerCalc.estimatedProfitPercent}%):`, leftMargin + 5, yPos);
-    doc.text(`${Math.round(worksProfit).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.setFontSize(10);
-    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
-    doc.text(`Итого по работам:`, leftMargin, yPos + 2);
-    doc.text(`${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 2, { align: "right" });
-    yPos += lineHeight * 2;
-
-    // Materials section
-    if (yPos > 240) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFontSize(12);
-    doc.text("МАТЕРИАЛЫ", leftMargin, yPos);
-    yPos += lineHeight;
-
-    doc.setFontSize(9);
-    materials.forEach((material, index) => {
-      if (yPos > 260) {
-        doc.addPage();
-        yPos = 20;
-      }
-      const materialTotal = material.quantity * material.pricePerUnit;
-      doc.text(`${index + 1}. ${material.materialName} (${material.quantity} шт.)`, leftMargin, yPos);
-      doc.text(`${Math.round(materialTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-      yPos += lineHeight;
-    });
-
-    yPos += lineHeight / 2;
-    doc.setFontSize(10);
-    doc.text(`Базовая стоимость материалов:`, leftMargin, yPos);
-    doc.text(`${Math.round(materialsTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.setFontSize(9);
-    doc.text(`+ Транспортные расходы (${customerCalc.transportPercent}%):`, leftMargin + 5, yPos);
-    doc.text(`${Math.round(materialsTransport).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.text(`+ Заготовительно-складские (${customerCalc.warehousePercent}%):`, leftMargin + 5, yPos);
-    doc.text(`${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-    yPos += lineHeight;
-
-    doc.setFontSize(10);
-    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
-    doc.text(`Итого по материалам:`, leftMargin, yPos + 2);
-    doc.text(`${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 2, { align: "right" });
-    yPos += lineHeight * 2;
-
-    // Other costs
-    if (customerCalc.otherPercent && customerCalc.otherPercent > 0) {
-      doc.setFontSize(9);
-      doc.text(`+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%):`, leftMargin, yPos);
-      doc.text(`${Math.round(otherAmount).toLocaleString("ru-RU")} р.`, rightMargin, yPos, { align: "right" });
-      yPos += lineHeight * 1.5;
-    }
-
-    // Grand total
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFontSize(14);
-    doc.line(leftMargin, yPos - 2, rightMargin, yPos - 2);
-    doc.text(`ИТОГО:`, leftMargin, yPos + 5);
-    doc.text(`${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.`, rightMargin, yPos + 5, { align: "right" });
-
-    // Save PDF
-    const fileName = `Расчёт_${estimateNumber || estimateName || "без_номера"}_${new Date().toLocaleDateString("ru-RU")}.pdf`;
-    doc.save(fileName);
+    const fileName = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.pdf`;
+    pdf.save(fileName);
   };
 
   return (
@@ -653,6 +535,72 @@ export function EstimateForm({
           <Button type="submit">{estimate ? "Сохранить" : "Создать"}</Button>
         </div>
       )}
+
+      {/* Hidden PDF Content */}
+      <div 
+        ref={pdfContentRef} 
+        className="fixed left-[-9999px] top-0 w-[800px] bg-white text-black p-8"
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
+        <h1 className="text-2xl font-bold text-center mb-6">РАСЧЁТ СТОИМОСТИ</h1>
+        
+        <div className="mb-4 text-sm">
+          <p><strong>Расчёт:</strong> {watch("name") || "—"}</p>
+          <p><strong>Номер:</strong> {watch("estimateNumber") || "—"}</p>
+          <p><strong>Дата:</strong> {watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : "—"}</p>
+          {selectedRequest?.clientName && <p><strong>Заказчик:</strong> {selectedRequest.clientName}</p>}
+          {selectedRequest?.serviceObjectName && <p><strong>Объект:</strong> {selectedRequest.serviceObjectName}</p>}
+          {selectedEmployee && <p><strong>Составил:</strong> {selectedEmployee.fullName}</p>}
+        </div>
+
+        <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">РАБОТЫ</h2>
+        <div className="text-sm space-y-1 mb-4">
+          {workBlocks.map((block, index) => (
+            <div key={block.id} className="flex justify-between">
+              <span>{index + 1}. {block.description || "Работа без названия"}</span>
+              <span>{Math.round(calculateWorkBlockTotal(block)).toLocaleString("ru-RU")} р.</span>
+            </div>
+          ))}
+        </div>
+        <div className="text-sm border-t pt-2 space-y-1">
+          <div className="flex justify-between"><span>Базовая стоимость работ:</span><span>{Math.round(worksTotal).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between text-gray-600"><span>+ Накладные расходы ({customerCalc.overheadPercent}%):</span><span>{Math.round(worksOverhead).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between text-gray-600"><span>+ Сметная прибыль ({customerCalc.estimatedProfitPercent}%):</span><span>{Math.round(worksProfit).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between font-bold border-t pt-1"><span>Итого по работам:</span><span>{Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
+        </div>
+
+        <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">МАТЕРИАЛЫ</h2>
+        <div className="text-sm space-y-1 mb-4">
+          {materials.map((material, index) => (
+            <div key={material.id} className="flex justify-between">
+              <span>{index + 1}. {material.materialName} ({material.quantity} шт.)</span>
+              <span>{Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</span>
+            </div>
+          ))}
+        </div>
+        <div className="text-sm border-t pt-2 space-y-1">
+          <div className="flex justify-between"><span>Базовая стоимость материалов:</span><span>{Math.round(materialsTotal).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between text-gray-600"><span>+ Транспортные расходы ({customerCalc.transportPercent}%):</span><span>{Math.round(materialsTransport).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between text-gray-600"><span>+ Заготовительно-складские ({customerCalc.warehousePercent}%):</span><span>{Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</span></div>
+          <div className="flex justify-between font-bold border-t pt-1"><span>Итого по материалам:</span><span>{Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
+        </div>
+
+        {customerCalc.otherPercent && customerCalc.otherPercent > 0 && (
+          <div className="text-sm mt-4">
+            <div className="flex justify-between text-gray-600">
+              <span>+ {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>
+              <span>{Math.round(otherAmount).toLocaleString("ru-RU")} р.</span>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 pt-4 border-t-2 border-black">
+          <div className="flex justify-between text-xl font-bold">
+            <span>ИТОГО:</span>
+            <span>{Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</span>
+          </div>
+        </div>
+      </div>
     </form>
   );
 }
