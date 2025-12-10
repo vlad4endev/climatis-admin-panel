@@ -20,9 +20,9 @@ import { PageHeader } from "@/components/layout/PageHeader";
 
 // Mock data
 const mockRequests = [
-  { id: "1", name: "Заявка #001 - Ремонт котла", createdAt: "2024-01-15" },
-  { id: "2", name: "Заявка #002 - ТО системы", createdAt: "2024-01-20" },
-  { id: "3", name: "Заявка #003 - Замена насоса", createdAt: "2024-01-25" },
+  { id: "1", name: "Заявка #001 - Ремонт котла", createdAt: "2024-01-15", clientName: "ООО «ТеплоСервис»", serviceObjectName: "Котельная №3", serviceObjectAddress: "г. Москва, ул. Промышленная, 15" },
+  { id: "2", name: "Заявка #002 - ТО системы", createdAt: "2024-01-20", clientName: "АО «Энергоснаб»", serviceObjectName: "БЦ Меркурий", serviceObjectAddress: "г. Москва, ул. Садовая, 25" },
+  { id: "3", name: "Заявка #003 - Замена насоса", createdAt: "2024-01-25", clientName: "ИП Смирнов", serviceObjectName: "Склад №7", serviceObjectAddress: "г. Москва, Складской проезд, 8" },
 ];
 
 const mockMaterials = [
