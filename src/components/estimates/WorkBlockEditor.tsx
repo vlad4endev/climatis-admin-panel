@@ -15,9 +15,10 @@ import {
 interface WorkBlockEditorProps {
   blocks: WorkBlock[];
   onChange: (blocks: WorkBlock[]) => void;
+  readOnly?: boolean;
 }
 
-export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
+export function WorkBlockEditor({ blocks, onChange, readOnly = false }: WorkBlockEditorProps) {
   const addBlock = () => {
     onChange([...blocks, createEmptyWorkBlock()]);
   };
@@ -69,17 +70,21 @@ export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
                 }
                 placeholder="Описание работы..."
                 rows={2}
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => removeBlock(block.id)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-6"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {!readOnly && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeBlock(block.id)}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-6"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           <div className="overflow-x-auto">
@@ -123,8 +128,9 @@ export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="h-8 text-center"
+                          className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
                           placeholder="0"
+                          readOnly={readOnly}
                         />
                       </td>
                       <td className="py-2 px-2">
@@ -141,8 +147,9 @@ export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
                               parseInt(e.target.value) || 0
                             )
                           }
-                          className="h-8 text-center"
+                          className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
                           placeholder="0"
+                          readOnly={readOnly}
                         />
                       </td>
                       <td className="py-2 px-2">
@@ -159,8 +166,9 @@ export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="h-8 text-center"
+                          className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
                           placeholder="0"
+                          readOnly={readOnly}
                         />
                       </td>
                       <td className="py-2 px-2 text-right font-medium">
@@ -188,15 +196,17 @@ export function WorkBlockEditor({ blocks, onChange }: WorkBlockEditorProps) {
         </div>
       ))}
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={addBlock}
-        className="w-full"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Добавить блок работ
-      </Button>
+      {!readOnly && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addBlock}
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Добавить блок работ
+        </Button>
+      )}
 
       {blocks.length > 0 && (
         <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary/30">

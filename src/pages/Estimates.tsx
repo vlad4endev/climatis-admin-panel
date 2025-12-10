@@ -123,6 +123,7 @@ export default function Estimates() {
   const [estimates, setEstimates] = useState<Estimate[]>(mockEstimates);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
+  const [viewingEstimate, setViewingEstimate] = useState<Estimate | undefined>();
   const { toast } = useToast();
 
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
@@ -198,16 +199,8 @@ export default function Estimates() {
         searchable: true,
       },
     ],
-    onUpdate: (id, field, value) => {
-      setEstimates((prev) =>
-        prev.map((estimate) =>
-          estimate.id === id ? { ...estimate, [field]: value } : estimate
-        )
-      );
-      toast({
-        title: "Расчёт обновлён",
-        description: "Изменения сохранены",
-      });
+    onRowClick: (estimate) => {
+      setViewingEstimate(estimate);
     },
     onDelete: (id) => {
       setEstimates((prev) => prev.filter((estimate) => estimate.id !== id));
@@ -327,6 +320,25 @@ export default function Estimates() {
             employees={mockEmployees}
             availableMaterials={mockMaterials}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingEstimate} onOpenChange={(open) => !open && setViewingEstimate(undefined)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Просмотр расчёта</DialogTitle>
+          </DialogHeader>
+          {viewingEstimate && (
+            <EstimateForm
+              estimate={viewingEstimate}
+              onSubmit={() => {}}
+              onCancel={() => setViewingEstimate(undefined)}
+              requests={mockRequests}
+              employees={mockEmployees}
+              availableMaterials={mockMaterials}
+              readOnly
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -8,12 +8,14 @@ interface MaterialListEditorProps {
   materials: Material[];
   onChange: (materials: Material[]) => void;
   availableMaterials: Array<{ id: string; name: string; price?: number }>;
+  readOnly?: boolean;
 }
 
 export function MaterialListEditor({
   materials,
   onChange,
   availableMaterials,
+  readOnly = false,
 }: MaterialListEditorProps) {
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -99,12 +101,12 @@ export function MaterialListEditor({
   return (
     <div className="space-y-4">
       {materials.length > 0 && (
-        <div className="grid grid-cols-[1fr_80px_100px_100px_80px] gap-3 text-sm font-medium text-muted-foreground">
+        <div className={`grid gap-3 text-sm font-medium text-muted-foreground ${readOnly ? "grid-cols-[1fr_80px_100px_100px]" : "grid-cols-[1fr_80px_100px_100px_80px]"}`}>
           <div>Материал</div>
           <div>Кол-во</div>
           <div>Цена/ед.</div>
           <div>Сумма</div>
-          <div></div>
+          {!readOnly && <div></div>}
         </div>
       )}
 
@@ -113,19 +115,21 @@ export function MaterialListEditor({
           const lineTotal = material.quantity * material.pricePerUnit;
           const filteredMaterials = getFilteredMaterials(material.id);
           const showDropdown =
-            activeDropdown === material.id && filteredMaterials.length > 0;
+            activeDropdown === material.id && filteredMaterials.length > 0 && !readOnly;
 
           return (
             <div
               key={material.id}
-              className="grid grid-cols-[1fr_80px_100px_100px_80px] gap-3 items-center"
+              className={`grid gap-3 items-center ${readOnly ? "grid-cols-[1fr_80px_100px_100px]" : "grid-cols-[1fr_80px_100px_100px_80px]"}`}
             >
               <div className="relative" ref={(el) => (dropdownRefs.current[material.id] = el)}>
                 <Input
                   value={searchValues[material.id] ?? material.materialName}
                   onChange={(e) => handleSearchChange(material.id, e.target.value)}
-                  onFocus={() => setActiveDropdown(material.id)}
+                  onFocus={() => !readOnly && setActiveDropdown(material.id)}
                   placeholder="Поиск материала или введите название"
+                  readOnly={readOnly}
+                  className={readOnly ? "bg-muted/50" : ""}
                 />
                 {showDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto z-50">
@@ -160,6 +164,8 @@ export function MaterialListEditor({
                   )
                 }
                 placeholder="0"
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
 
               <Input
@@ -175,36 +181,40 @@ export function MaterialListEditor({
                   )
                 }
                 placeholder="0"
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
 
               <div className="text-sm font-medium text-right pr-2">
                 {Math.round(lineTotal).toLocaleString("ru-RU")} ₽
               </div>
 
-              <div className="flex gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeMaterial(material.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={addMaterial}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeMaterial(material.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={addMaterial}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {materials.length === 0 && (
+      {materials.length === 0 && !readOnly && (
         <div className="text-center py-8">
           <Button type="button" onClick={addMaterial} variant="outline">
             <Plus className="h-4 w-4 mr-2" />

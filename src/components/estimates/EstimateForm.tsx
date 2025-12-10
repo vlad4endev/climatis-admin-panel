@@ -30,6 +30,7 @@ interface EstimateFormProps {
   requests: Array<{ id: string; name: string; createdAt: string }>;
   employees: Array<{ id: string; fullName: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
+  readOnly?: boolean;
 }
 
 export function EstimateForm({
@@ -39,6 +40,7 @@ export function EstimateForm({
   requests,
   employees,
   availableMaterials = [],
+  readOnly = false,
 }: EstimateFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
@@ -108,6 +110,8 @@ export function EstimateForm({
                 id="name"
                 {...register("name")}
                 placeholder="Название расчёта"
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
             </div>
 
@@ -120,6 +124,8 @@ export function EstimateForm({
                   id="estimateNumber"
                   {...register("estimateNumber")}
                   placeholder="РС-001"
+                  readOnly={readOnly}
+                  className={readOnly ? "bg-muted/50" : ""}
                 />
               </div>
               <div>
@@ -128,6 +134,8 @@ export function EstimateForm({
                   id="estimateDate"
                   type="date"
                   {...register("estimateDate")}
+                  readOnly={readOnly}
+                  className={readOnly ? "bg-muted/50" : ""}
                 />
               </div>
             </div>
@@ -141,8 +149,9 @@ export function EstimateForm({
                 <Select
                   value={status}
                   onValueChange={(value) => setValue("status", value as any)}
+                  disabled={readOnly}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,8 +168,9 @@ export function EstimateForm({
                 <Select
                   value={type}
                   onValueChange={(value) => setValue("type", value as any)}
+                  disabled={readOnly}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -183,8 +193,9 @@ export function EstimateForm({
                 <Select
                   value={requestId}
                   onValueChange={(value) => setValue("requestId", value)}
+                  disabled={readOnly}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                     <SelectValue placeholder="Выберите заявку (необязательно)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,8 +212,9 @@ export function EstimateForm({
                 <Select
                   value={createdById}
                   onValueChange={(value) => setValue("createdById", value)}
+                  disabled={readOnly}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                     <SelectValue placeholder="Выберите сотрудника" />
                   </SelectTrigger>
                   <SelectContent>
@@ -223,6 +235,8 @@ export function EstimateForm({
                 {...register("engineerComment")}
                 rows={3}
                 placeholder="Дополнительные комментарии..."
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
             </div>
           </div>
@@ -258,7 +272,7 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
-          <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} />
+          <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} readOnly={readOnly} />
         </TabsContent>
 
         <TabsContent value="materials" className="space-y-4 mt-4">
@@ -266,16 +280,19 @@ export function EstimateForm({
             materials={materials}
             onChange={setMaterials}
             availableMaterials={availableMaterials}
+            readOnly={readOnly}
           />
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">{estimate ? "Сохранить" : "Создать"}</Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">{estimate ? "Сохранить" : "Создать"}</Button>
+        </div>
+      )}
     </form>
   );
 }
