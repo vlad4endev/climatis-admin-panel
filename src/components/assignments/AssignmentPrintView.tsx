@@ -87,6 +87,30 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
           </div>
         )}
 
+        {assignment.materials && assignment.materials.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-3 border-b pb-1">Материалы</h2>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2 text-left">№</th>
+                  <th className="border p-2 text-left">Наименование</th>
+                  <th className="border p-2 text-right">Кол-во</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignment.materials.map((material, index) => (
+                  <tr key={material.id || index}>
+                    <td className="border p-2">{index + 1}</td>
+                    <td className="border p-2">{material.materialName}</td>
+                    <td className="border p-2 text-right">{material.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <div className="mb-6 p-3 bg-gray-100 rounded">
           <div className="flex justify-between items-center text-lg font-bold">
             <span>ИТОГО ПО РАБОТАМ:</span>

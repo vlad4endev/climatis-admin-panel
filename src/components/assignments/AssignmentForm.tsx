@@ -165,6 +165,19 @@ export function AssignmentForm({
             </div>
           )}
 
+          {assignment.materials && assignment.materials.length > 0 && (
+            <div className="bg-form-section p-4 rounded-lg space-y-3">
+              <h3 className="font-semibold text-form-label">Материалы</h3>
+              <div className="space-y-2">
+                {assignment.materials.map((material, index) => (
+                  <div key={material.id || index} className="flex justify-between items-center py-2 px-3 bg-background/50 rounded text-sm">
+                    <span>{material.materialName}</span>
+                    <span className="text-muted-foreground">{material.quantity} шт</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
 
