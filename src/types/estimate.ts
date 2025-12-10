@@ -28,6 +28,24 @@ export interface Material {
   pricePerUnit: number;
 }
 
+export interface CustomerCalculation {
+  overheadPercent: number; // Накладные расходы (работа)
+  estimatedProfitPercent: number; // Сметная прибыль (работа)
+  transportPercent: number; // Транспортные расходы (материалы)
+  warehousePercent: number; // Заготовительно-складские расходы (материалы)
+  otherName?: string; // Название дополнительного расхода
+  otherPercent?: number; // Процент к общей сумме
+}
+
+export const DEFAULT_CUSTOMER_CALCULATION: CustomerCalculation = {
+  overheadPercent: 95,
+  estimatedProfitPercent: 58,
+  transportPercent: 6,
+  warehousePercent: 3,
+  otherName: "",
+  otherPercent: undefined,
+};
+
 export interface Estimate {
   id: string;
   name: string;
@@ -42,6 +60,7 @@ export interface Estimate {
   engineerComment?: string;
   workBlocks?: WorkBlock[];
   materials?: Material[];
+  customerCalculation?: CustomerCalculation;
 }
 
 export const ESTIMATE_STATUSES = [
