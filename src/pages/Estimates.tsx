@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
-import { Plus, ClipboardCheck } from "lucide-react";
+import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
+import { Plus, ClipboardCheck, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -124,7 +126,15 @@ export default function Estimates() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
   const [viewingEstimate, setViewingEstimate] = useState<Estimate | undefined>();
+  const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
   const { toast } = useToast();
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: printingEstimate ? `Расчёт_${printingEstimate.estimateNumber}` : 'Расчёт',
+    onAfterPrint: () => setPrintingEstimate(undefined),
+  });
 
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
     switch (status) {
@@ -214,18 +224,32 @@ export default function Estimates() {
       setIsFormOpen(true);
     },
     customActions: (estimate) => (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleCreateAssignment(estimate);
-        }}
-        title="Создать задание"
-        disabled={estimate.status === "черновик"}
-      >
-        <ClipboardCheck className="h-4 w-4" />
-      </Button>
+      <>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            setPrintingEstimate(estimate);
+            setTimeout(() => handlePrint(), 100);
+          }}
+          title="Печать"
+        >
+          <Printer className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCreateAssignment(estimate);
+          }}
+          title="Создать задание"
+          disabled={estimate.status === "черновик"}
+        >
+          <ClipboardCheck className="h-4 w-4" />
+        </Button>
+      </>
     ),
   };
 
@@ -341,6 +365,13 @@ export default function Estimates() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Hidden print view */}
+      <div style={{ display: 'none' }}>
+        {printingEstimate && (
+          <EstimatePrintView ref={printRef} estimate={printingEstimate} />
+        )}
+      </div>
     </div>
   );
 }
