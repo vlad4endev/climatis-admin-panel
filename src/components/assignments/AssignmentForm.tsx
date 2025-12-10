@@ -50,11 +50,6 @@ export function AssignmentForm({
 
   const worksTotal = assignment?.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
 
-  const materialsTotal = assignment?.materials?.reduce(
-    (sum, material) => sum + material.quantity * material.pricePerUnit,
-    0
-  ) || 0;
-
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="bg-form-section p-4 rounded-lg space-y-4">
@@ -153,9 +148,7 @@ export function AssignmentForm({
                       {block.rows.filter(row => row.planHours > 0 || row.quantity > 0).map((row) => (
                         <div key={row.category} className="flex justify-between items-center py-1 px-2 bg-background/50 rounded text-sm">
                           <span className="text-muted-foreground">{row.category}</span>
-                          <span>
-                            {row.planHours}ч × {row.quantity}чел × {row.rate.toLocaleString('ru-RU')}₽ = {Math.round(calculateWorkRowTotal(row)).toLocaleString('ru-RU')} ₽
-                          </span>
+                          <span>{Math.round(calculateWorkRowTotal(row)).toLocaleString('ru-RU')} ₽</span>
                         </div>
                       ))}
                     </div>
@@ -172,25 +165,6 @@ export function AssignmentForm({
             </div>
           )}
 
-          {assignment.materials && assignment.materials.length > 0 && (
-            <div className="bg-form-section p-4 rounded-lg space-y-3">
-              <h3 className="font-semibold text-form-label">Материалы</h3>
-              <div className="space-y-2">
-                {assignment.materials.map((material, index) => (
-                  <div key={material.id || index} className="flex justify-between items-center py-2 px-3 bg-background/50 rounded text-sm">
-                    <span>{material.materialName}</span>
-                    <span className="text-muted-foreground">
-                      {material.quantity} шт × {Math.round(material.pricePerUnit).toLocaleString('ru-RU')} ₽
-                    </span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="font-medium">Итого по материалам:</span>
-                  <span className="font-medium">{Math.round(materialsTotal).toLocaleString('ru-RU')} ₽</span>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
 
