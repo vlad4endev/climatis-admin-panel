@@ -6,7 +6,7 @@ import { Mail, Phone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { Badge } from "@/components/ui/badge";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockClients: Client[] = [
@@ -141,7 +141,7 @@ export default function Clients() {
           { value: 'individual_entrepreneur', label: 'ИП' },
         ],
         render: (value) => (
-          <Badge variant="secondary">{getTypeLabel(value)}</Badge>
+          <span className="text-sm">{getTypeLabel(value)}</span>
         ),
       },
       {
