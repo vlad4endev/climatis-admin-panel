@@ -87,7 +87,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className="border-r border-sidebar-border"
+      className="border-r border-sidebar-border z-20"
       collapsible="icon"
     >
       <SidebarContent>
