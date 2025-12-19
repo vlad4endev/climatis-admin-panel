@@ -246,7 +246,8 @@ export function EstimateForm({
                 {...register("name")}
                 placeholder="Название расчёта"
                 readOnly={readOnly}
-                className={readOnly ? "bg-muted/50" : ""}
+                tabIndex={readOnly ? -1 : undefined}
+                className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
 
@@ -260,7 +261,8 @@ export function EstimateForm({
                   {...register("estimateNumber")}
                   placeholder="РС-001"
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
               <div>
@@ -270,7 +272,8 @@ export function EstimateForm({
                   type="date"
                   {...register("estimateDate")}
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
             </div>
@@ -286,7 +289,7 @@ export function EstimateForm({
                   onValueChange={(value) => setValue("status", value as any)}
                   disabled={readOnly}
                 >
-                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+                  <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -305,7 +308,7 @@ export function EstimateForm({
                   onValueChange={(value) => setValue("type", value as any)}
                   disabled={readOnly}
                 >
-                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+                  <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -330,7 +333,7 @@ export function EstimateForm({
                   onValueChange={(value) => setValue("requestId", value)}
                   disabled={readOnly}
                 >
-                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+                  <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                     <SelectValue placeholder="Выберите заявку (необязательно)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,7 +352,7 @@ export function EstimateForm({
                   onValueChange={(value) => setValue("createdById", value)}
                   disabled={readOnly}
                 >
-                  <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+                  <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                     <SelectValue placeholder="Выберите сотрудника" />
                   </SelectTrigger>
                   <SelectContent>
@@ -371,7 +374,8 @@ export function EstimateForm({
                 rows={3}
                 placeholder="Дополнительные комментарии..."
                 readOnly={readOnly}
-                className={readOnly ? "bg-muted/50" : ""}
+                tabIndex={readOnly ? -1 : undefined}
+                className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
           </div>
@@ -438,7 +442,8 @@ export function EstimateForm({
                     overheadPercent: parseFloat(e.target.value) || 0
                   }))}
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
               <div>
@@ -451,7 +456,8 @@ export function EstimateForm({
                     estimatedProfitPercent: parseFloat(e.target.value) || 0
                   }))}
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
             </div>
@@ -486,7 +492,8 @@ export function EstimateForm({
                     transportPercent: parseFloat(e.target.value) || 0
                   }))}
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
               <div>
@@ -499,7 +506,8 @@ export function EstimateForm({
                     warehousePercent: parseFloat(e.target.value) || 0
                   }))}
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
             </div>
@@ -536,7 +544,8 @@ export function EstimateForm({
                   }))}
                   placeholder="Например: НДС"
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
               <div>
@@ -550,7 +559,8 @@ export function EstimateForm({
                   }))}
                   placeholder="0"
                   readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
             </div>
