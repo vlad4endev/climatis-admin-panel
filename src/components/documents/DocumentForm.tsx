@@ -137,15 +137,15 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
         <div>
           <Label htmlFor="objectId">Объект (необязательно)</Label>
           <Select
-            value={watch('objectId')}
-            onValueChange={(value) => setValue('objectId', value)}
+            value={watch('objectId') || "__none__"}
+            onValueChange={(value) => setValue('objectId', value === "__none__" ? "" : value)}
             disabled={readOnly}
           >
             <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue placeholder="Выберите объект" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Не привязан к объекту</SelectItem>
+              <SelectItem value="__none__">Не привязан к объекту</SelectItem>
               {filteredObjects.map((obj) => (
                 <SelectItem key={obj.id} value={obj.id}>
                   {obj.objectName}
