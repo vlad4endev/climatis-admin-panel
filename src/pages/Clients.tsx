@@ -3,63 +3,12 @@ import { Client } from "@/types/client";
 import { ClientForm } from "@/components/clients/ClientForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Mail, Phone, Building2 } from "lucide-react";
-import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
-
-const mockClients: Client[] = [
-  {
-    id: "1",
-    companyName: "ООО 'Торговый дом Север'",
-    type: "legal_entity",
-    division: "Центральный офис",
-    mainContactName: "Петров Петр Петрович",
-    phone: "+7 (495) 123-45-67",
-    email: "p.petrov@sever-td.ru",
-    additionalContacts: [
-      {
-        id: "1",
-        name: "Сидорова Анна Ивановна",
-        phone: "+7 (495) 123-45-68",
-        email: "a.sidorova@sever-td.ru",
-      },
-    ],
-    notes: "Постоянный клиент с 2020 года. Требуется регулярное обслуживание системы кондиционирования в офисе.",
-    createdAt: new Date("2024-01-15"),
-  },
-  {
-    id: "2",
-    companyName: "ИП Иванов Иван Иванович",
-    type: "individual_entrepreneur",
-    division: "",
-    mainContactName: "Иванов Иван Иванович",
-    phone: "+7 (916) 234-56-78",
-    email: "ivanov.ip@gmail.com",
-    additionalContacts: [],
-    notes: "Ресторан 'У Ивана'. Установка вентиляционной системы на кухне.",
-    createdAt: new Date("2024-02-20"),
-  },
-  {
-    id: "3",
-    companyName: "ООО 'МедЦентр Здоровье'",
-    type: "legal_entity",
-    division: "Филиал №2",
-    mainContactName: "Смирнова Елена Александровна",
-    phone: "+7 (499) 987-65-43",
-    email: "info@medcentr-zdorovie.ru",
-    additionalContacts: [
-      {
-        id: "2",
-        name: "Козлов Андрей Викторович",
-        phone: "+7 (499) 987-65-44",
-      },
-    ],
-    notes: "Медицинский центр. Требуется поддержка специальных требований к микроклимату.",
-    createdAt: new Date("2024-03-10"),
-  },
-];
+import { useClients, useCreateClient, useUpdateClient, useUpdateClientField, useDeleteClient } from "@/hooks/useClients";
+import { Loader2 } from "lucide-react";
 
 const getTypeLabel = (type: string) => {
   switch (type) {
@@ -73,46 +22,32 @@ const getTypeLabel = (type: string) => {
 };
 
 export default function Clients() {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const { data: clients = [], isLoading, error } = useClients();
+  const createClient = useCreateClient();
+  const updateClient = useUpdateClient();
+  const updateClientField = useUpdateClientField();
+  const deleteClient = useDeleteClient();
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
 
-  const handleSubmit = (clientData: Omit<Client, "id" | "createdAt">) => {
+  const handleSubmit = async (clientData: Omit<Client, "id" | "createdAt">) => {
     if (editingClient) {
-      setClients(prev =>
-        prev.map(client =>
-          client.id === editingClient.id
-            ? { ...client, ...clientData }
-            : client
-        )
-      );
-      toast.success("Клиент обновлён");
+      await updateClient.mutateAsync({ id: editingClient.id, ...clientData });
     } else {
-      const newClient: Client = {
-        ...clientData,
-        id: Date.now().toString(),
-        createdAt: new Date(),
-      };
-      setClients([newClient, ...clients]);
-      toast.success("Клиент успешно создан");
+      await createClient.mutateAsync(clientData);
     }
     setIsFormOpen(false);
     setEditingClient(null);
   };
 
-  const handleUpdateField = (id: string, field: string, value: any) => {
-    setClients(prev =>
-      prev.map(client =>
-        client.id === id ? { ...client, [field]: value } : client
-      )
-    );
-    toast.success("Данные обновлены");
+  const handleUpdateField = (id: string, field: string, value: unknown) => {
+    updateClientField.mutate({ id, field, value });
   };
 
   const handleDeleteClient = (id: string) => {
-    setClients(prev => prev.filter(client => client.id !== id));
-    toast.success("Клиент удален");
+    deleteClient.mutate(id);
   };
 
   const handleEditClient = (client: Client) => {
@@ -197,6 +132,22 @@ export default function Clients() {
     onDelete: handleDeleteClient,
     onEdit: handleEditClient,
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-destructive">Ошибка загрузки данных: {error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
