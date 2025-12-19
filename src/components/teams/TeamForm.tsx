@@ -52,6 +52,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           id="name" 
           {...register('name', { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -109,6 +110,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           {...register('competencies')}
           placeholder="Установка кондиционеров, ремонт систем вентиляции..."
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -119,6 +121,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           id="notes" 
           {...register('notes')} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

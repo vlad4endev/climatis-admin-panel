@@ -107,6 +107,7 @@ export function InvoiceForm({
               {...register("invoiceNumber")}
               placeholder="СЧ-001"
               readOnly={readOnly}
+              tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
@@ -117,6 +118,7 @@ export function InvoiceForm({
               type="date"
               {...register("invoiceDate")}
               readOnly={readOnly}
+              tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
@@ -131,6 +133,7 @@ export function InvoiceForm({
             <Input
               value={clientSearch}
               readOnly
+              tabIndex={-1}
               className="bg-input-readonly"
             />
           ) : (
@@ -219,6 +222,7 @@ export function InvoiceForm({
             {...register("amount", { valueAsNumber: true })}
             placeholder="0"
             readOnly={readOnly}
+            tabIndex={readOnly ? -1 : undefined}
             className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>

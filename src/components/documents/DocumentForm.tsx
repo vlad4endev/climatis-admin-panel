@@ -60,6 +60,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           id="contractNumber" 
           {...register('contractNumber', { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -72,6 +73,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             type="date" 
             {...register('startDate', { required: !readOnly })} 
             readOnly={readOnly}
+            tabIndex={readOnly ? -1 : undefined}
             className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
@@ -82,6 +84,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             type="date" 
             {...register('endDate', { required: !readOnly })} 
             readOnly={readOnly}
+            tabIndex={readOnly ? -1 : undefined}
             className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
@@ -160,6 +163,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           {...register('responseConditions')}
           placeholder="Например: выезд до 24 часов"
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -170,6 +174,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           id="notes" 
           {...register('notes')} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

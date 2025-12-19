@@ -39,6 +39,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="name" 
           {...register("name", { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -49,6 +50,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="internalArticle" 
           {...register("internalArticle", { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -98,6 +100,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("currentStock", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -110,6 +113,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("minStock", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -122,6 +126,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("purchasePrice", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -134,6 +139,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("retailPrice", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -144,6 +150,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="notes" 
           {...register("notes")} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

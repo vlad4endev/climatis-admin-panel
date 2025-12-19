@@ -106,6 +106,7 @@ export function ServiceObjectForm({
                     placeholder="Офис, склад, производство..." 
                     {...field} 
                     readOnly={readOnly}
+                    tabIndex={readOnly ? -1 : undefined}
                     className={readOnly ? "bg-input-readonly" : ""}
                   />
                 </FormControl>
@@ -125,6 +126,7 @@ export function ServiceObjectForm({
                     placeholder="Улица, дом, корпус..." 
                     {...field} 
                     readOnly={readOnly}
+                    tabIndex={readOnly ? -1 : undefined}
                     className={readOnly ? "bg-input-readonly" : ""}
                   />
                 </FormControl>
@@ -145,6 +147,7 @@ export function ServiceObjectForm({
                     className={`min-h-[100px] ${readOnly ? "bg-input-readonly" : ""}`}
                     {...field}
                     readOnly={readOnly}
+                    tabIndex={readOnly ? -1 : undefined}
                   />
                 </FormControl>
                 <FormMessage />
@@ -164,6 +167,7 @@ export function ServiceObjectForm({
                     className={`min-h-[100px] ${readOnly ? "bg-input-readonly" : ""}`}
                     {...field}
                     readOnly={readOnly}
+                    tabIndex={readOnly ? -1 : undefined}
                   />
                 </FormControl>
                 <FormMessage />

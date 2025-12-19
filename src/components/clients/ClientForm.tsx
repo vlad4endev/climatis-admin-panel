@@ -86,6 +86,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="ООО 'Пример'"
           required={!readOnly}
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -111,6 +112,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           onChange={(e) => setDivision(e.target.value)}
           placeholder="Филиал / цех / предприятие"
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -124,6 +126,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="Иванов Иван Иванович"
           required={!readOnly}
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -139,6 +142,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
             placeholder="+7 (999) 123-45-67"
             required={!readOnly}
             readOnly={readOnly}
+            tabIndex={readOnly ? -1 : undefined}
             className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
@@ -153,6 +157,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
             placeholder="example@company.ru"
             required={!readOnly}
             readOnly={readOnly}
+            tabIndex={readOnly ? -1 : undefined}
             className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
@@ -226,6 +231,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="Дополнительная информация о клиенте"
           rows={4}
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

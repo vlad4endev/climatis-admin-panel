@@ -113,6 +113,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               placeholder="Введите название"
               required={!readOnly}
               readOnly={readOnly}
+              tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
@@ -126,6 +127,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               placeholder="Подробное описание задачи"
               rows={3}
               readOnly={readOnly}
+              tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
@@ -172,6 +174,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 value={proposedDeadline}
                 onChange={(e) => setProposedDeadline(e.target.value)}
                 readOnly={readOnly}
+                tabIndex={readOnly ? -1 : undefined}
                 className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
@@ -183,6 +186,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 value={agreedDeadline}
                 onChange={(e) => setAgreedDeadline(e.target.value)}
                 readOnly={readOnly}
+                tabIndex={readOnly ? -1 : undefined}
                 className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
