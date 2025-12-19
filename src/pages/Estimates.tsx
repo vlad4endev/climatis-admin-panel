@@ -6,8 +6,7 @@ import { EntityListConfig } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
 import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
-import { Plus, ClipboardCheck, Printer } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ClipboardCheck, Printer } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,118 +16,51 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
-
-// Mock data
-const mockRequests = [
-  { id: "1", name: "Заявка #001 - Ремонт котла", createdAt: "2024-01-15", clientName: "ООО «ТеплоСервис»", serviceObjectName: "Котельная №3", serviceObjectAddress: "г. Москва, ул. Промышленная, 15" },
-  { id: "2", name: "Заявка #002 - ТО системы", createdAt: "2024-01-20", clientName: "АО «Энергоснаб»", serviceObjectName: "БЦ Меркурий", serviceObjectAddress: "г. Москва, ул. Садовая, 25" },
-  { id: "3", name: "Заявка #003 - Замена насоса", createdAt: "2024-01-25", clientName: "ИП Смирнов", serviceObjectName: "Склад №7", serviceObjectAddress: "г. Москва, Складской проезд, 8" },
-];
-
-const mockMaterials = [
-  { id: "1", name: "Теплообменник", price: 25000 },
-  { id: "2", name: "Насос циркуляционный", price: 8500 },
-  { id: "3", name: "Расширительный бак", price: 3200 },
-  { id: "4", name: "Термостат", price: 1500 },
-  { id: "5", name: "Манометр", price: 450 },
-  { id: "6", name: "Прокладка фланцевая", price: 120 },
-];
-
-const mockEmployees = [
-  { id: "1", fullName: "Иванов Иван Иванович" },
-  { id: "2", fullName: "Петров Петр Петрович" },
-  { id: "3", fullName: "Сидоров Сидор Сидорович" },
-];
-
-const mockEstimates: Estimate[] = [
-  {
-    id: "1",
-    name: "Расчёт по ремонту котла",
-    requestId: "1",
-    requestName: "Заявка #001 - Ремонт котла",
-    estimateNumber: "РС-2024-001",
-    estimateDate: "2024-01-16",
-    status: "готов",
-    type: "сложный ремонт",
-    createdById: "1",
-    createdByName: "Иванов Иван Иванович",
-    engineerComment: "Требуется замена теплообменника",
-    workBlocks: [
-      {
-        id: "1",
-        description: "Диагностика котла",
-        rows: [
-          { category: "Инженер", planHours: 2, quantity: 1, rate: 1500 },
-          { category: "Мастер", planHours: 0, quantity: 0, rate: 0 },
-          { category: "Монтажник 6 разр.", planHours: 0, quantity: 0, rate: 0 },
-          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
-        ],
-      },
-      {
-        id: "2",
-        description: "Замена теплообменника",
-        rows: [
-          { category: "Инженер", planHours: 1, quantity: 1, rate: 1500 },
-          { category: "Мастер", planHours: 2, quantity: 1, rate: 1200 },
-          { category: "Монтажник 6 разр.", planHours: 4, quantity: 2, rate: 900 },
-          { category: "Монтажник 5 разр.", planHours: 4, quantity: 1, rate: 750 },
-        ],
-      },
-    ],
-    materials: [
-      { id: "1", materialName: "Теплообменник", quantity: 1, pricePerUnit: 25000 },
-      { id: "2", materialName: "Прокладка фланцевая", quantity: 2, pricePerUnit: 120 },
-    ],
-  },
-  {
-    id: "2",
-    name: "Смета на ТО",
-    requestId: "2",
-    requestName: "Заявка #002 - ТО системы",
-    estimateNumber: "РС-2024-002",
-    estimateDate: "2024-01-21",
-    status: "согласован",
-    type: "по договору ТО",
-    createdById: "2",
-    createdByName: "Петров Петр Петрович",
-    engineerComment: "Плановое обслуживание",
-    workBlocks: [
-      {
-        id: "1",
-        description: "Профилактический осмотр и чистка",
-        rows: [
-          { category: "Инженер", planHours: 1, quantity: 1, rate: 1200 },
-          { category: "Мастер", planHours: 2, quantity: 1, rate: 1000 },
-          { category: "Монтажник 6 разр.", planHours: 0, quantity: 0, rate: 0 },
-          { category: "Монтажник 5 разр.", planHours: 0, quantity: 0, rate: 0 },
-        ],
-      },
-    ],
-    materials: [],
-  },
-  {
-    id: "3",
-    name: "Расчёт замены насоса",
-    requestId: "3",
-    requestName: "Заявка #003 - Замена насоса",
-    estimateNumber: "РС-2024-003",
-    estimateDate: "2024-01-26",
-    status: "черновик",
-    type: "простой ремонт",
-    createdById: "3",
-    createdByName: "Сидоров Сидор Сидорович",
-  },
-];
+import { useEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate } from "@/hooks/useEstimates";
+import { useRequests } from "@/hooks/useRequests";
+import { useEmployees } from "@/hooks/useEmployees";
+import { useSpareParts } from "@/hooks/useSpareParts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Estimates() {
   const navigate = useNavigate();
-  const [estimates, setEstimates] = useState<Estimate[]>(mockEstimates);
+  const { toast } = useToast();
+  
+  const { data: estimates = [], isLoading } = useEstimates();
+  const { data: requestsData = [] } = useRequests();
+  const { data: employeesData = [] } = useEmployees();
+  const { data: sparePartsData = [] } = useSpareParts();
+  
+  const createMutation = useCreateEstimate();
+  const updateMutation = useUpdateEstimate();
+  const deleteMutation = useDeleteEstimate();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
   const [viewingEstimate, setViewingEstimate] = useState<Estimate | undefined>();
   const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
-  const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
+
+  const requests = requestsData.map(r => ({
+    id: r.id,
+    name: r.requestNumber,
+    createdAt: r.createdAt.toString(),
+    clientName: r.clientName || "",
+    serviceObjectName: r.objectName || "",
+    serviceObjectAddress: "",
+  }));
+
+  const employees = employeesData.map(e => ({
+    id: e.id,
+    fullName: e.fullName,
+  }));
+
+  const availableMaterials = sparePartsData.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.retailPrice,
+  }));
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -138,14 +70,10 @@ export default function Estimates() {
 
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
     switch (status) {
-      case "черновик":
-        return "draft";
-      case "готов":
-        return "ready";
-      case "согласован":
-        return "approved";
-      default:
-        return "default";
+      case "черновик": return "draft";
+      case "готов": return "ready";
+      case "согласован": return "approved";
+      default: return "default";
     }
   };
 
@@ -159,18 +87,8 @@ export default function Estimates() {
         searchable: true,
         render: (value) => <span className="font-medium">{value}</span>,
       },
-      {
-        key: "estimateNumber",
-        label: "Номер расчёта",
-        type: "text",
-        searchable: true,
-      },
-      {
-        key: "estimateDate",
-        label: "Дата расчёта",
-        type: "date",
-        sortable: true,
-      },
+      { key: "estimateNumber", label: "Номер расчёта", type: "text", searchable: true },
+      { key: "estimateDate", label: "Дата расчёта", type: "date", sortable: true },
       {
         key: "status",
         label: "Статус",
@@ -183,42 +101,13 @@ export default function Estimates() {
           </Badge>
         ),
       },
-      {
-        key: "type",
-        label: "Тип расчёта",
-        type: "select",
-        options: ESTIMATE_TYPES,
-        filterable: true,
-      },
-      {
-        key: "createdByName",
-        label: "Расчёт составил",
-        type: "text",
-        searchable: true,
-      },
-      {
-        key: "requestName",
-        label: "Заявка",
-        type: "text",
-        searchable: true,
-      },
-      {
-        key: "engineerComment",
-        label: "Комментарий инженера",
-        type: "text",
-        searchable: true,
-      },
+      { key: "type", label: "Тип расчёта", type: "select", options: ESTIMATE_TYPES, filterable: true },
+      { key: "createdByName", label: "Расчёт составил", type: "text", searchable: true },
+      { key: "requestName", label: "Заявка", type: "text", searchable: true },
+      { key: "engineerComment", label: "Комментарий инженера", type: "text", searchable: true },
     ],
-    onRowClick: (estimate) => {
-      setViewingEstimate(estimate);
-    },
-    onDelete: (id) => {
-      setEstimates((prev) => prev.filter((estimate) => estimate.id !== id));
-      toast({
-        title: "Расчёт удалён",
-        description: "Расчёт успешно удалён",
-      });
-    },
+    onRowClick: (estimate) => setViewingEstimate(estimate),
+    onDelete: (id) => deleteMutation.mutate(id),
     onEdit: (estimate) => {
       setEditingEstimate(estimate);
       setIsFormOpen(true);
@@ -254,7 +143,6 @@ export default function Estimates() {
   };
 
   const handleCreateAssignment = (estimate: Estimate) => {
-    // Store estimate data in sessionStorage to pass to Assignments page
     const assignmentData = {
       requestId: estimate.requestId,
       requestNumber: estimate.requestName?.split(' - ')[0] || "",
@@ -274,40 +162,30 @@ export default function Estimates() {
 
   const handleSubmit = (data: Partial<Estimate>) => {
     if (editingEstimate) {
-      setEstimates((prev) =>
-        prev.map((estimate) =>
-          estimate.id === editingEstimate.id
-            ? { ...estimate, ...data }
-            : estimate
-        )
-      );
-      toast({
-        title: "Расчёт обновлён",
-        description: "Изменения успешно сохранены",
+      updateMutation.mutate({ id: editingEstimate.id, ...data }, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setEditingEstimate(undefined);
+        }
       });
     } else {
-      const newEstimate: Estimate = {
-        id: Date.now().toString(),
-        name: data.name || "",
-        requestId: data.requestId,
-        requestName: data.requestName,
-        estimateNumber: data.estimateNumber || "",
-        estimateDate: data.estimateDate || new Date().toISOString().split('T')[0],
-        status: data.status || "черновик",
-        type: data.type || "простой ремонт",
-        createdById: data.createdById || "",
-        createdByName: data.createdByName || "",
-        engineerComment: data.engineerComment,
-      };
-      setEstimates((prev) => [newEstimate, ...prev]);
-      toast({
-        title: "Расчёт создан",
-        description: "Новый расчёт успешно создан",
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setEditingEstimate(undefined);
+        }
       });
     }
-    setIsFormOpen(false);
-    setEditingEstimate(undefined);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Расчеты" buttonLabel="Создать расчёт" onButtonClick={() => {}} />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -320,11 +198,7 @@ export default function Estimates() {
         }}
       />
 
-      <EntityList
-        items={estimates}
-        config={config}
-        defaultViewMode="table"
-      />
+      <EntityList items={estimates} config={config} defaultViewMode="table" />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -340,9 +214,9 @@ export default function Estimates() {
               setIsFormOpen(false);
               setEditingEstimate(undefined);
             }}
-            requests={mockRequests}
-            employees={mockEmployees}
-            availableMaterials={mockMaterials}
+            requests={requests}
+            employees={employees}
+            availableMaterials={availableMaterials}
           />
         </DialogContent>
       </Dialog>
@@ -357,16 +231,15 @@ export default function Estimates() {
               estimate={viewingEstimate}
               onSubmit={() => {}}
               onCancel={() => setViewingEstimate(undefined)}
-              requests={mockRequests}
-              employees={mockEmployees}
-              availableMaterials={mockMaterials}
+              requests={requests}
+              employees={employees}
+              availableMaterials={availableMaterials}
               readOnly
             />
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Hidden print view */}
       <div style={{ display: 'none' }}>
         {printingEstimate && (
           <EstimatePrintView ref={printRef} estimate={printingEstimate} />

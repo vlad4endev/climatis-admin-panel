@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Task } from "@/types/task";
-import { Employee } from "@/types/employee";
-import { Request } from "@/types/request";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
@@ -10,18 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/layout/PageHeader";
-
-const mockEmployees: Employee[] = [
-  { id: "1", fullName: "Иванов Иван", phone: "+7 (999) 123-45-67", position: "Инженер", createdAt: new Date() },
-  { id: "2", fullName: "Петров Петр", phone: "+7 (999) 234-56-78", position: "Техник", createdAt: new Date() },
-  { id: "3", fullName: "Сидоров Сидор", phone: "+7 (999) 345-67-89", position: "Мастер", createdAt: new Date() },
-];
-
-const mockRequests: Request[] = [
-  { id: "1", requestNumber: "ЗАЯ-001", createdAt: new Date(), status: "in_progress", type: "repair", priority: "urgent", clientId: "1", clientName: "ООО Альфа", objectId: "1", objectName: "Офис на Ленина", problemDescription: "Не работает кондиционер", comments: "" },
-  { id: "2", requestNumber: "ЗАЯ-002", createdAt: new Date(), status: "new", type: "maintenance", priority: "normal", clientId: "2", clientName: "ИП Бета", objectId: "2", objectName: "Склад №3", problemDescription: "Плановое ТО вентиляции", comments: "" },
-  { id: "3", requestNumber: "ЗАЯ-003", createdAt: new Date(), status: "completed", type: "repair", priority: "normal", clientId: "1", clientName: "ООО Альфа", objectId: "3", objectName: "Цех №1", problemDescription: "Ремонт чиллера", comments: "" },
-];
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/useTasks";
+import { useEmployees } from "@/hooks/useEmployees";
+import { useRequests } from "@/hooks/useRequests";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const statusOptions = [
   { value: "новая", label: "Новая" },
@@ -37,68 +27,6 @@ const kanbanColumns = [
   { value: "выполнена", label: "Выполнена" },
 ];
 
-const mockTasks: Task[] = [
-  {
-    id: "1",
-    title: "Проверка системы кондиционирования",
-    description: "Провести полную диагностику системы кондиционирования в офисе клиента",
-    assigneeId: "1",
-    assigneeName: "Иванов Иван",
-    requestId: "1",
-    requestNumber: "ЗАЯ-001",
-    proposedDeadline: "2025-12-01",
-    agreedDeadline: "2025-12-03",
-    status: "в работе",
-    checklist: [
-      { id: "1", text: "Проверить компрессор", completed: true },
-      { id: "2", text: "Проверить фреон", completed: true },
-      { id: "3", text: "Очистить фильтры", completed: false },
-      { id: "4", text: "Проверить дренаж", completed: false },
-    ],
-    comments: [
-      { id: "1", text: "Начал работу, компрессор в норме", authorId: "1", authorName: "Иванов Иван", createdAt: "2025-12-02T10:30:00" },
-    ],
-    createdAt: "2025-11-28",
-    createdBy: "admin"
-  },
-  {
-    id: "2",
-    title: "Установка вентиляции",
-    description: "Монтаж приточно-вытяжной вентиляции",
-    assigneeId: "2",
-    assigneeName: "Петров Петр",
-    proposedDeadline: "2025-12-10",
-    agreedDeadline: "",
-    status: "новая",
-    checklist: [],
-    comments: [],
-    createdAt: "2025-12-01",
-    createdBy: "admin"
-  },
-  {
-    id: "3",
-    title: "Ремонт чиллера",
-    description: "Замена теплообменника",
-    assigneeId: "3",
-    assigneeName: "Сидоров Сидор",
-    requestId: "3",
-    requestNumber: "ЗАЯ-003",
-    proposedDeadline: "2025-12-01",
-    agreedDeadline: "2025-12-01",
-    status: "выполнена",
-    checklist: [
-      { id: "1", text: "Демонтаж старого теплообменника", completed: true },
-      { id: "2", text: "Установка нового", completed: true },
-      { id: "3", text: "Тестирование", completed: true },
-    ],
-    comments: [
-      { id: "1", text: "Работа выполнена в срок", authorId: "3", authorName: "Сидоров Сидор", createdAt: "2025-12-01T16:00:00" },
-    ],
-    createdAt: "2025-11-25",
-    createdBy: "admin"
-  },
-];
-
 const getStatusColor = (status: string) => {
   switch (status) {
     case "новая": return "bg-sky-100 text-sky-800";
@@ -110,18 +38,25 @@ const getStatusColor = (status: string) => {
 };
 
 const getProgressPercent = (task: Task) => {
-  if (task.checklist.length === 0) return null;
+  if (!task.checklist || task.checklist.length === 0) return null;
   const completed = task.checklist.filter(item => item.completed).length;
   return Math.round((completed / task.checklist.length) * 100);
 };
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const { data: tasks = [], isLoading } = useTasks();
+  const { data: employees = [] } = useEmployees();
+  const { data: requests = [] } = useRequests();
+  
+  const createMutation = useCreateTask();
+  const updateMutation = useUpdateTask();
+  const deleteMutation = useDeleteTask();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
 
-  const assigneeOptions = mockEmployees.map(e => ({ value: e.fullName, label: e.fullName }));
+  const assigneeOptions = employees.map(e => ({ value: e.fullName, label: e.fullName }));
 
   const config: EntityListConfig<Task> = {
     fields: [
@@ -210,7 +145,7 @@ export default function Tasks() {
         label: "Комм.",
         type: "text",
         render: (value: Task['comments']) => (
-          <span className="text-muted-foreground">{value.length || "—"}</span>
+          <span className="text-muted-foreground">{value?.length || "—"}</span>
         )
       }
     ],
@@ -220,33 +155,41 @@ export default function Tasks() {
       setEditingTask(task);
       setIsDialogOpen(true);
     },
-    onDelete: (id) => {
-      setTasks(tasks.filter((t) => t.id !== id));
-    },
+    onDelete: (id) => deleteMutation.mutate(id),
     onUpdate: (id, field, value) => {
-      setTasks(tasks.map(t => t.id === id ? { ...t, [field]: value } : t));
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        updateMutation.mutate({ id, ...task, [field]: value });
+      }
     },
   };
 
   const handleSubmit = (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
     if (editingTask) {
-      setTasks(tasks.map(t =>
-        t.id === editingTask.id
-          ? { ...t, ...taskData }
-          : t
-      ));
+      updateMutation.mutate({ id: editingTask.id, ...taskData }, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+          setEditingTask(undefined);
+        }
+      });
     } else {
-      const newTask: Task = {
-        ...taskData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        createdBy: "admin"
-      };
-      setTasks([...tasks, newTask]);
+      createMutation.mutate(taskData, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+          setEditingTask(undefined);
+        }
+      });
     }
-    setIsDialogOpen(false);
-    setEditingTask(undefined);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Задачи" description="Управление задачами сотрудников" buttonLabel="Добавить задачу" onButtonClick={() => {}} />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -275,8 +218,27 @@ export default function Tasks() {
           </DialogHeader>
           <TaskForm
             task={editingTask}
-            employees={mockEmployees}
-            requests={mockRequests}
+            employees={employees.map(e => ({
+              id: e.id,
+              fullName: e.fullName,
+              phone: e.phone || "",
+              position: e.position || "",
+              createdAt: new Date(e.createdAt),
+            }))}
+            requests={requests.map(r => ({
+              id: r.id,
+              requestNumber: r.requestNumber,
+              createdAt: new Date(r.createdAt),
+              status: r.status,
+              type: r.type,
+              priority: r.priority,
+              clientId: r.clientId,
+              clientName: r.clientName || "",
+              objectId: r.objectId,
+              objectName: r.objectName || "",
+              problemDescription: r.problemDescription || "",
+              comments: r.comments || "",
+            }))}
             onSubmit={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
           />

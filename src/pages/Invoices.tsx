@@ -4,83 +4,37 @@ import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Invoice, INVOICE_STATUSES } from "@/types/invoice";
 import { InvoiceForm } from "@/components/invoices/InvoiceForm";
-import { Plus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-const mockClients = [
-  { id: "1", name: "ООО Теплосеть" },
-  { id: "2", name: "АО Энергомаш" },
-  { id: "3", name: "ИП Петров" },
-];
-
-const mockRequests = [
-  { id: "1", name: "Заявка #001 - Ремонт котла", createdAt: "2024-01-15" },
-  { id: "2", name: "Заявка #002 - ТО системы", createdAt: "2024-01-20" },
-  { id: "3", name: "Заявка #003 - Замена насоса", createdAt: "2024-01-25" },
-];
-
-const mockEstimates = [
-  { id: "1", name: "Расчёт по ремонту котла", estimateDate: "2024-01-16" },
-  { id: "2", name: "Смета на ТО", estimateDate: "2024-01-21" },
-  { id: "3", name: "Расчёт замены насоса", estimateDate: "2024-01-26" },
-];
-
-const mockInvoices: Invoice[] = [
-  {
-    id: "1",
-    invoiceNumber: "СЧ-2024-001",
-    invoiceDate: "2024-01-17",
-    clientId: "1",
-    clientName: "ООО Теплосеть",
-    requestId: "1",
-    requestName: "Заявка #001 - Ремонт котла",
-    estimateId: "1",
-    estimateName: "Расчёт по ремонту котла",
-    amount: 125000,
-    status: "оплачен",
-  },
-  {
-    id: "2",
-    invoiceNumber: "СЧ-2024-002",
-    invoiceDate: "2024-01-22",
-    clientId: "2",
-    clientName: "АО Энергомаш",
-    requestId: "2",
-    requestName: "Заявка #002 - ТО системы",
-    estimateId: "2",
-    estimateName: "Смета на ТО",
-    amount: 85000,
-    status: "выставлен",
-  },
-  {
-    id: "3",
-    invoiceNumber: "СЧ-2024-003",
-    invoiceDate: "2024-01-27",
-    clientId: "3",
-    clientName: "ИП Петров",
-    requestId: "3",
-    requestName: "Заявка #003 - Замена насоса",
-    estimateId: "3",
-    estimateName: "Расчёт замены насоса",
-    amount: 45000,
-    status: "подготовлен",
-  },
-];
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useInvoices, useCreateInvoice, useUpdateInvoice, useDeleteInvoice } from "@/hooks/useInvoices";
+import { useClients } from "@/hooks/useClients";
+import { useRequests } from "@/hooks/useRequests";
+import { useEstimates } from "@/hooks/useEstimates";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Invoices() {
-  const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
+  const { data: invoices = [], isLoading } = useInvoices();
+  const { data: clientsData = [] } = useClients();
+  const { data: requestsData = [] } = useRequests();
+  const { data: estimatesData = [] } = useEstimates();
+  
+  const createMutation = useCreateInvoice();
+  const updateMutation = useUpdateInvoice();
+  const deleteMutation = useDeleteInvoice();
+
+  const clients = clientsData.map(c => ({ id: c.id, name: c.companyName }));
+  const requests = requestsData.map(r => ({ id: r.id, name: r.requestNumber, createdAt: r.createdAt.toString() }));
+  const estimates = estimatesData.map(e => ({ id: e.id, name: e.name, estimateDate: e.estimateDate }));
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
   const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
-  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, { bg: string; text: string }> = {
@@ -103,30 +57,10 @@ export default function Invoices() {
         searchable: true,
         render: (value) => <span className="font-medium">{value}</span>,
       },
-      {
-        key: "invoiceDate",
-        label: "Дата счёта",
-        type: "date",
-        sortable: true,
-      },
-      {
-        key: "clientName",
-        label: "Контрагент",
-        type: "text",
-        searchable: true,
-      },
-      {
-        key: "requestName",
-        label: "Заявка",
-        type: "text",
-        searchable: true,
-      },
-      {
-        key: "estimateName",
-        label: "Основание (расчёт)",
-        type: "text",
-        searchable: true,
-      },
+      { key: "invoiceDate", label: "Дата счёта", type: "date", sortable: true },
+      { key: "clientName", label: "Контрагент", type: "text", searchable: true },
+      { key: "requestName", label: "Заявка", type: "text", searchable: true },
+      { key: "estimateName", label: "Основание (расчёт)", type: "text", searchable: true },
       {
         key: "amount",
         label: "Сумма",
@@ -155,23 +89,12 @@ export default function Invoices() {
       },
     ],
     onUpdate: (id, field, value) => {
-      setInvoices((prev) =>
-        prev.map((invoice) =>
-          invoice.id === id ? { ...invoice, [field]: value } : invoice
-        )
-      );
-      toast({
-        title: "Счёт обновлён",
-        description: "Изменения сохранены",
-      });
+      const invoice = invoices.find(i => i.id === id);
+      if (invoice) {
+        updateMutation.mutate({ id, ...invoice, [field]: value });
+      }
     },
-    onDelete: (id) => {
-      setInvoices((prev) => prev.filter((invoice) => invoice.id !== id));
-      toast({
-        title: "Счёт удалён",
-        description: "Счёт успешно удалён",
-      });
-    },
+    onDelete: (id) => deleteMutation.mutate(id),
     onEdit: (invoice) => {
       setEditingInvoice(invoice);
       setIsFormOpen(true);
@@ -180,65 +103,43 @@ export default function Invoices() {
 
   const handleSubmit = (data: Partial<Invoice>) => {
     if (editingInvoice) {
-      setInvoices((prev) =>
-        prev.map((invoice) =>
-          invoice.id === editingInvoice.id
-            ? { ...invoice, ...data }
-            : invoice
-        )
-      );
-      toast({
-        title: "Счёт обновлён",
-        description: "Изменения успешно сохранены",
+      updateMutation.mutate({ id: editingInvoice.id, ...data }, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setEditingInvoice(undefined);
+        }
       });
     } else {
-      const selectedClient = mockClients.find((c) => c.id === data.clientId);
-      const selectedRequest = mockRequests.find((r) => r.id === data.requestId);
-      const selectedEstimate = mockEstimates.find((e) => e.id === data.estimateId);
-
-      const newInvoice: Invoice = {
-        id: Date.now().toString(),
-        invoiceNumber: data.invoiceNumber || "",
-        invoiceDate: data.invoiceDate || new Date().toISOString().split('T')[0],
-        clientId: data.clientId,
-        clientName: selectedClient?.name,
-        requestId: data.requestId,
-        requestName: selectedRequest?.name,
-        estimateId: data.estimateId,
-        estimateName: selectedEstimate?.name,
-        amount: data.amount || 0,
-        status: data.status || "подготовлен",
-      };
-      setInvoices((prev) => [newInvoice, ...prev]);
-      toast({
-        title: "Счёт создан",
-        description: "Новый счёт успешно создан",
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setEditingInvoice(undefined);
+        }
       });
     }
-    setIsFormOpen(false);
-    setEditingInvoice(undefined);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Счета" buttonLabel="Создать счёт" onButtonClick={() => {}} />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Счета</h1>
-        <Button
-          onClick={() => {
-            setEditingInvoice(undefined);
-            setIsFormOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Создать счёт
-        </Button>
-      </div>
-
-      <EntityList
-        items={invoices}
-        config={config}
-        defaultViewMode="table"
+      <PageHeader
+        title="Счета"
+        buttonLabel="Создать счёт"
+        onButtonClick={() => {
+          setEditingInvoice(undefined);
+          setIsFormOpen(true);
+        }}
       />
+
+      <EntityList items={invoices} config={config} defaultViewMode="table" />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -254,9 +155,9 @@ export default function Invoices() {
               setIsFormOpen(false);
               setEditingInvoice(undefined);
             }}
-            clients={mockClients}
-            requests={mockRequests}
-            estimates={mockEstimates}
+            clients={clients}
+            requests={requests}
+            estimates={estimates}
           />
         </DialogContent>
       </Dialog>
