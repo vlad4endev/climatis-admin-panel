@@ -17,9 +17,7 @@ interface EntityFiltersProps {
 }
 
 export function EntityFilters({ fields, filters, onFilterChange }: EntityFiltersProps) {
-  // Показываем только select поля
   const selectFields = fields.filter(f => f.type === 'select' && f.options);
-  const activeFilters = filters.filter(f => f.value);
 
   if (selectFields.length === 0) {
     return null;
@@ -55,31 +53,47 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
 
         return null;
       })}
+    </div>
+  );
+}
 
-      {activeFilters.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          {activeFilters.map(filter => {
-            const field = selectFields.find(f => f.key === filter.field);
-            if (!field) return null;
+interface ActiveFiltersProps {
+  fields: EntityField[];
+  filters: FilterValue[];
+  onFilterChange: (field: string, value: string) => void;
+}
 
-            let displayValue = filter.value;
-            if (field.options) {
-              const option = field.options.find(o => o.value === filter.value);
-              if (option) displayValue = option.label;
-            }
+export function ActiveFilters({ fields, filters, onFilterChange }: ActiveFiltersProps) {
+  const selectFields = fields.filter(f => f.type === 'select' && f.options);
+  const activeFilters = filters.filter(f => f.value);
 
-            return (
-              <Badge key={filter.field} variant="secondary" className="gap-1">
-                {field.label}: {displayValue}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange(filter.field, '')}
-                />
-              </Badge>
-            );
-          })}
-        </div>
-      )}
+  if (activeFilters.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-sm text-muted-foreground">Фильтры:</span>
+      {activeFilters.map(filter => {
+        const field = selectFields.find(f => f.key === filter.field);
+        if (!field) return null;
+
+        let displayValue = filter.value;
+        if (field.options) {
+          const option = field.options.find(o => o.value === filter.value);
+          if (option) displayValue = option.label;
+        }
+
+        return (
+          <Badge key={filter.field} variant="secondary" className="gap-1">
+            {field.label}: {displayValue}
+            <X
+              className="h-3 w-3 cursor-pointer"
+              onClick={() => onFilterChange(filter.field, '')}
+            />
+          </Badge>
+        );
+      })}
     </div>
   );
 }
