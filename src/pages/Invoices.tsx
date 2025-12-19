@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Invoice, INVOICE_STATUSES } from "@/types/invoice";
 import { InvoiceForm } from "@/components/invoices/InvoiceForm";
 import { Plus } from "lucide-react";
@@ -14,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Mock data
 const mockClients = [
   { id: "1", name: "ООО Теплосеть" },
   { id: "2", name: "АО Энергомаш" },
@@ -79,6 +79,7 @@ export default function Invoices() {
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>();
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -93,6 +94,7 @@ export default function Invoices() {
 
   const config: EntityListConfig<Invoice> = {
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingInvoice(item),
     fields: [
       {
         key: "invoiceNumber",
@@ -258,6 +260,14 @@ export default function Invoices() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingInvoice}
+        open={!!viewingInvoice}
+        onOpenChange={(open) => !open && setViewingInvoice(null)}
+        config={config}
+        title={viewingInvoice?.invoiceNumber}
+      />
     </div>
   );
 }

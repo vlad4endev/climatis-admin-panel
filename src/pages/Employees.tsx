@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Employee } from "@/types/employee";
 import { EmployeeForm } from "@/components/employees/EmployeeForm";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -38,6 +39,7 @@ export default function Employees() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
 
   const config: EntityListConfig<Employee> = {
     fields: [
@@ -61,6 +63,7 @@ export default function Employees() {
       },
     ],
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingEmployee(item),
     onEdit: (item) => {
       setEditingEmployee(item);
       setIsDialogOpen(true);
@@ -131,6 +134,14 @@ export default function Employees() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingEmployee}
+        open={!!viewingEmployee}
+        onOpenChange={(open) => !open && setViewingEmployee(null)}
+        config={config}
+        title={viewingEmployee?.fullName}
+      />
     </>
   );
 }

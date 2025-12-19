@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Document, CONTRACT_TYPES } from "@/types/document";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { Client } from "@/types/client";
@@ -45,6 +45,7 @@ export default function Documents() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
 
   const config: EntityListConfig<Document> = {
     fields: [
@@ -109,6 +110,7 @@ export default function Documents() {
       },
     ],
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingDocument(item),
     onEdit: (item) => {
       setEditingDocument(item);
       setIsDialogOpen(true);
@@ -175,6 +177,14 @@ export default function Documents() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingDocument}
+        open={!!viewingDocument}
+        onOpenChange={(open) => !open && setViewingDocument(null)}
+        config={config}
+        title={viewingDocument?.contractNumber}
+      />
     </>
   );
 }
