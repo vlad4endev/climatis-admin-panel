@@ -6,7 +6,7 @@ import { Mail, Phone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 const mockClients: Client[] = [
@@ -76,6 +76,7 @@ export default function Clients() {
   const [clients, setClients] = useState<Client[]>(mockClients);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [viewingClient, setViewingClient] = useState<Client | null>(null);
 
   const handleSubmit = (clientData: Omit<Client, "id" | "createdAt">) => {
     if (editingClient) {
@@ -191,6 +192,7 @@ export default function Clients() {
       },
     ],
     getItemId: (client) => client.id,
+    onRowClick: (client) => setViewingClient(client),
     onUpdate: handleUpdateField,
     onDelete: handleDeleteClient,
     onEdit: handleEditClient,
@@ -232,6 +234,14 @@ export default function Clients() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingClient}
+        open={!!viewingClient}
+        onOpenChange={(open) => !open && setViewingClient(null)}
+        config={clientsConfig}
+        title={viewingClient?.companyName}
+      />
     </div>
   );
 }

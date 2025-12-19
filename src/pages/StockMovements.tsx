@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { StockMovement } from "@/types/stockMovement";
 import { StockMovementForm } from "@/components/stockMovements/StockMovementForm";
 import { useToast } from "@/hooks/use-toast";
@@ -38,13 +39,11 @@ export default function StockMovements() {
     },
   ]);
 
-  // Mock data for spare parts
   const spareParts = [
     { id: "1", name: "Подшипник 6205" },
     { id: "2", name: "Кабель ВВГ 3х2.5" },
   ];
 
-  // Mock data for requests
   const requests = [
     { id: "1", name: "Заявка #001", createdAt: "2024-01-15T10:00:00Z" },
     { id: "2", name: "Заявка #002", createdAt: "2024-01-16T14:30:00Z" },
@@ -52,6 +51,7 @@ export default function StockMovements() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMovement, setEditingMovement] = useState<StockMovement | undefined>();
+  const [viewingMovement, setViewingMovement] = useState<StockMovement | null>(null);
 
   const config: EntityListConfig<StockMovement> = {
     fields: [
@@ -70,7 +70,6 @@ export default function StockMovements() {
         searchable: true,
         render: (value: any, item: StockMovement) => {
           const materials = value as Array<{ materialName: string; quantity: number }>;
-          const isIncoming = item.operationType === "приход" || item.operationType === "возврат";
           return materials.map((m, i) => (
             <div key={i} className="text-sm">
               {m.materialName}
@@ -98,6 +97,7 @@ export default function StockMovements() {
       { key: "comment", label: "Комментарий", type: "textarea", editable: true },
     ],
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingMovement(item),
     onUpdate: (id, field, value) => {
       setStockMovements(prev =>
         prev.map(sm =>
@@ -192,6 +192,14 @@ export default function StockMovements() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingMovement}
+        open={!!viewingMovement}
+        onOpenChange={(open) => !open && setViewingMovement(null)}
+        config={config}
+        title="Операция"
+      />
     </div>
   );
 }

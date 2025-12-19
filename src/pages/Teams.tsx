@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Team } from "@/types/team";
 import { Employee } from "@/types/employee";
 import { TeamForm } from "@/components/teams/TeamForm";
@@ -53,6 +54,7 @@ export default function Teams() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [viewingTeam, setViewingTeam] = useState<Team | null>(null);
 
   const config: EntityListConfig<Team> = {
     fields: [
@@ -90,6 +92,7 @@ export default function Teams() {
       },
     ],
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingTeam(item),
     onEdit: (item) => {
       setEditingTeam(item);
       setIsDialogOpen(true);
@@ -172,6 +175,14 @@ export default function Teams() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingTeam}
+        open={!!viewingTeam}
+        onOpenChange={(open) => !open && setViewingTeam(null)}
+        config={config}
+        title={viewingTeam?.name}
+      />
     </>
   );
 }

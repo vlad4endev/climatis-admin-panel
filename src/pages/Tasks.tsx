@@ -4,6 +4,7 @@ import { Employee } from "@/types/employee";
 import { Request } from "@/types/request";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle } from "lucide-react";
@@ -118,6 +119,7 @@ export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [viewingTask, setViewingTask] = useState<Task | null>(null);
 
   const assigneeOptions = mockEmployees.map(e => ({ value: e.fullName, label: e.fullName }));
 
@@ -213,6 +215,7 @@ export default function Tasks() {
       }
     ],
     getItemId: (task) => task.id,
+    onRowClick: (task) => setViewingTask(task),
     onEdit: (task) => {
       setEditingTask(task);
       setIsDialogOpen(true);
@@ -279,6 +282,14 @@ export default function Tasks() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingTask}
+        open={!!viewingTask}
+        onOpenChange={(open) => !open && setViewingTask(null)}
+        config={config}
+        title={viewingTask?.title}
+      />
     </div>
   );
 }

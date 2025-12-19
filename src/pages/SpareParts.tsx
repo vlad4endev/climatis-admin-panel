@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { SparePart } from "@/types/sparePart";
 import { SparePartForm } from "@/components/spareParts/SparePartForm";
 import { useToast } from "@/hooks/use-toast";
@@ -151,6 +152,7 @@ export default function SpareParts() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSparePart, setEditingSparePart] = useState<SparePart | undefined>();
+  const [viewingSparePart, setViewingSparePart] = useState<SparePart | null>(null);
 
   const config: EntityListConfig<SparePart> = {
     fields: [
@@ -211,6 +213,7 @@ export default function SpareParts() {
       { key: "notes", label: "Примечания", type: "textarea", editable: true },
     ],
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingSparePart(item),
     onUpdate: (id, field, value) => {
       setSpareParts(prev =>
         prev.map(sp =>
@@ -298,6 +301,14 @@ export default function SpareParts() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingSparePart}
+        open={!!viewingSparePart}
+        onOpenChange={(open) => !open && setViewingSparePart(null)}
+        config={config}
+        title={viewingSparePart?.name}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
 import { AssignmentForm } from "@/components/assignments/AssignmentForm";
 import { AssignmentPrintView } from "@/components/assignments/AssignmentPrintView";
@@ -73,6 +74,7 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>(mockAssignments);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | undefined>();
+  const [viewingAssignment, setViewingAssignment] = useState<Assignment | null>(null);
   const [newAssignmentData, setNewAssignmentData] = useState<Partial<Assignment> | null>(null);
   const [printingAssignment, setPrintingAssignment] = useState<Assignment | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -138,6 +140,7 @@ export default function Assignments() {
 
   const config: EntityListConfig<Assignment> = {
     getItemId: (item) => item.id,
+    onRowClick: (item) => setViewingAssignment(item),
     fields: [
       {
         key: "assignmentNumber",
@@ -328,6 +331,14 @@ export default function Assignments() {
           <AssignmentPrintView ref={printRef} assignment={printingAssignment} />
         )}
       </div>
+
+      <EntityViewDialog
+        item={viewingAssignment}
+        open={!!viewingAssignment}
+        onOpenChange={(open) => !open && setViewingAssignment(null)}
+        config={config}
+        title={viewingAssignment?.assignmentNumber}
+      />
     </div>
   );
 }

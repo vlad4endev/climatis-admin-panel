@@ -6,11 +6,11 @@ import { MapPin, Building2, User } from "lucide-react";
 import { toast } from "sonner";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
+import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 
-// Мок данные клиентов (в реальном приложении будут из базы)
 const mockClients: Client[] = [
   {
     id: "1",
@@ -87,6 +87,7 @@ export default function ServiceObjects() {
   const [objects, setObjects] = useState<ServiceObject[]>(mockServiceObjects);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingObject, setEditingObject] = useState<ServiceObject | null>(null);
+  const [viewingObject, setViewingObject] = useState<ServiceObject | null>(null);
 
   const handleCreateObject = (objectData: Omit<ServiceObject, "id" | "createdAt" | "clientName">) => {
     const client = mockClients.find(c => c.id === objectData.clientId);
@@ -109,7 +110,6 @@ export default function ServiceObjects() {
       prev.map(obj => {
         if (obj.id !== id) return obj;
         
-        // Если обновляется clientId, нужно обновить и clientName
         if (field === 'clientId') {
           const client = mockClients.find(c => c.id === value);
           return { ...obj, clientId: value, clientName: client?.companyName || '' };
@@ -191,6 +191,7 @@ export default function ServiceObjects() {
       },
     ],
     getItemId: (obj) => obj.id,
+    onRowClick: (obj) => setViewingObject(obj),
     onUpdate: handleUpdateField,
     onDelete: handleDeleteObject,
     onEdit: handleEditObject,
@@ -232,6 +233,14 @@ export default function ServiceObjects() {
           />
         </DialogContent>
       </Dialog>
+
+      <EntityViewDialog
+        item={viewingObject}
+        open={!!viewingObject}
+        onOpenChange={(open) => !open && setViewingObject(null)}
+        config={objectsConfig}
+        title={viewingObject?.objectName}
+      />
     </div>
   );
 }
