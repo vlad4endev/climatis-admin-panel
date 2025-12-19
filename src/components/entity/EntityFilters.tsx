@@ -24,13 +24,13 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
   }
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 w-full">
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
 
         if (field.options) {
           return (
-            <div key={field.key} className="min-w-[120px]">
+            <div key={field.key} className="flex-1 min-w-0">
               <Select
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
