@@ -5,7 +5,7 @@ import { Search, LayoutGrid, Table2, Kanban } from "lucide-react";
 import { EntityTableView } from "./EntityTableView";
 import { EntityCardView } from "./EntityCardView";
 import { EntityKanbanView } from "./EntityKanbanView";
-import { EntityFilters } from "./EntityFilters";
+import { EntityFilters, ActiveFilters } from "./EntityFilters";
 import { EntityListConfig, ViewMode, FilterValue } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -153,6 +153,15 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           )}
         </div>
       </div>
+
+      {/* Активные фильтры на отдельной строке */}
+      {filterableFields.length > 0 && (
+        <ActiveFilters
+          fields={filterableFields}
+          filters={filters}
+          onFilterChange={handleFilterChange}
+        />
+      )}
 
       {/* Список */}
       {filteredItems.length === 0 ? (
