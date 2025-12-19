@@ -52,7 +52,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           id="name" 
           {...register('name', { required: !readOnly })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -63,7 +63,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           onValueChange={(value) => setValue('leaderId', value)}
           disabled={readOnly}
         >
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите ответственного" />
           </SelectTrigger>
           <SelectContent>
@@ -78,7 +78,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
 
       <div>
         <Label>Состав бригады</Label>
-        <div className={`border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto ${readOnly ? "bg-muted/50" : ""}`}>
+        <div className={`border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto ${readOnly ? "bg-input-readonly" : ""}`}>
           {employees.length === 0 ? (
             <p className="text-sm text-muted-foreground">Нет доступных сотрудников</p>
           ) : (
@@ -109,7 +109,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           {...register('competencies')}
           placeholder="Установка кондиционеров, ремонт систем вентиляции..."
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -119,7 +119,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly 
           id="notes" 
           {...register('notes')} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 

@@ -60,7 +60,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           id="contractNumber" 
           {...register('contractNumber', { required: !readOnly })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -72,7 +72,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             type="date" 
             {...register('startDate', { required: !readOnly })} 
             readOnly={readOnly}
-            className={readOnly ? "bg-muted/50" : ""}
+            className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
         <div>
@@ -82,7 +82,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             type="date" 
             {...register('endDate', { required: !readOnly })} 
             readOnly={readOnly}
-            className={readOnly ? "bg-muted/50" : ""}
+            className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           onValueChange={(value) => setValue('contractType', value as any)}
           disabled={readOnly}
         >
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите тип договора" />
           </SelectTrigger>
           <SelectContent>
@@ -117,7 +117,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           }}
           disabled={readOnly}
         >
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите контрагента" />
           </SelectTrigger>
           <SelectContent>
@@ -138,7 +138,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             onValueChange={(value) => setValue('objectId', value)}
             disabled={readOnly}
           >
-            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+            <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue placeholder="Выберите объект" />
             </SelectTrigger>
             <SelectContent>
@@ -160,7 +160,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           {...register('responseConditions')}
           placeholder="Например: выезд до 24 часов"
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -170,7 +170,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           id="notes" 
           {...register('notes')} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 

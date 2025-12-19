@@ -62,7 +62,7 @@ export function AssignmentForm({
               id="assignmentNumber"
               {...register("assignmentNumber")}
               readOnly={readOnly}
-              className={readOnly ? "bg-muted/50" : ""}
+              className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function AssignmentForm({
               onValueChange={(value) => setValue("status", value as any)}
               disabled={readOnly}
             >
-              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -93,7 +93,7 @@ export function AssignmentForm({
             onValueChange={(value) => setValue("teamId", value)}
             disabled={readOnly}
           >
-            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+            <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue placeholder="Выберите бригаду" />
             </SelectTrigger>
             <SelectContent>
@@ -177,7 +177,7 @@ export function AssignmentForm({
           rows={3}
           placeholder="Дополнительные указания для бригады..."
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 

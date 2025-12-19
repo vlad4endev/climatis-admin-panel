@@ -60,6 +60,7 @@ All colors MUST be HSL.
     /* Form section colors */
     --form-section: 38 53% 95%;
     --form-label: 196 30% 25%;
+    --input-readonly: 38 53% 93%;
 
     --sidebar-background: 196 30% 25%;
     --sidebar-foreground: 38 53% 91%;
@@ -120,8 +121,9 @@ All colors MUST be HSL.
     --table-row-odd: 196 30% 13%;
 
     /* Form section colors */
-    --form-section: 162 6% 48%;
+    --form-section: 196 30% 20%;
     --form-label: 38 53% 91%;
+    --input-readonly: 196 30% 18%;
 
     --sidebar-background: 196 30% 25%;
     --sidebar-foreground: 38 53% 91%;

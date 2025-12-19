@@ -65,7 +65,7 @@ export function StockMovementForm({
           onValueChange={(value) => setValue("operationType", value as any)}
           disabled={readOnly}
         >
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -83,7 +83,7 @@ export function StockMovementForm({
           type="date"
           {...register("operationDate")}
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -94,7 +94,7 @@ export function StockMovementForm({
           onValueChange={(value) => setValue("relatedRequestId", value)}
           disabled={readOnly}
         >
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите заявку (необязательно)" />
           </SelectTrigger>
           <SelectContent>
@@ -112,7 +112,7 @@ export function StockMovementForm({
         {readOnly ? (
           <div className="space-y-2 mt-2">
             {materials.map((m, i) => (
-              <div key={i} className="p-3 bg-muted/50 rounded-md">
+              <div key={i} className="p-3 bg-input-readonly rounded-md">
                 <div className="font-medium">{m.materialName}</div>
                 <div className="text-sm text-muted-foreground">Количество: {m.quantity}</div>
               </div>
@@ -134,7 +134,7 @@ export function StockMovementForm({
           {...register("comment")}
           rows={3}
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
