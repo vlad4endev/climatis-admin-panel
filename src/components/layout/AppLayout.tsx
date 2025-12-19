@@ -16,7 +16,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className="flex-1 flex flex-col relative">
           {/* Background image with high transparency */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none"
             style={{ backgroundImage: `url(${siberianForestBg})` }}
           />
           
