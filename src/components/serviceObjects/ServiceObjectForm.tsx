@@ -78,7 +78,7 @@ export function ServiceObjectForm({
                 <FormLabel>Клиент {!readOnly && '*'}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={readOnly}>
                   <FormControl>
-                    <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+                    <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                       <SelectValue placeholder="Выберите клиента" />
                     </SelectTrigger>
                   </FormControl>
@@ -106,7 +106,7 @@ export function ServiceObjectForm({
                     placeholder="Офис, склад, производство..." 
                     {...field} 
                     readOnly={readOnly}
-                    className={readOnly ? "bg-muted/50" : ""}
+                    className={readOnly ? "bg-input-readonly" : ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -125,7 +125,7 @@ export function ServiceObjectForm({
                     placeholder="Улица, дом, корпус..." 
                     {...field} 
                     readOnly={readOnly}
-                    className={readOnly ? "bg-muted/50" : ""}
+                    className={readOnly ? "bg-input-readonly" : ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -142,7 +142,7 @@ export function ServiceObjectForm({
                 <FormControl>
                   <Textarea
                     placeholder="Код домофона, инструкции по проходу..."
-                    className={`min-h-[100px] ${readOnly ? "bg-muted/50" : ""}`}
+                    className={`min-h-[100px] ${readOnly ? "bg-input-readonly" : ""}`}
                     {...field}
                     readOnly={readOnly}
                   />
@@ -161,7 +161,7 @@ export function ServiceObjectForm({
                 <FormControl>
                   <Textarea
                     placeholder="Дополнительная информация..."
-                    className={`min-h-[100px] ${readOnly ? "bg-muted/50" : ""}`}
+                    className={`min-h-[100px] ${readOnly ? "bg-input-readonly" : ""}`}
                     {...field}
                     readOnly={readOnly}
                   />

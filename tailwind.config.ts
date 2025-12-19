@@ -68,6 +68,7 @@ export default {
           section: "hsl(var(--form-section))",
           label: "hsl(var(--form-label))",
         },
+        "input-readonly": "hsl(var(--input-readonly))",
         status: {
           draft: "hsl(var(--status-draft))",
           "draft-foreground": "hsl(var(--status-draft-foreground))",

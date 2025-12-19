@@ -113,7 +113,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               placeholder="Введите название"
               required={!readOnly}
               readOnly={readOnly}
-              className={readOnly ? "bg-muted/50" : ""}
+              className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
 
@@ -126,14 +126,14 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               placeholder="Подробное описание задачи"
               rows={3}
               readOnly={readOnly}
-              className={readOnly ? "bg-muted/50" : ""}
+              className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="assignee">Исполнитель</Label>
             <Select value={assigneeId} onValueChange={setAssigneeId} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                 <SelectValue placeholder="Выберите исполнителя" />
               </SelectTrigger>
               <SelectContent>
@@ -149,7 +149,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
           <div className="space-y-2">
             <Label htmlFor="request">Связанная заявка</Label>
             <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                 <SelectValue placeholder="Выберите заявку (необязательно)" />
               </SelectTrigger>
               <SelectContent>
@@ -172,7 +172,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 value={proposedDeadline}
                 onChange={(e) => setProposedDeadline(e.target.value)}
                 readOnly={readOnly}
-                className={readOnly ? "bg-muted/50" : ""}
+                className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -183,7 +183,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 value={agreedDeadline}
                 onChange={(e) => setAgreedDeadline(e.target.value)}
                 readOnly={readOnly}
-                className={readOnly ? "bg-muted/50" : ""}
+                className={readOnly ? "bg-input-readonly" : ""}
               />
             </div>
           </div>
@@ -191,7 +191,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
           <div className="space-y-2">
             <Label htmlFor="status">Статус</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as Task['status'])} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

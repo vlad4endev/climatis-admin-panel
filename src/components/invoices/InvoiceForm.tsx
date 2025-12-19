@@ -107,7 +107,7 @@ export function InvoiceForm({
               {...register("invoiceNumber")}
               placeholder="СЧ-001"
               readOnly={readOnly}
-              className={readOnly ? "bg-muted/50" : ""}
+              className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
           <div>
@@ -117,7 +117,7 @@ export function InvoiceForm({
               type="date"
               {...register("invoiceDate")}
               readOnly={readOnly}
-              className={readOnly ? "bg-muted/50" : ""}
+              className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
         </div>
@@ -131,7 +131,7 @@ export function InvoiceForm({
             <Input
               value={clientSearch}
               readOnly
-              className="bg-muted/50"
+              className="bg-input-readonly"
             />
           ) : (
             <div className="relative">
@@ -173,7 +173,7 @@ export function InvoiceForm({
             onValueChange={(value) => setValue("requestId", value)}
             disabled={readOnly}
           >
-            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+            <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue placeholder="Выберите заявку (необязательно)" />
             </SelectTrigger>
             <SelectContent>
@@ -193,7 +193,7 @@ export function InvoiceForm({
             onValueChange={(value) => setValue("estimateId", value)}
             disabled={readOnly}
           >
-            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+            <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue placeholder="Выберите расчёт (необязательно)" />
             </SelectTrigger>
             <SelectContent>
@@ -219,7 +219,7 @@ export function InvoiceForm({
             {...register("amount", { valueAsNumber: true })}
             placeholder="0"
             readOnly={readOnly}
-            className={readOnly ? "bg-muted/50" : ""}
+            className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
 
@@ -230,7 +230,7 @@ export function InvoiceForm({
             onValueChange={(value) => setValue("status", value as any)}
             disabled={readOnly}
           >
-            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+            <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

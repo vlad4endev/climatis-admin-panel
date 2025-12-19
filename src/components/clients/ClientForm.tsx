@@ -86,14 +86,14 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="ООО 'Пример'"
           required={!readOnly}
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="type">Тип {!readOnly && '*'}</Label>
         <Select value={type} onValueChange={(value) => setType(value as ClientType)} disabled={readOnly}>
-          <SelectTrigger id="type" className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger id="type" className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +111,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           onChange={(e) => setDivision(e.target.value)}
           placeholder="Филиал / цех / предприятие"
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -124,7 +124,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="Иванов Иван Иванович"
           required={!readOnly}
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -139,7 +139,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
             placeholder="+7 (999) 123-45-67"
             required={!readOnly}
             readOnly={readOnly}
-            className={readOnly ? "bg-muted/50" : ""}
+            className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
 
@@ -153,7 +153,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
             placeholder="example@company.ru"
             required={!readOnly}
             readOnly={readOnly}
-            className={readOnly ? "bg-muted/50" : ""}
+            className={readOnly ? "bg-input-readonly" : ""}
           />
         </div>
       </div>
@@ -208,7 +208,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
         <div className="space-y-3">
           <Label>Дополнительные контактные лица</Label>
           {additionalContacts.map((contact, index) => (
-            <div key={contact.id} className="p-4 border rounded-lg space-y-2 bg-muted/50">
+            <div key={contact.id} className="p-4 border rounded-lg space-y-2 bg-input-readonly">
               <div className="font-medium">{contact.name}</div>
               {contact.phone && <div className="text-sm text-muted-foreground">{contact.phone}</div>}
               {contact.email && <div className="text-sm text-muted-foreground">{contact.email}</div>}
@@ -226,7 +226,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
           placeholder="Дополнительная информация о клиенте"
           rows={4}
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 

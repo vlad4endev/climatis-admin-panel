@@ -39,7 +39,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="name" 
           {...register("name", { required: !readOnly })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -49,14 +49,14 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="internalArticle" 
           {...register("internalArticle", { required: !readOnly })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
       <div>
         <Label htmlFor="category">Раздел {!readOnly && '*'}</Label>
         <Select value={category} onValueChange={(value) => setValue("category", value)} disabled={readOnly}>
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите раздел" />
           </SelectTrigger>
           <SelectContent>
@@ -70,7 +70,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
       <div>
         <Label htmlFor="unit">Единица измерения {!readOnly && '*'}</Label>
         <Select value={unit} onValueChange={(value) => setValue("unit", value as SparePart['unit'])} disabled={readOnly}>
-          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите единицу" />
           </SelectTrigger>
           <SelectContent>
@@ -98,7 +98,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("currentStock", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -110,7 +110,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("minStock", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -122,7 +122,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("purchasePrice", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -134,7 +134,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           step="0.01"
           {...register("retailPrice", { required: !readOnly, valueAsNumber: true })} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
@@ -144,7 +144,7 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
           id="notes" 
           {...register("notes")} 
           readOnly={readOnly}
-          className={readOnly ? "bg-muted/50" : ""}
+          className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
 
