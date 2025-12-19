@@ -310,7 +310,7 @@ export default function Estimates() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="space-y-6">
       <PageHeader
         title="Расчеты"
         buttonLabel="Создать расчёт"

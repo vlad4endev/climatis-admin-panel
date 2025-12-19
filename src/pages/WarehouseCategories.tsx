@@ -127,7 +127,7 @@ export default function WarehouseCategories() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Разделы в складе</h1>

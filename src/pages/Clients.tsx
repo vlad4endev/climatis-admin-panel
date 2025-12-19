@@ -199,7 +199,7 @@ export default function Clients() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="space-y-6">
       <PageHeader
         title="Клиенты"
         description="Управление базой клиентов компании"
