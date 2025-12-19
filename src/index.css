@@ -51,7 +51,7 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     /* Table colors */
-    --table-header: 162 6% 58%;
+    --table-header: 162 6% 40%;
     --table-header-foreground: 196 30% 25%;
     --table-row-hover: 38 53% 96%;
     --table-row-even: 0 0% 100%;
@@ -114,7 +114,7 @@ All colors MUST be HSL.
     --ring: 184 16% 39%;
 
     /* Table colors */
-    --table-header: 196 30% 20%;
+    --table-header: 196 30% 14%;
     --table-header-foreground: 38 53% 91%;
     --table-row-hover: 196 30% 18%;
     --table-row-even: 196 30% 15%;
