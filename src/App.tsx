@@ -3,7 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import Auth from "./pages/Auth";
 import Clients from "./pages/Clients";
 import ServiceObjects from "./pages/ServiceObjects";
 import Documents from "./pages/Documents";
@@ -26,22 +29,25 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/clients" replace />} />
-          <Route path="/clients" element={<AppLayout><Clients /></AppLayout>} />
-          <Route path="/service-objects" element={<AppLayout><ServiceObjects /></AppLayout>} />
-          <Route path="/documents" element={<AppLayout><Documents /></AppLayout>} />
-          <Route path="/employees" element={<AppLayout><Employees /></AppLayout>} />
-          <Route path="/teams" element={<AppLayout><Teams /></AppLayout>} />
-          <Route path="/requests" element={<AppLayout><Requests /></AppLayout>} />
-          <Route path="/estimates" element={<AppLayout><Estimates /></AppLayout>} />
-          <Route path="/assignments" element={<AppLayout><Assignments /></AppLayout>} />
-          <Route path="/spare-parts" element={<AppLayout><SpareParts /></AppLayout>} />
-          <Route path="/stock-movements" element={<AppLayout><StockMovements /></AppLayout>} />
-          <Route path="/warehouse-categories" element={<AppLayout><WarehouseCategories /></AppLayout>} />
-          <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Navigate to="/clients" replace />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
+            <Route path="/service-objects" element={<ProtectedRoute><AppLayout><ServiceObjects /></AppLayout></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute><AppLayout><Documents /></AppLayout></ProtectedRoute>} />
+            <Route path="/employees" element={<ProtectedRoute><AppLayout><Employees /></AppLayout></ProtectedRoute>} />
+            <Route path="/teams" element={<ProtectedRoute><AppLayout><Teams /></AppLayout></ProtectedRoute>} />
+            <Route path="/requests" element={<ProtectedRoute><AppLayout><Requests /></AppLayout></ProtectedRoute>} />
+            <Route path="/estimates" element={<ProtectedRoute><AppLayout><Estimates /></AppLayout></ProtectedRoute>} />
+            <Route path="/assignments" element={<ProtectedRoute><AppLayout><Assignments /></AppLayout></ProtectedRoute>} />
+            <Route path="/spare-parts" element={<ProtectedRoute><AppLayout><SpareParts /></AppLayout></ProtectedRoute>} />
+            <Route path="/stock-movements" element={<ProtectedRoute><AppLayout><StockMovements /></AppLayout></ProtectedRoute>} />
+            <Route path="/warehouse-categories" element={<ProtectedRoute><AppLayout><WarehouseCategories /></AppLayout></ProtectedRoute>} />
+            <Route path="/tasks" element={<ProtectedRoute><AppLayout><Tasks /></AppLayout></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
