@@ -83,6 +83,7 @@ export function StockMovementForm({
           type="date"
           {...register("operationDate")}
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -134,6 +135,7 @@ export function StockMovementForm({
           {...register("comment")}
           rows={3}
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

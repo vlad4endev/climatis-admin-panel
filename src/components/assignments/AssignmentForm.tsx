@@ -62,6 +62,7 @@ export function AssignmentForm({
               id="assignmentNumber"
               {...register("assignmentNumber")}
               readOnly={readOnly}
+              tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
             />
           </div>
@@ -177,6 +178,7 @@ export function AssignmentForm({
           rows={3}
           placeholder="Дополнительные указания для бригады..."
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>

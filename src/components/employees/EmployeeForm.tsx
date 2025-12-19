@@ -28,6 +28,7 @@ export function EmployeeForm({ initialData, onSubmit, onCancel, readOnly = false
           id="fullName" 
           {...register('fullName', { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -40,6 +41,7 @@ export function EmployeeForm({ initialData, onSubmit, onCancel, readOnly = false
           placeholder="+7 (999) 123-45-67"
           {...register('phone', { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
@@ -50,6 +52,7 @@ export function EmployeeForm({ initialData, onSubmit, onCancel, readOnly = false
           id="position" 
           {...register('position', { required: !readOnly })} 
           readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
           className={readOnly ? "bg-input-readonly" : ""}
         />
       </div>
