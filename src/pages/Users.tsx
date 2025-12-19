@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -143,6 +142,14 @@ function UserPermissionsDialog({ user, onClose }: { user: UserWithRole | null; o
     setPermission.mutate({ userId: user.id, section, permission });
   };
 
+  const getPermissionLabel = (permission: PermissionLevel) => {
+    switch (permission) {
+      case "none": return "Нет доступа";
+      case "view": return "Просмотр";
+      case "edit": return "Редактирование";
+    }
+  };
+
   return (
     <Dialog open={!!user} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -174,18 +181,18 @@ function UserPermissionsDialog({ user, onClose }: { user: UserWithRole | null; o
                       value={getPermission(section.key)}
                       onValueChange={(value: PermissionLevel) => handlePermissionChange(section.key, value)}
                     >
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
+                      <SelectTrigger className="w-44 bg-background">
+                        <SelectValue>{getPermissionLabel(getPermission(section.key))}</SelectValue>
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">
-                          <Badge variant="outline" className="bg-muted">Нет доступа</Badge>
+                      <SelectContent className="bg-background border shadow-lg">
+                        <SelectItem value="none" className="cursor-pointer">
+                          <span className="text-muted-foreground">Нет доступа</span>
                         </SelectItem>
-                        <SelectItem value="view">
-                          <Badge variant="secondary">Просмотр</Badge>
+                        <SelectItem value="view" className="cursor-pointer">
+                          <span className="text-blue-600 dark:text-blue-400">Просмотр</span>
                         </SelectItem>
-                        <SelectItem value="edit">
-                          <Badge className="bg-primary">Редактирование</Badge>
+                        <SelectItem value="edit" className="cursor-pointer">
+                          <span className="text-green-600 dark:text-green-400">Редактирование</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>
