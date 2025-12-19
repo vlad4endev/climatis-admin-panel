@@ -19,9 +19,10 @@ interface TeamFormProps {
   onSubmit: (data: Omit<Team, 'id' | 'createdAt' | 'leaderName' | 'memberNames'>) => void;
   onCancel: () => void;
   employees: Employee[];
+  readOnly?: boolean;
 }
 
-export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFormProps) {
+export function TeamForm({ initialData, onSubmit, onCancel, employees, readOnly = false }: TeamFormProps) {
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       name: initialData?.name || '',
@@ -47,7 +48,12 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFor
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="name">Название бригады</Label>
-        <Input id="name" {...register('name', { required: true })} />
+        <Input 
+          id="name" 
+          {...register('name', { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
       <div>
@@ -55,8 +61,9 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFor
         <Select
           value={watch('leaderId')}
           onValueChange={(value) => setValue('leaderId', value)}
+          disabled={readOnly}
         >
-          <SelectTrigger>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите ответственного" />
           </SelectTrigger>
           <SelectContent>
@@ -71,7 +78,7 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFor
 
       <div>
         <Label>Состав бригады</Label>
-        <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
+        <div className={`border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto ${readOnly ? "bg-muted/50" : ""}`}>
           {employees.length === 0 ? (
             <p className="text-sm text-muted-foreground">Нет доступных сотрудников</p>
           ) : (
@@ -80,7 +87,8 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFor
                 <Checkbox
                   id={`member-${employee.id}`}
                   checked={selectedMemberIds?.includes(employee.id)}
-                  onCheckedChange={() => toggleMember(employee.id)}
+                  onCheckedChange={() => !readOnly && toggleMember(employee.id)}
+                  disabled={readOnly}
                 />
                 <label
                   htmlFor={`member-${employee.id}`}
@@ -100,22 +108,31 @@ export function TeamForm({ initialData, onSubmit, onCancel, employees }: TeamFor
           id="competencies"
           {...register('competencies')}
           placeholder="Установка кондиционеров, ремонт систем вентиляции..."
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
         <Label htmlFor="notes">Примечания</Label>
-        <Textarea id="notes" {...register('notes')} />
+        <Textarea 
+          id="notes" 
+          {...register('notes')} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {initialData ? 'Сохранить' : 'Создать'}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {initialData ? 'Сохранить' : 'Создать'}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

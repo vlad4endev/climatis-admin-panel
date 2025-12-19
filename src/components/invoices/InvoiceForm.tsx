@@ -19,6 +19,7 @@ interface InvoiceFormProps {
   clients: Array<{ id: string; name: string }>;
   requests: Array<{ id: string; name: string; createdAt: string }>;
   estimates: Array<{ id: string; name: string; estimateDate: string }>;
+  readOnly?: boolean;
 }
 
 export function InvoiceForm({
@@ -28,6 +29,7 @@ export function InvoiceForm({
   clients,
   requests,
   estimates,
+  readOnly = false,
 }: InvoiceFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
@@ -104,6 +106,8 @@ export function InvoiceForm({
               id="invoiceNumber"
               {...register("invoiceNumber")}
               placeholder="СЧ-001"
+              readOnly={readOnly}
+              className={readOnly ? "bg-muted/50" : ""}
             />
           </div>
           <div>
@@ -112,6 +116,8 @@ export function InvoiceForm({
               id="invoiceDate"
               type="date"
               {...register("invoiceDate")}
+              readOnly={readOnly}
+              className={readOnly ? "bg-muted/50" : ""}
             />
           </div>
         </div>
@@ -121,35 +127,43 @@ export function InvoiceForm({
         <h3 className="font-semibold text-form-label">Контрагент и связи</h3>
         <div>
           <Label htmlFor="clientId">Контрагент</Label>
-          <div className="relative">
+          {readOnly ? (
             <Input
-              ref={clientInputRef}
               value={clientSearch}
-              onChange={(e) => {
-                setClientSearch(e.target.value);
-                setValue("clientId", "");
-                setShowClientDropdown(true);
-              }}
-              onFocus={() => setShowClientDropdown(true)}
-              placeholder="Поиск контрагента..."
+              readOnly
+              className="bg-muted/50"
             />
-            {showClientDropdown && filteredClients.length > 0 && (
-              <div
-                ref={dropdownRef}
-                className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto z-50"
-              >
-                {filteredClients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="px-3 py-2 hover:bg-accent cursor-pointer"
-                    onClick={() => handleClientSelect(client)}
-                  >
-                    {client.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className="relative">
+              <Input
+                ref={clientInputRef}
+                value={clientSearch}
+                onChange={(e) => {
+                  setClientSearch(e.target.value);
+                  setValue("clientId", "");
+                  setShowClientDropdown(true);
+                }}
+                onFocus={() => setShowClientDropdown(true)}
+                placeholder="Поиск контрагента..."
+              />
+              {showClientDropdown && filteredClients.length > 0 && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto z-50"
+                >
+                  {filteredClients.map((client) => (
+                    <div
+                      key={client.id}
+                      className="px-3 py-2 hover:bg-accent cursor-pointer"
+                      onClick={() => handleClientSelect(client)}
+                    >
+                      {client.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
@@ -157,8 +171,9 @@ export function InvoiceForm({
           <Select
             value={requestId}
             onValueChange={(value) => setValue("requestId", value)}
+            disabled={readOnly}
           >
-            <SelectTrigger>
+            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
               <SelectValue placeholder="Выберите заявку (необязательно)" />
             </SelectTrigger>
             <SelectContent>
@@ -176,8 +191,9 @@ export function InvoiceForm({
           <Select
             value={estimateId}
             onValueChange={(value) => setValue("estimateId", value)}
+            disabled={readOnly}
           >
-            <SelectTrigger>
+            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
               <SelectValue placeholder="Выберите расчёт (необязательно)" />
             </SelectTrigger>
             <SelectContent>
@@ -202,6 +218,8 @@ export function InvoiceForm({
             step="0.01"
             {...register("amount", { valueAsNumber: true })}
             placeholder="0"
+            readOnly={readOnly}
+            className={readOnly ? "bg-muted/50" : ""}
           />
         </div>
 
@@ -210,8 +228,9 @@ export function InvoiceForm({
           <Select
             value={status}
             onValueChange={(value) => setValue("status", value as any)}
+            disabled={readOnly}
           >
-            <SelectTrigger>
+            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -225,14 +244,16 @@ export function InvoiceForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {invoice ? "Сохранить" : "Создать"}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {invoice ? "Сохранить" : "Создать"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

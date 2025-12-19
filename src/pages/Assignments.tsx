@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
 import { AssignmentForm } from "@/components/assignments/AssignmentForm";
 import { AssignmentPrintView } from "@/components/assignments/AssignmentPrintView";
@@ -332,13 +331,22 @@ export default function Assignments() {
         )}
       </div>
 
-      <EntityViewDialog
-        item={viewingAssignment}
-        open={!!viewingAssignment}
-        onOpenChange={(open) => !open && setViewingAssignment(null)}
-        config={config}
-        title={viewingAssignment?.assignmentNumber}
-      />
+      <Dialog open={!!viewingAssignment} onOpenChange={(open) => !open && setViewingAssignment(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Просмотр задания {viewingAssignment?.assignmentNumber}</DialogTitle>
+          </DialogHeader>
+          {viewingAssignment && (
+            <AssignmentForm
+              assignment={viewingAssignment}
+              onSubmit={() => {}}
+              onCancel={() => setViewingAssignment(null)}
+              teams={mockTeams}
+              readOnly
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

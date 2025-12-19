@@ -18,9 +18,10 @@ interface TaskFormProps {
   requests: Request[];
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => void;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
-export function TaskForm({ task, employees, requests, onSubmit, onCancel }: TaskFormProps) {
+export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOnly = false }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [assigneeId, setAssigneeId] = useState(task?.assigneeId || "");
@@ -110,7 +111,9 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Введите название"
-              required
+              required={!readOnly}
+              readOnly={readOnly}
+              className={readOnly ? "bg-muted/50" : ""}
             />
           </div>
 
@@ -122,13 +125,15 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Подробное описание задачи"
               rows={3}
+              readOnly={readOnly}
+              className={readOnly ? "bg-muted/50" : ""}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="assignee">Исполнитель</Label>
-            <Select value={assigneeId} onValueChange={setAssigneeId}>
-              <SelectTrigger>
+            <Select value={assigneeId} onValueChange={setAssigneeId} disabled={readOnly}>
+              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                 <SelectValue placeholder="Выберите исполнителя" />
               </SelectTrigger>
               <SelectContent>
@@ -143,8 +148,8 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
 
           <div className="space-y-2">
             <Label htmlFor="request">Связанная заявка</Label>
-            <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)}>
-              <SelectTrigger>
+            <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)} disabled={readOnly}>
+              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                 <SelectValue placeholder="Выберите заявку (необязательно)" />
               </SelectTrigger>
               <SelectContent>
@@ -166,6 +171,8 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
                 type="date"
                 value={proposedDeadline}
                 onChange={(e) => setProposedDeadline(e.target.value)}
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -175,14 +182,16 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
                 type="date"
                 value={agreedDeadline}
                 onChange={(e) => setAgreedDeadline(e.target.value)}
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="status">Статус</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as Task['status'])}>
-              <SelectTrigger>
+            <Select value={status} onValueChange={(v) => setStatus(v as Task['status'])} disabled={readOnly}>
+              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -214,40 +223,51 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
               >
                 <Checkbox
                   checked={item.completed}
-                  onCheckedChange={() => handleToggleChecklistItem(item.id)}
+                  onCheckedChange={() => !readOnly && handleToggleChecklistItem(item.id)}
+                  disabled={readOnly}
                 />
                 <span className={`flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
                   {item.text}
                 </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemoveChecklistItem(item.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                {!readOnly && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleRemoveChecklistItem(item.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              value={newChecklistItem}
-              onChange={(e) => setNewChecklistItem(e.target.value)}
-              placeholder="Новый пункт чек-листа"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddChecklistItem();
-                }
-              }}
-            />
-            <Button type="button" variant="outline" onClick={handleAddChecklistItem}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex gap-2">
+              <Input
+                value={newChecklistItem}
+                onChange={(e) => setNewChecklistItem(e.target.value)}
+                placeholder="Новый пункт чек-листа"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddChecklistItem();
+                  }
+                }}
+              />
+              <Button type="button" variant="outline" onClick={handleAddChecklistItem}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {readOnly && checklist.length === 0 && (
+            <p className="text-muted-foreground text-sm text-center py-4">
+              Чек-лист пуст
+            </p>
+          )}
         </TabsContent>
 
         <TabsContent value="comments" className="space-y-4 mt-4">
@@ -276,35 +296,39 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel }: Task
             )}
           </div>
 
-          <div className="flex gap-2">
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Написать комментарий..."
-              rows={2}
-              className="resize-none"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="self-end"
-              onClick={handleAddComment}
-              disabled={!newComment.trim()}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex gap-2">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Написать комментарий..."
+                rows={2}
+                className="resize-none"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="self-end"
+                onClick={handleAddComment}
+                disabled={!newComment.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {task ? "Сохранить" : "Создать"}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {task ? "Сохранить" : "Создать"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

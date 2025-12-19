@@ -8,9 +8,10 @@ interface EmployeeFormProps {
   initialData?: Partial<Employee>;
   onSubmit: (data: Omit<Employee, 'id' | 'createdAt'>) => void;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
-export function EmployeeForm({ initialData, onSubmit, onCancel }: EmployeeFormProps) {
+export function EmployeeForm({ initialData, onSubmit, onCancel, readOnly = false }: EmployeeFormProps) {
   const { register, handleSubmit } = useForm({
     defaultValues: {
       fullName: initialData?.fullName || '',
@@ -23,7 +24,12 @@ export function EmployeeForm({ initialData, onSubmit, onCancel }: EmployeeFormPr
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="fullName">ФИО</Label>
-        <Input id="fullName" {...register('fullName', { required: true })} />
+        <Input 
+          id="fullName" 
+          {...register('fullName', { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
       <div>
@@ -32,23 +38,32 @@ export function EmployeeForm({ initialData, onSubmit, onCancel }: EmployeeFormPr
           id="phone" 
           type="tel" 
           placeholder="+7 (999) 123-45-67"
-          {...register('phone', { required: true })} 
+          {...register('phone', { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
         <Label htmlFor="position">Должность</Label>
-        <Input id="position" {...register('position', { required: true })} />
+        <Input 
+          id="position" 
+          {...register('position', { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {initialData ? 'Сохранить' : 'Создать'}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {initialData ? 'Сохранить' : 'Создать'}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
