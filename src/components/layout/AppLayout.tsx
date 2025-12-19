@@ -26,10 +26,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             </SidebarTrigger>
           </header>
           
-          <main className="flex-1 p-6 relative z-10 overflow-x-hidden">
-            <div className="max-w-full">
-              {children}
-            </div>
+          <main className="flex-1 p-6 relative z-10 min-w-0">
+            {children}
           </main>
         </div>
       </div>
