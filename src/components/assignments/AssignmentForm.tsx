@@ -72,7 +72,7 @@ export function AssignmentForm({
               onValueChange={(value) => setValue("status", value as any)}
               disabled={readOnly}
             >
-              <SelectTrigger>
+              <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -93,7 +93,7 @@ export function AssignmentForm({
             onValueChange={(value) => setValue("teamId", value)}
             disabled={readOnly}
           >
-            <SelectTrigger>
+            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
               <SelectValue placeholder="Выберите бригаду" />
             </SelectTrigger>
             <SelectContent>
