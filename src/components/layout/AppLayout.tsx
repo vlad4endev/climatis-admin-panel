@@ -13,7 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col relative min-w-0">
           {/* Background image with high transparency */}
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none"
@@ -26,7 +26,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </SidebarTrigger>
           </header>
           
-          <main className="flex-1 p-6 relative z-10 overflow-auto min-w-0">
+          <main className="flex-1 p-6 relative z-10 overflow-x-auto overflow-y-auto">
             {children}
           </main>
         </div>
