@@ -1,88 +1,35 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
+import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
-import { Plus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
-
-const mockClients = [
-  { id: "1", companyName: "ООО Ромашка" },
-  { id: "2", companyName: "ИП Иванов" },
-];
-
-const mockObjects = [
-  { id: "1", objectName: "Офис на Ленина 15", clientId: "1" },
-  { id: "2", objectName: "Склад на Гагарина 20", clientId: "2" },
-];
-
-const mockDocuments = [
-  { id: "1", contractNumber: "Д-001/2024", clientId: "1", responseConditions: "Время реагирования: 4 часа. Время устранения неисправности: 24 часа." },
-  { id: "2", contractNumber: "Д-002/2024", clientId: "2", responseConditions: "Время реагирования: 8 часов. Плановое ТО: ежеквартально." },
-];
-
-const mockEmployees = [
-  { id: "1", fullName: "Иванов Иван Иванович" },
-  { id: "2", fullName: "Петров Петр Петрович" },
-];
-
-const mockTeams = [
-  { id: "1", teamName: "Бригада №1" },
-  { id: "2", teamName: "Бригада №2" },
-];
-
-const mockRequests: Request[] = [
-  {
-    id: "1",
-    requestNumber: "ЗВ-001",
-    createdAt: new Date("2024-01-15T10:30:00"),
-    status: "new",
-    type: "repair",
-    priority: "urgent",
-    clientId: "1",
-    clientName: "ООО Ромашка",
-    objectId: "1",
-    objectName: "Офис на Ленина 15",
-    contractId: "1",
-    contractNumber: "Д-001/2024",
-    problemDescription: "Не работает кондиционер",
-    comments: "Клиент просит приехать сегодня",
-    desiredDate: "2024-01-16",
-    responsibleManagerId: "1",
-    responsibleManagerName: "Иванов Иван Иванович",
-    assignedTeamId: "1",
-    assignedTeamName: "Бригада №1",
-  },
-  {
-    id: "2",
-    requestNumber: "ЗВ-002",
-    createdAt: new Date("2024-01-16T14:00:00"),
-    status: "in_progress",
-    type: "maintenance",
-    priority: "normal",
-    clientId: "2",
-    clientName: "ИП Иванов",
-    objectId: "2",
-    objectName: "Склад на Гагарина 20",
-    problemDescription: "Плановое ТО системы вентиляции",
-    comments: "",
-    plannedVisitDate: "2024-01-17T09:00",
-    assignedTeamId: "2",
-    assignedTeamName: "Бригада №2",
-  },
-];
+import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
+import { useClients } from "@/hooks/useClients";
+import { useServiceObjects } from "@/hooks/useServiceObjects";
+import { useDocuments } from "@/hooks/useDocuments";
+import { useEmployees } from "@/hooks/useEmployees";
+import { useTeams } from "@/hooks/useTeams";
 
 export default function Requests() {
-  const [requests, setRequests] = useState<Request[]>(mockRequests);
+  const { data: requests = [], isLoading: requestsLoading } = useRequests();
+  const { data: clients = [] } = useClients();
+  const { data: serviceObjects = [] } = useServiceObjects();
+  const { data: documents = [] } = useDocuments();
+  const { data: employees = [] } = useEmployees();
+  const { data: teams = [] } = useTeams();
+  
+  const createRequest = useCreateRequest();
+  const updateRequest = useUpdateRequest();
+  const deleteRequest = useDeleteRequest();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
-  const { toast } = useToast();
 
   const config: EntityListConfig<Request> = {
     fields: [
@@ -106,7 +53,7 @@ export default function Requests() {
         editable: false,
         render: (value) => {
           const status = REQUEST_STATUSES.find(s => s.value === value);
-          const variantMap: Record<string, any> = {
+          const variantMap: Record<string, { bg: string; text: string }> = {
             new: { bg: "bg-blue-500", text: "text-white" },
             needs_calculation: { bg: "bg-purple-500", text: "text-white" },
             awaiting_materials: { bg: "bg-orange-500", text: "text-white" },
@@ -130,10 +77,7 @@ export default function Requests() {
         options: REQUEST_TYPES,
         filterable: true,
         editable: false,
-        render: (value) => {
-          const type = REQUEST_TYPES.find(t => t.value === value);
-          return type?.label;
-        }
+        render: (value) => REQUEST_TYPES.find(t => t.value === value)?.label
       },
       { 
         key: "clientObject", 
@@ -156,9 +100,7 @@ export default function Requests() {
         searchable: true,
         editable: false,
         render: (value) => (
-          <div className="max-w-[200px] truncate" title={value}>
-            {value}
-          </div>
+          <div className="max-w-[200px] truncate" title={value}>{value}</div>
         )
       },
       { 
@@ -185,34 +127,27 @@ export default function Requests() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingRequest(item),
-    onDelete: (id) => {
-      setRequests(prev => prev.filter(req => req.id !== id));
-      toast({ title: "Заявка удалена" });
-    },
-    onEdit: (item) => {
-      setEditingRequest(item);
-      setIsFormOpen(true);
-    },
+    onDelete: (id) => deleteRequest.mutate(id),
+    onEdit: (item) => { setEditingRequest(item); setIsFormOpen(true); },
   };
 
-  const handleSubmit = (data: Partial<Request>) => {
+  const handleSubmit = async (data: Partial<Request>) => {
     if (editingRequest) {
-      setRequests(prev =>
-        prev.map(req => (req.id === editingRequest.id ? { ...req, ...data } : req))
-      );
-      toast({ title: "Заявка обновлена" });
+      await updateRequest.mutateAsync({ id: editingRequest.id, ...data });
     } else {
-      const newRequest: Request = {
-        id: Math.random().toString(),
-        createdAt: new Date(),
-        ...data,
-      } as Request;
-      setRequests(prev => [...prev, newRequest]);
-      toast({ title: "Заявка создана" });
+      await createRequest.mutateAsync(data);
     }
     setIsFormOpen(false);
     setEditingRequest(undefined);
   };
+
+  if (requestsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -231,28 +166,20 @@ export default function Requests() {
         kanbanColumns={REQUEST_STATUSES}
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        setIsFormOpen(open);
-        if (!open) setEditingRequest(undefined);
-      }}>
+      <Dialog open={isFormOpen} onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingRequest(undefined); }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingRequest ? "Редактировать заявку" : "Создать заявку"}
-            </DialogTitle>
+            <DialogTitle>{editingRequest ? "Редактировать заявку" : "Создать заявку"}</DialogTitle>
           </DialogHeader>
           <RequestForm
             initialData={editingRequest}
             onSubmit={handleSubmit}
-            onCancel={() => {
-              setIsFormOpen(false);
-              setEditingRequest(undefined);
-            }}
-            clients={mockClients}
-            serviceObjects={mockObjects}
-            documents={mockDocuments}
-            employees={mockEmployees}
-            teams={mockTeams}
+            onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); }}
+            clients={clients.map(c => ({ id: c.id, companyName: c.companyName }))}
+            serviceObjects={serviceObjects.map(o => ({ id: o.id, objectName: o.objectName, clientId: o.clientId }))}
+            documents={documents.map(d => ({ id: d.id, contractNumber: d.contractNumber, clientId: d.clientId, responseConditions: d.responseConditions }))}
+            employees={employees.map(e => ({ id: e.id, fullName: e.fullName }))}
+            teams={teams.map(t => ({ id: t.id, teamName: t.name }))}
           />
         </DialogContent>
       </Dialog>
