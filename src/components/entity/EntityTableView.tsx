@@ -20,8 +20,8 @@ interface EntityTableViewProps<T> {
 
 export function EntityTableView<T>({ items, config, sortField, sortDirection, onSort }: EntityTableViewProps<T>) {
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border overflow-x-auto">
+      <Table className="min-w-max">
         <TableHeader>
           <TableRow>
             {config.fields.map(field => (

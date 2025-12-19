@@ -105,7 +105,7 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
   const filterableFields = config.fields.filter(f => f.filterable !== false && f.type === 'select' && f.options);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       {/* Панель управления - поиск, фильтры и переключатели на одной строке */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 min-w-[150px] max-w-[400px]">
