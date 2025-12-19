@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -19,6 +19,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronRight } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { useIsAdmin } from "@/hooks/useUserRoles";
 
 const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
@@ -83,6 +84,7 @@ const MenuItemComponent = ({ item, open }: { item: typeof clientsItems[0], open:
 export function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
+  const { data: isAdmin } = useIsAdmin();
   const isWarehouseActive = warehouseItems.some(item => location.pathname === item.url);
 
   return (
@@ -223,6 +225,23 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Admin section - Users */}
+        {isAdmin && (
+          <>
+            <Separator className="my-2 bg-sidebar-border" />
+            <SidebarGroup className="py-0">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <MenuItemComponent 
+                    item={{ title: "Пользователи", url: "/users", icon: Shield }} 
+                    open={open} 
+                  />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
     </Sidebar>
   );

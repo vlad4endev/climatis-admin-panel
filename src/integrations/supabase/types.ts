@@ -509,6 +509,33 @@ export type Database = {
           },
         ]
       }
+      section_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: Database["public"]["Enums"]["permission_level"]
+          section: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_level"]
+          section: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_level"]
+          section?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       service_objects: {
         Row: {
           access_description: string | null
@@ -892,6 +919,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       warehouse_categories: {
         Row: {
           created_at: string
@@ -988,9 +1036,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_section_permission: {
+        Args: { _section: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["permission_level"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      app_role: "admin" | "user"
       assignment_status: "new" | "assigned" | "completed"
       client_type: "legal_entity" | "individual_entrepreneur"
       contract_type: "maintenance" | "general" | "one-time"
@@ -998,6 +1058,7 @@ export type Database = {
       estimate_type: "простой ремонт" | "сложный ремонт" | "по договору ТО"
       invoice_status: "подготовлен" | "выставлен" | "оплачен" | "отменён"
       operation_type: "приход" | "расход" | "возврат"
+      permission_level: "none" | "view" | "edit"
       request_priority: "urgent" | "normal"
       request_status:
         | "new"
@@ -1154,6 +1215,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       assignment_status: ["new", "assigned", "completed"],
       client_type: ["legal_entity", "individual_entrepreneur"],
       contract_type: ["maintenance", "general", "one-time"],
@@ -1161,6 +1223,7 @@ export const Constants = {
       estimate_type: ["простой ремонт", "сложный ремонт", "по договору ТО"],
       invoice_status: ["подготовлен", "выставлен", "оплачен", "отменён"],
       operation_type: ["приход", "расход", "возврат"],
+      permission_level: ["none", "view", "edit"],
       request_priority: ["urgent", "normal"],
       request_status: [
         "new",

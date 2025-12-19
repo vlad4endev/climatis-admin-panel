@@ -19,6 +19,7 @@ import SpareParts from "./pages/SpareParts";
 import StockMovements from "./pages/StockMovements";
 import WarehouseCategories from "./pages/WarehouseCategories";
 import Tasks from "./pages/Tasks";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/stock-movements" element={<ProtectedRoute><AppLayout><StockMovements /></AppLayout></ProtectedRoute>} />
             <Route path="/warehouse-categories" element={<ProtectedRoute><AppLayout><WarehouseCategories /></AppLayout></ProtectedRoute>} />
             <Route path="/tasks" element={<ProtectedRoute><AppLayout><Tasks /></AppLayout></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute><AppLayout><Users /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
