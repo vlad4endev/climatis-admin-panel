@@ -185,13 +185,13 @@ function UserPermissionsDialog({ user, onClose }: { user: UserWithRole | null; o
                         <SelectValue>{getPermissionLabel(getPermission(section.key))}</SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-background border shadow-lg">
-                        <SelectItem value="none" className="cursor-pointer">
+                        <SelectItem value="none" className="cursor-pointer hover:bg-muted/20 focus:bg-muted/20">
                           <span className="text-muted-foreground">Нет доступа</span>
                         </SelectItem>
-                        <SelectItem value="view" className="cursor-pointer">
+                        <SelectItem value="view" className="cursor-pointer hover:bg-blue-500/20 focus:bg-blue-500/20">
                           <span className="text-blue-600 dark:text-blue-400">Просмотр</span>
                         </SelectItem>
-                        <SelectItem value="edit" className="cursor-pointer">
+                        <SelectItem value="edit" className="cursor-pointer hover:bg-green-500/20 focus:bg-green-500/20">
                           <span className="text-green-600 dark:text-green-400">Редактирование</span>
                         </SelectItem>
                       </SelectContent>
