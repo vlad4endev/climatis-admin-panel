@@ -20,9 +20,10 @@ interface DocumentFormProps {
   onCancel: () => void;
   clients: Client[];
   serviceObjects: ServiceObject[];
+  readOnly?: boolean;
 }
 
-export function DocumentForm({ initialData, onSubmit, onCancel, clients, serviceObjects }: DocumentFormProps) {
+export function DocumentForm({ initialData, onSubmit, onCancel, clients, serviceObjects, readOnly = false }: DocumentFormProps) {
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       contractNumber: initialData?.contractNumber || '',
@@ -55,17 +56,34 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
     <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
       <div>
         <Label htmlFor="contractNumber">Номер договора</Label>
-        <Input id="contractNumber" {...register('contractNumber', { required: true })} />
+        <Input 
+          id="contractNumber" 
+          {...register('contractNumber', { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="startDate">Дата начала</Label>
-          <Input id="startDate" type="date" {...register('startDate', { required: true })} />
+          <Input 
+            id="startDate" 
+            type="date" 
+            {...register('startDate', { required: !readOnly })} 
+            readOnly={readOnly}
+            className={readOnly ? "bg-muted/50" : ""}
+          />
         </div>
         <div>
           <Label htmlFor="endDate">Дата окончания</Label>
-          <Input id="endDate" type="date" {...register('endDate', { required: true })} />
+          <Input 
+            id="endDate" 
+            type="date" 
+            {...register('endDate', { required: !readOnly })} 
+            readOnly={readOnly}
+            className={readOnly ? "bg-muted/50" : ""}
+          />
         </div>
       </div>
 
@@ -74,8 +92,9 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
         <Select
           value={watch('contractType')}
           onValueChange={(value) => setValue('contractType', value as any)}
+          disabled={readOnly}
         >
-          <SelectTrigger>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите тип договора" />
           </SelectTrigger>
           <SelectContent>
@@ -96,8 +115,9 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             setValue('clientId', value);
             setValue('objectId', '');
           }}
+          disabled={readOnly}
         >
-          <SelectTrigger>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите контрагента" />
           </SelectTrigger>
           <SelectContent>
@@ -116,8 +136,9 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           <Select
             value={watch('objectId')}
             onValueChange={(value) => setValue('objectId', value)}
+            disabled={readOnly}
           >
-            <SelectTrigger>
+            <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
               <SelectValue placeholder="Выберите объект" />
             </SelectTrigger>
             <SelectContent>
@@ -138,41 +159,59 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           id="responseConditions"
           {...register('responseConditions')}
           placeholder="Например: выезд до 24 часов"
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
         <Label htmlFor="notes">Примечания</Label>
-        <Textarea id="notes" {...register('notes')} />
-      </div>
-
-      <div>
-        <Label htmlFor="file">Файл договора</Label>
-        <Input
-          id="file"
-          type="file"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              setValue('fileName', file.name);
-            }
-          }}
+        <Textarea 
+          id="notes" 
+          {...register('notes')} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
-        {watch('fileName') && (
-          <p className="text-sm text-muted-foreground mt-1">
-            Текущий файл: {watch('fileName')}
-          </p>
-        )}
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {initialData ? 'Сохранить' : 'Создать'}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div>
+          <Label htmlFor="file">Файл договора</Label>
+          <Input
+            id="file"
+            type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setValue('fileName', file.name);
+              }
+            }}
+          />
+          {watch('fileName') && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Текущий файл: {watch('fileName')}
+            </p>
+          )}
+        </div>
+      )}
+
+      {readOnly && watch('fileName') && (
+        <div>
+          <Label>Файл договора</Label>
+          <p className="text-sm mt-1">{watch('fileName')}</p>
+        </div>
+      )}
+
+      {!readOnly && (
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {initialData ? 'Сохранить' : 'Создать'}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

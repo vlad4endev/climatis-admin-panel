@@ -10,9 +10,10 @@ interface SparePartFormProps {
   sparePart?: SparePart;
   onSubmit: (data: Partial<SparePart>) => void;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
-export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormProps) {
+export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false }: SparePartFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: sparePart || {
       name: "",
@@ -33,19 +34,29 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="name">Наименование *</Label>
-        <Input id="name" {...register("name", { required: true })} />
+        <Label htmlFor="name">Наименование {!readOnly && '*'}</Label>
+        <Input 
+          id="name" 
+          {...register("name", { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
       <div>
-        <Label htmlFor="internalArticle">Внутренний артикул *</Label>
-        <Input id="internalArticle" {...register("internalArticle", { required: true })} />
+        <Label htmlFor="internalArticle">Внутренний артикул {!readOnly && '*'}</Label>
+        <Input 
+          id="internalArticle" 
+          {...register("internalArticle", { required: !readOnly })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
       <div>
-        <Label htmlFor="category">Раздел *</Label>
-        <Select value={category} onValueChange={(value) => setValue("category", value)}>
-          <SelectTrigger>
+        <Label htmlFor="category">Раздел {!readOnly && '*'}</Label>
+        <Select value={category} onValueChange={(value) => setValue("category", value)} disabled={readOnly}>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите раздел" />
           </SelectTrigger>
           <SelectContent>
@@ -57,9 +68,9 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
       </div>
 
       <div>
-        <Label htmlFor="unit">Единица измерения *</Label>
-        <Select value={unit} onValueChange={(value) => setValue("unit", value as SparePart['unit'])}>
-          <SelectTrigger>
+        <Label htmlFor="unit">Единица измерения {!readOnly && '*'}</Label>
+        <Select value={unit} onValueChange={(value) => setValue("unit", value as SparePart['unit'])} disabled={readOnly}>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите единицу" />
           </SelectTrigger>
           <SelectContent>
@@ -80,56 +91,71 @@ export function SparePartForm({ sparePart, onSubmit, onCancel }: SparePartFormPr
       </div>
 
       <div>
-        <Label htmlFor="currentStock">Текущий остаток на складе *</Label>
+        <Label htmlFor="currentStock">Текущий остаток на складе {!readOnly && '*'}</Label>
         <Input 
           id="currentStock" 
           type="number" 
           step="0.01"
-          {...register("currentStock", { required: true, valueAsNumber: true })} 
+          {...register("currentStock", { required: !readOnly, valueAsNumber: true })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
-        <Label htmlFor="minStock">Неснижаемый остаток (порог) *</Label>
+        <Label htmlFor="minStock">Неснижаемый остаток (порог) {!readOnly && '*'}</Label>
         <Input 
           id="minStock" 
           type="number" 
           step="0.01"
-          {...register("minStock", { required: true, valueAsNumber: true })} 
+          {...register("minStock", { required: !readOnly, valueAsNumber: true })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
-        <Label htmlFor="purchasePrice">Закупка (₽) *</Label>
+        <Label htmlFor="purchasePrice">Закупка (₽) {!readOnly && '*'}</Label>
         <Input 
           id="purchasePrice" 
           type="number" 
           step="0.01"
-          {...register("purchasePrice", { required: true, valueAsNumber: true })} 
+          {...register("purchasePrice", { required: !readOnly, valueAsNumber: true })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
-        <Label htmlFor="retailPrice">Розница (₽) *</Label>
+        <Label htmlFor="retailPrice">Розница (₽) {!readOnly && '*'}</Label>
         <Input 
           id="retailPrice" 
           type="number" 
           step="0.01"
-          {...register("retailPrice", { required: true, valueAsNumber: true })} 
+          {...register("retailPrice", { required: !readOnly, valueAsNumber: true })} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div>
         <Label htmlFor="notes">Примечания</Label>
-        <Textarea id="notes" {...register("notes")} />
+        <Textarea 
+          id="notes" 
+          {...register("notes")} 
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
+        />
       </div>
 
-      <div className="flex gap-2">
-        <Button type="submit">Сохранить</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex gap-2">
+          <Button type="submit">Сохранить</Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

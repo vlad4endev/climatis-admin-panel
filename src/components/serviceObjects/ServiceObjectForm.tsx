@@ -35,6 +35,7 @@ interface ServiceObjectFormProps {
   onSubmit: (data: Omit<ServiceObject, "id" | "createdAt" | "clientName">) => void;
   onCancel: () => void;
   initialData?: ServiceObject;
+  readOnly?: boolean;
 }
 
 export function ServiceObjectForm({
@@ -42,6 +43,7 @@ export function ServiceObjectForm({
   onSubmit,
   onCancel,
   initialData,
+  readOnly = false,
 }: ServiceObjectFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,10 +75,10 @@ export function ServiceObjectForm({
             name="clientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Клиент *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Клиент {!readOnly && '*'}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={readOnly}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
                       <SelectValue placeholder="Выберите клиента" />
                     </SelectTrigger>
                   </FormControl>
@@ -98,9 +100,14 @@ export function ServiceObjectForm({
             name="objectName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Название объекта *</FormLabel>
+                <FormLabel>Название объекта {!readOnly && '*'}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Офис, склад, производство..." {...field} />
+                  <Input 
+                    placeholder="Офис, склад, производство..." 
+                    {...field} 
+                    readOnly={readOnly}
+                    className={readOnly ? "bg-muted/50" : ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -112,9 +119,14 @@ export function ServiceObjectForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Адрес объекта *</FormLabel>
+                <FormLabel>Адрес объекта {!readOnly && '*'}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Улица, дом, корпус..." {...field} />
+                  <Input 
+                    placeholder="Улица, дом, корпус..." 
+                    {...field} 
+                    readOnly={readOnly}
+                    className={readOnly ? "bg-muted/50" : ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,8 +142,9 @@ export function ServiceObjectForm({
                 <FormControl>
                   <Textarea
                     placeholder="Код домофона, инструкции по проходу..."
-                    className="min-h-[100px]"
+                    className={`min-h-[100px] ${readOnly ? "bg-muted/50" : ""}`}
                     {...field}
+                    readOnly={readOnly}
                   />
                 </FormControl>
                 <FormMessage />
@@ -148,8 +161,9 @@ export function ServiceObjectForm({
                 <FormControl>
                   <Textarea
                     placeholder="Дополнительная информация..."
-                    className="min-h-[100px]"
+                    className={`min-h-[100px] ${readOnly ? "bg-muted/50" : ""}`}
                     {...field}
+                    readOnly={readOnly}
                   />
                 </FormControl>
                 <FormMessage />
@@ -158,14 +172,16 @@ export function ServiceObjectForm({
           />
         </div>
 
-        <div className="flex gap-3 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Отмена
-          </Button>
-          <Button type="submit">
-            {initialData ? "Сохранить" : "Создать объект"}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex gap-3 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Отмена
+            </Button>
+            <Button type="submit">
+              {initialData ? "Сохранить" : "Создать объект"}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );

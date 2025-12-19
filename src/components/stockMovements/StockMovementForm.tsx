@@ -20,6 +20,7 @@ interface StockMovementFormProps {
   onCancel: () => void;
   spareParts: Array<{ id: string; name: string }>;
   requests: Array<{ id: string; name: string; createdAt: string }>;
+  readOnly?: boolean;
 }
 
 export function StockMovementForm({
@@ -28,6 +29,7 @@ export function StockMovementForm({
   onCancel,
   spareParts,
   requests,
+  readOnly = false,
 }: StockMovementFormProps) {
   const [materials, setMaterials] = useState<StockMovementMaterial[]>(
     stockMovement?.materials || [{ materialId: "", materialName: "", quantity: 0 }]
@@ -61,8 +63,9 @@ export function StockMovementForm({
         <Select
           defaultValue={stockMovement?.operationType || "приход"}
           onValueChange={(value) => setValue("operationType", value as any)}
+          disabled={readOnly}
         >
-          <SelectTrigger>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -79,6 +82,8 @@ export function StockMovementForm({
           id="operationDate"
           type="date"
           {...register("operationDate")}
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
@@ -87,8 +92,9 @@ export function StockMovementForm({
         <Select
           defaultValue={stockMovement?.relatedRequestId || undefined}
           onValueChange={(value) => setValue("relatedRequestId", value)}
+          disabled={readOnly}
         >
-          <SelectTrigger>
+          <SelectTrigger className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue placeholder="Выберите заявку (необязательно)" />
           </SelectTrigger>
           <SelectContent>
@@ -103,11 +109,22 @@ export function StockMovementForm({
 
       <div>
         <Label>Материалы</Label>
-        <MaterialListEditor
-          materials={materials}
-          onChange={setMaterials}
-          spareParts={spareParts}
-        />
+        {readOnly ? (
+          <div className="space-y-2 mt-2">
+            {materials.map((m, i) => (
+              <div key={i} className="p-3 bg-muted/50 rounded-md">
+                <div className="font-medium">{m.materialName}</div>
+                <div className="text-sm text-muted-foreground">Количество: {m.quantity}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <MaterialListEditor
+            materials={materials}
+            onChange={setMaterials}
+            spareParts={spareParts}
+          />
+        )}
       </div>
 
       <div>
@@ -116,17 +133,21 @@ export function StockMovementForm({
           id="comment"
           {...register("comment")}
           rows={3}
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {stockMovement ? "Сохранить" : "Создать"}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            {stockMovement ? "Сохранить" : "Создать"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

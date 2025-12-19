@@ -12,9 +12,10 @@ interface ClientFormProps {
   client?: Client | null;
   onSubmit: (client: Omit<Client, "id" | "createdAt">) => void;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
-export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
+export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: ClientFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [type, setType] = useState<ClientType>("legal_entity");
   const [division, setDivision] = useState("");
@@ -77,20 +78,22 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="companyName">Название компании *</Label>
+        <Label htmlFor="companyName">Название компании {!readOnly && '*'}</Label>
         <Input
           id="companyName"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
           placeholder="ООО 'Пример'"
-          required
+          required={!readOnly}
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="type">Тип *</Label>
-        <Select value={type} onValueChange={(value) => setType(value as ClientType)}>
-          <SelectTrigger id="type">
+        <Label htmlFor="type">Тип {!readOnly && '*'}</Label>
+        <Select value={type} onValueChange={(value) => setType(value as ClientType)} disabled={readOnly}>
+          <SelectTrigger id="type" className={readOnly ? "bg-muted/50" : ""}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -107,89 +110,112 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
           value={division}
           onChange={(e) => setDivision(e.target.value)}
           placeholder="Филиал / цех / предприятие"
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="mainContactName">Основное контактное лицо (ФИО) *</Label>
+        <Label htmlFor="mainContactName">Основное контактное лицо (ФИО) {!readOnly && '*'}</Label>
         <Input
           id="mainContactName"
           value={mainContactName}
           onChange={(e) => setMainContactName(e.target.value)}
           placeholder="Иванов Иван Иванович"
-          required
+          required={!readOnly}
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="phone">Телефон *</Label>
+          <Label htmlFor="phone">Телефон {!readOnly && '*'}</Label>
           <Input
             id="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+7 (999) 123-45-67"
-            required
+            required={!readOnly}
+            readOnly={readOnly}
+            className={readOnly ? "bg-muted/50" : ""}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">E-mail *</Label>
+          <Label htmlFor="email">E-mail {!readOnly && '*'}</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@company.ru"
-            required
+            required={!readOnly}
+            readOnly={readOnly}
+            className={readOnly ? "bg-muted/50" : ""}
           />
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Дополнительные контактные лица</Label>
-          <Button type="button" variant="outline" size="sm" onClick={handleAddContact}>
-            <Plus className="h-4 w-4 mr-1" />
-            Добавить контакт
-          </Button>
-        </div>
-
-        {additionalContacts.map((contact, index) => (
-          <div key={contact.id} className="p-4 border rounded-lg space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Контакт {index + 1}</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemoveContact(contact.id)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <Input
-              placeholder="ФИО"
-              value={contact.name}
-              onChange={(e) => handleContactChange(contact.id, "name", e.target.value)}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <Input
-                placeholder="Телефон"
-                value={contact.phone || ""}
-                onChange={(e) => handleContactChange(contact.id, "phone", e.target.value)}
-              />
-              <Input
-                placeholder="E-mail"
-                type="email"
-                value={contact.email || ""}
-                onChange={(e) => handleContactChange(contact.id, "email", e.target.value)}
-              />
-            </div>
+      {!readOnly && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>Дополнительные контактные лица</Label>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddContact}>
+              <Plus className="h-4 w-4 mr-1" />
+              Добавить контакт
+            </Button>
           </div>
-        ))}
-      </div>
+
+          {additionalContacts.map((contact, index) => (
+            <div key={contact.id} className="p-4 border rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Контакт {index + 1}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveContact(contact.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <Input
+                placeholder="ФИО"
+                value={contact.name}
+                onChange={(e) => handleContactChange(contact.id, "name", e.target.value)}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Input
+                  placeholder="Телефон"
+                  value={contact.phone || ""}
+                  onChange={(e) => handleContactChange(contact.id, "phone", e.target.value)}
+                />
+                <Input
+                  placeholder="E-mail"
+                  type="email"
+                  value={contact.email || ""}
+                  onChange={(e) => handleContactChange(contact.id, "email", e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {readOnly && additionalContacts.length > 0 && (
+        <div className="space-y-3">
+          <Label>Дополнительные контактные лица</Label>
+          {additionalContacts.map((contact, index) => (
+            <div key={contact.id} className="p-4 border rounded-lg space-y-2 bg-muted/50">
+              <div className="font-medium">{contact.name}</div>
+              {contact.phone && <div className="text-sm text-muted-foreground">{contact.phone}</div>}
+              {contact.email && <div className="text-sm text-muted-foreground">{contact.email}</div>}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="notes">Примечания</Label>
@@ -199,17 +225,21 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Дополнительная информация о клиенте"
           rows={4}
+          readOnly={readOnly}
+          className={readOnly ? "bg-muted/50" : ""}
         />
       </div>
 
-      <div className="flex gap-3 pt-4">
-        <Button type="submit" className="flex-1">
-          {client ? "Сохранить" : "Создать клиента"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex gap-3 pt-4">
+          <Button type="submit" className="flex-1">
+            {client ? "Сохранить" : "Создать клиента"}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
