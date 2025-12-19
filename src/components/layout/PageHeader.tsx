@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PageHeaderProps {
   title: string;
@@ -10,21 +9,21 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, description, buttonLabel, onButtonClick }: PageHeaderProps) {
-  const isMobile = useIsMobile();
 
   return (
     <div className="space-y-4 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
           {description && (
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">{description}</p>
           )}
         </div>
         {buttonLabel && onButtonClick && (
-          <Button onClick={onButtonClick} className="w-full sm:w-auto">
+          <Button onClick={onButtonClick} className="shrink-0">
             <Plus className="h-4 w-4 mr-2" />
-            {isMobile ? buttonLabel.split(' ').slice(-1)[0] : buttonLabel}
+            <span className="hidden sm:inline">{buttonLabel}</span>
+            <span className="sm:hidden">{buttonLabel.split(' ').slice(-1)[0]}</span>
           </Button>
         )}
       </div>

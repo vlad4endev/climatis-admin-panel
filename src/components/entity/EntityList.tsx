@@ -106,9 +106,10 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
 
   return (
     <div className="space-y-4 min-w-0">
-      {/* Панель управления - поиск, фильтры и переключатели на одной строке */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 min-w-[150px] max-w-[400px]">
+      {/* Панель управления - адаптивная верстка */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Поиск */}
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Поиск..."
@@ -118,16 +119,8 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           />
         </div>
 
-        {/* Фильтры inline */}
-        {filterableFields.length > 0 && (
-          <EntityFilters
-            fields={filterableFields}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
-        )}
-
-        <div className="flex items-center gap-2 ml-auto shrink-0">
+        {/* Переключатели видов */}
+        <div className="flex items-center gap-2 shrink-0 order-1 sm:order-none">
           <Button
             variant={viewMode === 'card' ? 'default' : 'outline'}
             size="icon"
@@ -154,7 +147,18 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
         </div>
       </div>
 
-      {/* Активные фильтры на отдельной строке */}
+      {/* Фильтры на отдельной строке */}
+      {filterableFields.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <EntityFilters
+            fields={filterableFields}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+          />
+        </div>
+      )}
+
+      {/* Активные фильтры */}
       {filterableFields.length > 0 && (
         <ActiveFilters
           fields={filterableFields}
