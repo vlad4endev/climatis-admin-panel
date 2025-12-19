@@ -107,6 +107,16 @@ export default function WarehouseCategories() {
                   <span className="text-sm text-muted-foreground">Наименований:</span>
                   <span className="font-semibold text-lg">{category.itemCount}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Общий остаток:</span>
+                  <span className="font-semibold text-lg">{category.totalStock.toLocaleString('ru-RU')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Нужно пополнить:</span>
+                  <span className={`font-semibold text-lg ${category.needsRestock > 0 ? 'text-destructive' : ''}`}>
+                    {category.needsRestock}
+                  </span>
+                </div>
               </div>
               <div className="flex justify-center gap-2 pt-2 border-t opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="ghost" size="icon" onClick={() => handleView(category)} title="Просмотреть" className="h-8 w-8">
@@ -131,7 +141,7 @@ export default function WarehouseCategories() {
             <CardDescription>Общая информация по всем разделам</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Всего категорий</p>
                 <p className="text-2xl font-bold">{categories.length}</p>
@@ -139,6 +149,10 @@ export default function WarehouseCategories() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Всего наименований</p>
                 <p className="text-2xl font-bold">{categories.reduce((sum, cat) => sum + cat.itemCount, 0)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Требуют внимания</p>
+                <p className="text-2xl font-bold text-destructive">{categories.reduce((sum, cat) => sum + cat.needsRestock, 0)}</p>
               </div>
             </div>
           </CardContent>

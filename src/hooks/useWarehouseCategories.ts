@@ -11,19 +11,27 @@ export function useWarehouseCategories() {
         .from("warehouse_categories")
         .select(`
           *,
-          spare_parts(id)
+          spare_parts(id, current_stock, min_stock)
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      return data.map((row): WarehouseCategory => ({
-        id: row.id,
-        name: row.name,
-        itemCount: row.spare_parts?.length || 0,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      }));
+      return data.map((row): WarehouseCategory => {
+        const parts = row.spare_parts || [];
+        const totalStock = parts.reduce((sum, p) => sum + (p.current_stock || 0), 0);
+        const needsRestock = parts.filter(p => (p.current_stock || 0) < (p.min_stock || 0)).length;
+        
+        return {
+          id: row.id,
+          name: row.name,
+          itemCount: parts.length,
+          totalStock,
+          needsRestock,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        };
+      });
     },
   });
 }
