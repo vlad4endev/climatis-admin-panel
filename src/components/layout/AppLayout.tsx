@@ -1,6 +1,5 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Menu } from "lucide-react";
 import siberianForestBg from "@/assets/siberian-forest-bg.jpg";
 
 interface AppLayoutProps {
@@ -20,11 +19,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             style={{ backgroundImage: `url(${siberianForestBg})` }}
           />
           
-          <header className="h-16 border-b border-border bg-card/80 backdrop-blur-sm flex items-center px-6 relative z-10 sticky top-0">
-            <SidebarTrigger className="-ml-1">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
-          </header>
           
           <main className="flex-1 p-6 relative z-10 min-w-0 overflow-y-auto overflow-x-hidden">
             <div className="min-w-0">
