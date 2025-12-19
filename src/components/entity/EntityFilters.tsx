@@ -24,7 +24,7 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
   }
 
   return (
-    <div className="flex items-center gap-2 flex-nowrap">
+    <div className="flex items-center gap-2 flex-wrap">
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
 
