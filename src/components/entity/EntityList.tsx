@@ -106,19 +106,28 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
 
   return (
     <div className="space-y-4">
-      {/* Панель управления */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
+      {/* Панель управления - поиск, фильтры и переключатели на одной строке */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative w-[180px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Поиск..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Фильтры inline */}
+        {filterableFields.length > 0 && (
+          <EntityFilters
+            fields={filterableFields}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+          />
+        )}
+
+        <div className="flex items-center gap-2 ml-auto">
           <Button
             variant={viewMode === 'card' ? 'default' : 'outline'}
             size="icon"
@@ -144,15 +153,6 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           )}
         </div>
       </div>
-
-      {/* Фильтры */}
-      {filterableFields.length > 0 && (
-        <EntityFilters
-          fields={filterableFields}
-          filters={filters}
-          onFilterChange={handleFilterChange}
-        />
-      )}
 
       {/* Список */}
       {filteredItems.length === 0 ? (
