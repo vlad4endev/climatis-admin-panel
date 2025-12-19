@@ -96,7 +96,7 @@ export default function Employees() {
 
   return (
     <>
-      <div className="container mx-auto py-6">
+      <div className="space-y-6">
         <PageHeader
           title="Сотрудники"
           description="Управление сотрудниками компании"

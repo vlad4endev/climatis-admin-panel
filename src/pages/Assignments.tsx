@@ -276,7 +276,7 @@ export default function Assignments() {
   const isNewAssignment = !!newAssignmentData;
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="space-y-6">
       <PageHeader
         title="Задания"
         description="Управление заданиями для бригад"

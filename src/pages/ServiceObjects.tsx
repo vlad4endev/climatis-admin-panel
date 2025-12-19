@@ -198,7 +198,7 @@ export default function ServiceObjects() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="space-y-6">
       <PageHeader
         title="Объекты обслуживания"
         description="Управление объектами клиентов"
