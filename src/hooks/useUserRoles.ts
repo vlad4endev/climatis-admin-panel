@@ -114,11 +114,19 @@ export function useUserPermissions(userId: string | null) {
 
 export function useMyPermissions() {
   const { user } = useAuth();
+  const { data: isAdmin } = useIsAdmin();
   
   return useQuery({
-    queryKey: ["my_permissions", user?.id],
+    queryKey: ["my_permissions", user?.id, isAdmin],
     queryFn: async () => {
       if (!user?.id) return new Map<string, PermissionLevel>();
+      
+      // Admins have full edit access to everything
+      if (isAdmin) {
+        const permMap = new Map<string, PermissionLevel>();
+        SECTIONS.forEach(s => permMap.set(s.key, "edit"));
+        return permMap;
+      }
       
       const { data, error } = await supabase
         .from("section_permissions")
