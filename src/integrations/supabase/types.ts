@@ -14,7 +14,975 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          assignment_number: string
+          comments: string | null
+          created_at: string
+          estimate_id: string
+          id: string
+          request_id: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_number: string
+          comments?: string | null
+          created_at?: string
+          estimate_id: string
+          id?: string
+          request_id: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_number?: string
+          comments?: string | null
+          created_at?: string
+          estimate_id?: string
+          id?: string
+          request_id?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          additional_contacts: Json | null
+          company_name: string
+          created_at: string
+          division: string | null
+          email: string | null
+          id: string
+          main_contact_name: string
+          notes: string | null
+          phone: string
+          type: Database["public"]["Enums"]["client_type"]
+          updated_at: string
+        }
+        Insert: {
+          additional_contacts?: Json | null
+          company_name: string
+          created_at?: string
+          division?: string | null
+          email?: string | null
+          id?: string
+          main_contact_name: string
+          notes?: string | null
+          phone: string
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+        }
+        Update: {
+          additional_contacts?: Json | null
+          company_name?: string
+          created_at?: string
+          division?: string | null
+          email?: string | null
+          id?: string
+          main_contact_name?: string
+          notes?: string | null
+          phone?: string
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          client_id: string
+          contract_number: string
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          end_date: string
+          file_name: string | null
+          id: string
+          notes: string | null
+          object_id: string | null
+          response_conditions: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          contract_number: string
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          end_date: string
+          file_name?: string | null
+          id?: string
+          notes?: string | null
+          object_id?: string | null
+          response_conditions?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          contract_number?: string
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          end_date?: string
+          file_name?: string | null
+          id?: string
+          notes?: string | null
+          object_id?: string | null
+          response_conditions?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "service_objects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          position: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      estimate_materials: {
+        Row: {
+          created_at: string
+          estimate_id: string
+          id: string
+          material_name: string
+          price_per_unit: number | null
+          quantity: number | null
+          sort_order: number | null
+          spare_part_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          estimate_id: string
+          id?: string
+          material_name: string
+          price_per_unit?: number | null
+          quantity?: number | null
+          sort_order?: number | null
+          spare_part_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          estimate_id?: string
+          id?: string
+          material_name?: string
+          price_per_unit?: number | null
+          quantity?: number | null
+          sort_order?: number | null
+          spare_part_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_materials_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_estimate_materials_spare_part"
+            columns: ["spare_part_id"]
+            isOneToOne: false
+            referencedRelation: "spare_parts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimates: {
+        Row: {
+          created_at: string
+          created_by_id: string | null
+          customer_calculation: Json | null
+          engineer_comment: string | null
+          estimate_date: string
+          estimate_number: string
+          id: string
+          name: string
+          request_id: string | null
+          status: Database["public"]["Enums"]["estimate_status"]
+          type: Database["public"]["Enums"]["estimate_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_id?: string | null
+          customer_calculation?: Json | null
+          engineer_comment?: string | null
+          estimate_date?: string
+          estimate_number: string
+          id?: string
+          name: string
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["estimate_status"]
+          type?: Database["public"]["Enums"]["estimate_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_id?: string | null
+          customer_calculation?: Json | null
+          engineer_comment?: string | null
+          estimate_date?: string
+          estimate_number?: string
+          id?: string
+          name?: string
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["estimate_status"]
+          type?: Database["public"]["Enums"]["estimate_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimates_created_by_id_fkey"
+            columns: ["created_by_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          client_id: string | null
+          created_at: string
+          estimate_id: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          request_id: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          client_id?: string | null
+          created_at?: string
+          estimate_id?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string | null
+          created_at?: string
+          estimate_id?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      requests: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          assigned_engineer_id: string | null
+          assigned_team_id: string | null
+          client_id: string
+          comments: string | null
+          contract_conditions: string | null
+          contract_id: string | null
+          created_at: string
+          desired_date: string | null
+          hours_spent: number | null
+          id: string
+          object_id: string
+          planned_visit_date: string | null
+          priority: Database["public"]["Enums"]["request_priority"]
+          problem_description: string | null
+          request_number: string
+          responsible_manager_id: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          type: Database["public"]["Enums"]["request_type"]
+          updated_at: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          assigned_engineer_id?: string | null
+          assigned_team_id?: string | null
+          client_id: string
+          comments?: string | null
+          contract_conditions?: string | null
+          contract_id?: string | null
+          created_at?: string
+          desired_date?: string | null
+          hours_spent?: number | null
+          id?: string
+          object_id: string
+          planned_visit_date?: string | null
+          priority?: Database["public"]["Enums"]["request_priority"]
+          problem_description?: string | null
+          request_number: string
+          responsible_manager_id?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          type?: Database["public"]["Enums"]["request_type"]
+          updated_at?: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          assigned_engineer_id?: string | null
+          assigned_team_id?: string | null
+          client_id?: string
+          comments?: string | null
+          contract_conditions?: string | null
+          contract_id?: string | null
+          created_at?: string
+          desired_date?: string | null
+          hours_spent?: number | null
+          id?: string
+          object_id?: string
+          planned_visit_date?: string | null
+          priority?: Database["public"]["Enums"]["request_priority"]
+          problem_description?: string | null
+          request_number?: string
+          responsible_manager_id?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          type?: Database["public"]["Enums"]["request_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requests_assigned_engineer_id_fkey"
+            columns: ["assigned_engineer_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_assigned_team_id_fkey"
+            columns: ["assigned_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "service_objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_responsible_manager_id_fkey"
+            columns: ["responsible_manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_objects: {
+        Row: {
+          access_description: string | null
+          address: string | null
+          client_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          object_name: string
+          updated_at: string
+        }
+        Insert: {
+          access_description?: string | null
+          address?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          object_name: string
+          updated_at?: string
+        }
+        Update: {
+          access_description?: string | null
+          address?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          object_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_objects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spare_parts: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          current_stock: number | null
+          id: string
+          internal_article: string | null
+          min_stock: number | null
+          name: string
+          notes: string | null
+          purchase_price: number | null
+          retail_price: number | null
+          unit: Database["public"]["Enums"]["unit_type"]
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          current_stock?: number | null
+          id?: string
+          internal_article?: string | null
+          min_stock?: number | null
+          name: string
+          notes?: string | null
+          purchase_price?: number | null
+          retail_price?: number | null
+          unit?: Database["public"]["Enums"]["unit_type"]
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          current_stock?: number | null
+          id?: string
+          internal_article?: string | null
+          min_stock?: number | null
+          name?: string
+          notes?: string | null
+          purchase_price?: number | null
+          retail_price?: number | null
+          unit?: Database["public"]["Enums"]["unit_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spare_parts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "warehouse_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movement_materials: {
+        Row: {
+          created_at: string
+          id: string
+          quantity: number
+          spare_part_id: string
+          stock_movement_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quantity?: number
+          spare_part_id: string
+          stock_movement_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quantity?: number
+          spare_part_id?: string
+          stock_movement_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movement_materials_spare_part_id_fkey"
+            columns: ["spare_part_id"]
+            isOneToOne: false
+            referencedRelation: "spare_parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movement_materials_stock_movement_id_fkey"
+            columns: ["stock_movement_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          operation_date: string
+          operation_type: Database["public"]["Enums"]["operation_type"]
+          related_request_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          operation_date?: string
+          operation_type: Database["public"]["Enums"]["operation_type"]
+          related_request_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          operation_date?: string
+          operation_type?: Database["public"]["Enums"]["operation_type"]
+          related_request_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_related_request_id_fkey"
+            columns: ["related_request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_checklist_items: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          sort_order: number | null
+          task_id: string
+          text: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          sort_order?: number | null
+          task_id: string
+          text: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          sort_order?: number | null
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_checklist_items_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          id: string
+          task_id: string
+          text: string
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          task_id: string
+          text: string
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          agreed_deadline: string | null
+          assignee_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          proposed_deadline: string | null
+          request_id: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_deadline?: string | null
+          assignee_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          proposed_deadline?: string | null
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_deadline?: string | null
+          assignee_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          proposed_deadline?: string | null
+          request_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          competencies: string | null
+          created_at: string
+          id: string
+          leader_id: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          competencies?: string | null
+          created_at?: string
+          id?: string
+          leader_id?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          competencies?: string | null
+          created_at?: string
+          id?: string
+          leader_id?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warehouse_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      work_blocks: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimate_id: string
+          id: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimate_id: string
+          id?: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimate_id?: string
+          id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_blocks_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_rows: {
+        Row: {
+          category: Database["public"]["Enums"]["worker_category"]
+          created_at: string
+          id: string
+          plan_hours: number | null
+          quantity: number | null
+          rate: number | null
+          work_block_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["worker_category"]
+          created_at?: string
+          id?: string
+          plan_hours?: number | null
+          quantity?: number | null
+          rate?: number | null
+          work_block_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["worker_category"]
+          created_at?: string
+          id?: string
+          plan_hours?: number | null
+          quantity?: number | null
+          rate?: number | null
+          work_block_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_rows_work_block_id_fkey"
+            columns: ["work_block_id"]
+            isOneToOne: false
+            referencedRelation: "work_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +991,42 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      assignment_status: "new" | "assigned" | "completed"
+      client_type: "legal_entity" | "individual_entrepreneur"
+      contract_type: "maintenance" | "general" | "one-time"
+      estimate_status: "черновик" | "готов" | "согласован"
+      estimate_type: "простой ремонт" | "сложный ремонт" | "по договору ТО"
+      invoice_status: "подготовлен" | "выставлен" | "оплачен" | "отменён"
+      operation_type: "приход" | "расход" | "возврат"
+      request_priority: "urgent" | "normal"
+      request_status:
+        | "new"
+        | "needs_calculation"
+        | "awaiting_materials"
+        | "in_progress"
+        | "partially_completed"
+        | "completed"
+        | "closed"
+      request_type: "repair" | "maintenance" | "installation"
+      task_status: "новая" | "в работе" | "частично выполнена" | "выполнена"
+      unit_type:
+        | "шт"
+        | "м"
+        | "кг"
+        | "л"
+        | "м²"
+        | "м³"
+        | "пара"
+        | "к-т"
+        | "мп"
+        | "баллон"
+        | "уп"
+        | "кор"
+      worker_category:
+        | "Инженер"
+        | "Мастер"
+        | "Монтажник 6 разр."
+        | "Монтажник 5 разр."
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +1153,46 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      assignment_status: ["new", "assigned", "completed"],
+      client_type: ["legal_entity", "individual_entrepreneur"],
+      contract_type: ["maintenance", "general", "one-time"],
+      estimate_status: ["черновик", "готов", "согласован"],
+      estimate_type: ["простой ремонт", "сложный ремонт", "по договору ТО"],
+      invoice_status: ["подготовлен", "выставлен", "оплачен", "отменён"],
+      operation_type: ["приход", "расход", "возврат"],
+      request_priority: ["urgent", "normal"],
+      request_status: [
+        "new",
+        "needs_calculation",
+        "awaiting_materials",
+        "in_progress",
+        "partially_completed",
+        "completed",
+        "closed",
+      ],
+      request_type: ["repair", "maintenance", "installation"],
+      task_status: ["новая", "в работе", "частично выполнена", "выполнена"],
+      unit_type: [
+        "шт",
+        "м",
+        "кг",
+        "л",
+        "м²",
+        "м³",
+        "пара",
+        "к-т",
+        "мп",
+        "баллон",
+        "уп",
+        "кор",
+      ],
+      worker_category: [
+        "Инженер",
+        "Мастер",
+        "Монтажник 6 разр.",
+        "Монтажник 5 разр.",
+      ],
+    },
   },
 } as const
