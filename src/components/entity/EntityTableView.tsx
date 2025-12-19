@@ -23,7 +23,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
     <div className="border rounded-md">
       <div className="overflow-x-auto">
         <Table className="w-max min-w-full">
-        <TableHeader className="bg-muted/50">
+        <TableHeader>
           <TableRow>
             {config.fields.map(field => (
               <TableHead key={field.key}>
