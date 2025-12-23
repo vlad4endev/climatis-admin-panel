@@ -257,29 +257,25 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* User footer with logout */}
-      <SidebarFooter className="border-t border-sidebar-border p-3">
+      <SidebarFooter className="border-t border-sidebar-border px-2 py-2">
         {open ? (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <UserCircle className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm font-medium text-sidebar-foreground truncate">
-                {userName}
-              </span>
-            </div>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs text-muted-foreground truncate">
+              {userName}
+            </span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={handleSignOut}
-                  className="h-8 w-8 flex-shrink-0 hover:bg-destructive/10 hover:text-destructive"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3 w-3 mr-1" />
+                  Выйти
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">Выйти</TooltipContent>
+              <TooltipContent side="right">Выйти из аккаунта</TooltipContent>
             </Tooltip>
           </div>
         ) : (
@@ -289,9 +285,9 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSignOut}
-                className="w-full h-8 hover:bg-destructive/10 hover:text-destructive"
+                className="w-full h-6 hover:bg-destructive/10 hover:text-destructive"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">Выйти</TooltipContent>
