@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -11,15 +11,18 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useIsAdmin } from "@/hooks/useUserRoles";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
@@ -84,8 +87,17 @@ const MenuItemComponent = ({ item, open }: { item: typeof clientsItems[0], open:
 export function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const { data: isAdmin } = useIsAdmin();
+  const { user, signOut } = useAuth();
   const isWarehouseActive = warehouseItems.some(item => location.pathname === item.url);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Пользователь';
 
   return (
     <Sidebar 
@@ -243,6 +255,49 @@ export function AppSidebar() {
           </>
         )}
       </SidebarContent>
+
+      {/* User footer with logout */}
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        {open ? (
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <UserCircle className="h-5 w-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-sidebar-foreground truncate">
+                {userName}
+              </span>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSignOut}
+                  className="h-8 w-8 flex-shrink-0 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Выйти</TooltipContent>
+            </Tooltip>
+          </div>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="w-full h-8 hover:bg-destructive/10 hover:text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Выйти</TooltipContent>
+          </Tooltip>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }
