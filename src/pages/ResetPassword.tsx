@@ -46,16 +46,25 @@ export default function ResetPassword() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({ password });
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      toast.error(error.message);
-    } else {
+      if (error) {
+        if (error.message.includes("should be different")) {
+          setError("Новый пароль должен отличаться от старого");
+        } else {
+          toast.error(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+      
       toast.success("Пароль успешно изменён");
       navigate("/clients");
+    } catch (err) {
+      toast.error("Произошла ошибка при сохранении пароля");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
