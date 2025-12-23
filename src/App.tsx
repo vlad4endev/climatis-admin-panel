@@ -21,6 +21,7 @@ import WarehouseCategories from "./pages/WarehouseCategories";
 import Tasks from "./pages/Tasks";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/clients" replace />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
             <Route path="/service-objects" element={<ProtectedRoute><AppLayout><ServiceObjects /></AppLayout></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute><AppLayout><Documents /></AppLayout></ProtectedRoute>} />
