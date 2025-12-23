@@ -104,7 +104,7 @@ export function EntityKanbanView<T>({ items, config, groupByField, columns }: En
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 text-destructive hover:text-destructive"
+                              className="h-6 w-6 text-destructive hover:bg-destructive hover:text-white"
                               onClick={() => config.onDelete!(id)}
                             >
                               <Trash2 className="h-3 w-3" />
