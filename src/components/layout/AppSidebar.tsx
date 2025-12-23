@@ -269,7 +269,7 @@ export function AppSidebar() {
                   variant="ghost"
                   size="sm"
                   onClick={handleSignOut}
-                  className="h-6 px-2 text-xs text-sidebar-foreground/80 hover:bg-destructive/10 hover:text-destructive"
+                  className="h-6 px-2 text-xs text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <LogOut className="h-3 w-3 mr-1" />
                   Выйти
@@ -285,7 +285,7 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSignOut}
-                className="w-full h-6 hover:bg-destructive/10 hover:text-destructive"
+                className="w-full h-6 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
                 <LogOut className="h-3 w-3" />
               </Button>
