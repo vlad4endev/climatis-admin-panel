@@ -260,7 +260,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border px-2 py-2">
         {open ? (
           <div className="flex items-center justify-between gap-1">
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="text-xs text-sidebar-foreground/80 truncate">
               {userName}
             </span>
             <Tooltip>
