@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface EntityField<T = any> {
   key: string;
   label: string;
@@ -6,7 +8,7 @@ export interface EntityField<T = any> {
   filterable?: boolean;
   editable?: boolean;
   searchable?: boolean;
-  options?: { value: string; label: string }[];
+  options?: { value: string; label: string; icon?: LucideIcon }[];
   render?: (value: any, item: T) => React.ReactNode;
   getValue?: (item: T) => any;
   cellClassName?: (item: T) => string;
