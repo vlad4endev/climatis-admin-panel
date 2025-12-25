@@ -1,5 +1,3 @@
-import { LucideIcon, CirclePlus, Calculator, Package, PlayCircle, CircleEllipsis, CheckCircle, XCircle, Wrench, Settings, HardHat, AlertTriangle, Circle } from "lucide-react";
-
 export type RequestStatus = 
   | "new"
   | "needs_calculation"
@@ -12,25 +10,25 @@ export type RequestStatus =
 export type RequestType = "repair" | "maintenance" | "installation";
 export type RequestPriority = "urgent" | "normal";
 
-export const REQUEST_STATUSES: { value: RequestStatus; label: string; icon?: LucideIcon }[] = [
-  { value: "new", label: "Новая", icon: CirclePlus },
-  { value: "needs_calculation", label: "Требует расчёта", icon: Calculator },
-  { value: "awaiting_materials", label: "Ожидает материалов", icon: Package },
-  { value: "in_progress", label: "В работе", icon: PlayCircle },
-  { value: "partially_completed", label: "Частично выполнена", icon: CircleEllipsis },
-  { value: "completed", label: "Выполнена", icon: CheckCircle },
-  { value: "closed", label: "Закрыта", icon: XCircle },
+export const REQUEST_STATUSES: { value: RequestStatus; label: string }[] = [
+  { value: "new", label: "Новая" },
+  { value: "needs_calculation", label: "Требует расчёта" },
+  { value: "awaiting_materials", label: "Ожидает материалов" },
+  { value: "in_progress", label: "В работе" },
+  { value: "partially_completed", label: "Частично выполнена" },
+  { value: "completed", label: "Выполнена" },
+  { value: "closed", label: "Закрыта" },
 ];
 
-export const REQUEST_TYPES: { value: RequestType; label: string; icon?: LucideIcon }[] = [
-  { value: "repair", label: "Ремонт", icon: Wrench },
-  { value: "maintenance", label: "ТО", icon: Settings },
-  { value: "installation", label: "Монтаж", icon: HardHat },
+export const REQUEST_TYPES: { value: RequestType; label: string }[] = [
+  { value: "repair", label: "Ремонт" },
+  { value: "maintenance", label: "ТО" },
+  { value: "installation", label: "Монтаж" },
 ];
 
-export const REQUEST_PRIORITIES: { value: RequestPriority; label: string; icon?: LucideIcon }[] = [
-  { value: "urgent", label: "Срочная", icon: AlertTriangle },
-  { value: "normal", label: "Обычная", icon: Circle },
+export const REQUEST_PRIORITIES: { value: RequestPriority; label: string }[] = [
+  { value: "urgent", label: "Срочная" },
+  { value: "normal", label: "Обычная" },
 ];
 
 export interface Request {
