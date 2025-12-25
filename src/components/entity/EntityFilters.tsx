@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -6,7 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { EntityField, FilterValue } from "./types";
 
 interface EntityFiltersProps {
@@ -39,22 +40,20 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
         const displayValue = getDisplayValue(field, currentValue);
+        const abbreviation = getAbbreviation(field.label);
 
         if (field.options) {
           return (
-            <div key={field.key} className="sm:flex-1 sm:min-w-0 w-9 shrink-0 sm:w-auto">
+            <div key={field.key} className="flex-1 min-w-0">
               <Select
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                <SelectTrigger className="h-9 sm:px-3 px-0 w-full">
-                  <span className="hidden sm:flex items-center gap-2 truncate min-w-0">
-                    <span className="truncate">
-                      {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
-                    </span>
-                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                <SelectTrigger className="h-9 sm:px-3 px-2">
+                  <span className="hidden sm:inline truncate">
+                    {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
-                  <span className="sm:hidden w-full flex items-center justify-center text-xs font-semibold" title={displayValue}>
+                  <span className="sm:hidden text-[10px] font-semibold leading-none" title={displayValue}>
                     {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
                   </span>
                 </SelectTrigger>
