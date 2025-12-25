@@ -70,19 +70,19 @@ export function MobileBottomNav() {
 
   const isLoading = isAdminLoading || permissionsLoading;
 
-  // For admin: fixed main items, all other items in more menu
-  // For regular user: first 4 accessible items in main, rest in more
+  // For admin: fixed main items, all items in more menu
+  // For regular user: first 4 accessible items in main, all accessible in more
   let mainItems: typeof allItems = [];
-  let moreItems: typeof allItems = [];
+  let allVisibleItems: typeof allItems = [];
 
   if (!isLoading) {
     if (isAdmin) {
       mainItems = adminMainItems;
-      moreItems = adminMoreItems;
+      allVisibleItems = [...adminMainItems, ...adminMoreItems];
     } else {
       const visibleItems = allItems.filter(item => canViewItem(item.url, permissions));
       mainItems = visibleItems.slice(0, 4);
-      moreItems = visibleItems.slice(4);
+      allVisibleItems = visibleItems;
     }
   }
 
@@ -123,13 +123,13 @@ export function MobileBottomNav() {
         ))}
 
         {/* More menu if there are additional items */}
-        {moreItems.length > 0 && (
+        {allVisibleItems.length > 0 && (
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <button
                 className={cn(
                   "flex flex-col items-center justify-center flex-1 h-full gap-1 text-xs transition-colors",
-                  moreItems.some(item => isActive(item.url))
+                  allVisibleItems.some(item => isActive(item.url))
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
@@ -143,7 +143,7 @@ export function MobileBottomNav() {
                 <SheetTitle>Меню</SheetTitle>
               </SheetHeader>
               <div className="grid grid-cols-3 gap-3 py-4">
-                {moreItems.map((item) => (
+                {allVisibleItems.map((item) => (
                   <button
                     key={item.url}
                     onClick={() => handleNavigate(item.url)}
