@@ -23,10 +23,24 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
     return null;
   }
 
+  const getAbbreviation = (label: string) => {
+    return label.charAt(0).toUpperCase();
+  };
+
+  const getDisplayValue = (field: EntityField, currentValue: string) => {
+    if (!currentValue) {
+      return field.label;
+    }
+    const option = field.options?.find(o => o.value === currentValue);
+    return option?.label || field.label;
+  };
+
   return (
     <div className="flex items-center gap-2 w-full">
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
+        const displayValue = getDisplayValue(field, currentValue);
+        const abbreviation = getAbbreviation(field.label);
 
         if (field.options) {
           return (
@@ -36,7 +50,12 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
                 <SelectTrigger className="h-9">
-                  <SelectValue placeholder={field.label} />
+                  <span className="hidden sm:inline">
+                    <SelectValue placeholder={field.label} />
+                  </span>
+                  <span className="sm:hidden text-xs font-medium" title={displayValue}>
+                    {currentValue ? getAbbreviation(displayValue) : abbreviation}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Все {field.label}</SelectItem>
