@@ -1,10 +1,9 @@
-import { Input } from "@/components/ui/input";
+import * as SelectPrimitive from "@radix-ui/react-select";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
@@ -49,14 +48,19 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                <SelectTrigger className="h-9 sm:px-3 px-1.5">
-                  <span className="hidden sm:inline truncate">
+                {/* Desktop version */}
+                <SelectTrigger className="h-9 px-3 hidden sm:flex">
+                  <span className="truncate">
                     {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
-                  <span className="sm:hidden text-[9px] font-bold leading-none flex-shrink-0" title={displayValue}>
-                    {getAbbreviation(field.label)}
-                  </span>
                 </SelectTrigger>
+                {/* Mobile version - custom button without chevron */}
+                <SelectPrimitive.Trigger
+                  className="h-8 w-full flex sm:hidden items-center justify-center rounded-md border border-input bg-background text-[10px] font-bold ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2"
+                  title={displayValue}
+                >
+                  {abbreviation}
+                </SelectPrimitive.Trigger>
                 <SelectContent>
                   <SelectItem value="__all__">Все {field.label}</SelectItem>
                   {field.options.map(opt => (
