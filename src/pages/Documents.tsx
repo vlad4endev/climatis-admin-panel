@@ -9,12 +9,14 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useDocuments, useCreateDocument, useUpdateDocument, useDeleteDocument } from "@/hooks/useDocuments";
 import { useClients } from "@/hooks/useClients";
 import { useServiceObjects } from "@/hooks/useServiceObjects";
+import { useCanEdit } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
 
 export default function Documents() {
   const { data: documents = [], isLoading: documentsLoading } = useDocuments();
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: serviceObjects = [] } = useServiceObjects();
+  const { canEdit } = useCanEdit("documents");
   const createDocument = useCreateDocument();
   const updateDocument = useUpdateDocument();
   const deleteDocument = useDeleteDocument();
@@ -53,8 +55,8 @@ export default function Documents() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingDocument(item),
-    onEdit: (item) => { setEditingDocument(item); setIsDialogOpen(true); },
-    onDelete: (id) => deleteDocument.mutate(id),
+    onEdit: canEdit ? (item) => { setEditingDocument(item); setIsDialogOpen(true); } : undefined,
+    onDelete: canEdit ? (id) => deleteDocument.mutate(id) : undefined,
   };
 
   const handleSubmit = async (data: Omit<Document, 'id' | 'clientName' | 'objectName'>) => {
@@ -81,8 +83,8 @@ export default function Documents() {
         <PageHeader
           title="Документы"
           description="Управление договорами и документами"
-          buttonLabel="Добавить документ"
-          onButtonClick={() => setIsDialogOpen(true)}
+          buttonLabel={canEdit ? "Добавить документ" : undefined}
+          onButtonClick={canEdit ? () => setIsDialogOpen(true) : undefined}
         />
 
         <EntityList items={documents} config={config} emptyMessage="Нет документов. Добавьте первый документ." />

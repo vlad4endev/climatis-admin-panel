@@ -20,9 +20,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-import { useIsAdmin } from "@/hooks/useUserRoles";
+import { useIsAdmin, useMyPermissions, PermissionLevel } from "@/hooks/useUserRoles";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+
+// Map URL paths to section keys
+const urlToSectionKey = (url: string): string => url.replace("/", "");
 
 const clientsItems = [
   { title: "Клиенты", url: "/clients", icon: Users },
@@ -47,6 +50,19 @@ const warehouseItems = [
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];
+
+// Helper to check if user can see an item
+const canViewItem = (url: string, permissions: Map<string, PermissionLevel> | undefined): boolean => {
+  if (!permissions) return false;
+  const sectionKey = urlToSectionKey(url);
+  const permission = permissions.get(sectionKey);
+  return permission === "view" || permission === "edit";
+};
+
+// Filter items based on permissions
+const filterItemsByPermission = (items: typeof clientsItems, permissions: Map<string, PermissionLevel> | undefined) => {
+  return items.filter(item => canViewItem(item.url, permissions));
+};
 
 const MenuItemComponent = ({ item, open }: { item: typeof clientsItems[0], open: boolean }) => (
   <SidebarMenuItem>
@@ -89,8 +105,16 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: isAdmin } = useIsAdmin();
+  const { data: permissions, isLoading: permissionsLoading } = useMyPermissions();
   const { user, signOut } = useAuth();
-  const isWarehouseActive = warehouseItems.some(item => location.pathname === item.url);
+  
+  // Filter items based on permissions
+  const visibleClientsItems = filterItemsByPermission(clientsItems, permissions);
+  const visibleRequestsItems = filterItemsByPermission(requestsItems, permissions);
+  const visibleStaffItems = filterItemsByPermission(staffItems, permissions);
+  const visibleWarehouseItems = filterItemsByPermission(warehouseItems, permissions);
+  
+  const isWarehouseActive = visibleWarehouseItems.some(item => location.pathname === item.url);
 
   const handleSignOut = async () => {
     await signOut();
@@ -135,108 +159,122 @@ export function AppSidebar() {
         )}
 
         {/* Клиенты и объекты */}
-        <SidebarGroup className="py-0">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {clientsItems.map((item) => (
-                <MenuItemComponent key={item.title} item={item} open={open} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleClientsItems.length > 0 && (
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleClientsItems.map((item) => (
+                  <MenuItemComponent key={item.title} item={item} open={open} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <Separator className="my-2 bg-sidebar-border" />
+        {visibleClientsItems.length > 0 && visibleRequestsItems.length > 0 && (
+          <Separator className="my-2 bg-sidebar-border" />
+        )}
 
         {/* Заявки и документы */}
-        <SidebarGroup className="py-0">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {requestsItems.map((item) => (
-                <MenuItemComponent key={item.title} item={item} open={open} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleRequestsItems.length > 0 && (
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleRequestsItems.map((item) => (
+                  <MenuItemComponent key={item.title} item={item} open={open} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <Separator className="my-2 bg-sidebar-border" />
+        {visibleRequestsItems.length > 0 && visibleStaffItems.length > 0 && (
+          <Separator className="my-2 bg-sidebar-border" />
+        )}
 
         {/* Сотрудники и бригады */}
-        <SidebarGroup className="py-0">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {staffItems.map((item) => (
-                <MenuItemComponent key={item.title} item={item} open={open} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleStaffItems.length > 0 && (
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleStaffItems.map((item) => (
+                  <MenuItemComponent key={item.title} item={item} open={open} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <Separator className="my-2 bg-sidebar-border" />
+        {visibleStaffItems.length > 0 && visibleWarehouseItems.length > 0 && (
+          <Separator className="my-2 bg-sidebar-border" />
+        )}
 
         {/* Склад */}
-        <SidebarGroup className="py-0">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {open ? (
-                <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton className="flex items-center gap-3 px-3 py-2">
-                        <Package className="h-5 w-5 flex-shrink-0" />
-                        <span>Склад</span>
-                        <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {warehouseItems.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
-                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            >
-                              <item.icon className="h-4 w-4 flex-shrink-0" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              ) : (
-                <Popover>
-                  <PopoverTrigger asChild>
+        {visibleWarehouseItems.length > 0 && (
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {open ? (
+                  <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
                     <SidebarMenuItem>
-                      <SidebarMenuButton className="flex items-center justify-center w-full py-2">
-                        <Package className="h-5 w-5" />
-                      </SidebarMenuButton>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton className="flex items-center gap-3 px-3 py-2">
+                          <Package className="h-5 w-5 flex-shrink-0" />
+                          <span>Склад</span>
+                          <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
                     </SidebarMenuItem>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" align="start" className="w-48 p-2">
-                    <div className="text-sm font-medium text-muted-foreground mb-2 px-2">Склад</div>
-                    <div className="space-y-1">
-                      {warehouseItems.map((item) => (
-                        <NavLink
-                          key={item.title}
-                          to={item.url}
-                          className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors hover:bg-accent"
-                          activeClassName="bg-accent text-accent-foreground font-medium"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {visibleWarehouseItems.map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild>
+                              <NavLink
+                                to={item.url}
+                                className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent"
+                                activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                              >
+                                <item.icon className="h-4 w-4 flex-shrink-0" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton className="flex items-center justify-center w-full py-2">
+                          <Package className="h-5 w-5" />
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </PopoverTrigger>
+                    <PopoverContent side="right" align="start" className="w-48 p-2">
+                      <div className="text-sm font-medium text-muted-foreground mb-2 px-2">Склад</div>
+                      <div className="space-y-1">
+                        {visibleWarehouseItems.map((item) => (
+                          <NavLink
+                            key={item.title}
+                            to={item.url}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors hover:bg-accent"
+                            activeClassName="bg-accent text-accent-foreground font-medium"
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Admin section - Users */}
         {isAdmin && (

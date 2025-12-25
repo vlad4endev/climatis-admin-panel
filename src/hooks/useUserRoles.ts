@@ -145,6 +145,20 @@ export function useMyPermissions() {
   });
 }
 
+// Hook to check if user can edit a specific section
+export function useCanEdit(section: string) {
+  const { data: permissions, isLoading } = useMyPermissions();
+  
+  if (isLoading || !permissions) return { canEdit: false, canView: false, isLoading };
+  
+  const permission = permissions.get(section);
+  return {
+    canEdit: permission === "edit",
+    canView: permission === "view" || permission === "edit",
+    isLoading,
+  };
+}
+
 export function useSetUserRole() {
   const queryClient = useQueryClient();
 

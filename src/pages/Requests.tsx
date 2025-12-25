@@ -14,6 +14,7 @@ import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useTeams } from "@/hooks/useTeams";
+import { useCanEdit } from "@/hooks/useUserRoles";
 
 export default function Requests() {
   const { data: requests = [], isLoading: requestsLoading } = useRequests();
@@ -22,6 +23,7 @@ export default function Requests() {
   const { data: documents = [] } = useDocuments();
   const { data: employees = [] } = useEmployees();
   const { data: teams = [] } = useTeams();
+  const { canEdit } = useCanEdit("requests");
   
   const createRequest = useCreateRequest();
   const updateRequest = useUpdateRequest();
@@ -127,8 +129,8 @@ export default function Requests() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingRequest(item),
-    onDelete: (id) => deleteRequest.mutate(id),
-    onEdit: (item) => { setEditingRequest(item); setIsFormOpen(true); },
+    onDelete: canEdit ? (id) => deleteRequest.mutate(id) : undefined,
+    onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
   };
 
   const handleSubmit = async (data: Partial<Request>) => {
@@ -154,8 +156,8 @@ export default function Requests() {
       <PageHeader
         title="Заявки"
         description="Управление заявками на обслуживание"
-        buttonLabel="Создать заявку"
-        onButtonClick={() => setIsFormOpen(true)}
+        buttonLabel={canEdit ? "Создать заявку" : undefined}
+        onButtonClick={canEdit ? () => setIsFormOpen(true) : undefined}
       />
 
       <EntityList

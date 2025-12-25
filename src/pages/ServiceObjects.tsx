@@ -10,10 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useServiceObjects, useCreateServiceObject, useUpdateServiceObject, useDeleteServiceObject } from "@/hooks/useServiceObjects";
 import { useClients } from "@/hooks/useClients";
+import { useCanEdit } from "@/hooks/useUserRoles";
 
 export default function ServiceObjects() {
   const { data: objects = [], isLoading: objectsLoading } = useServiceObjects();
   const { data: clients = [], isLoading: clientsLoading } = useClients();
+  const { canEdit } = useCanEdit("service-objects");
   const createObject = useCreateServiceObject();
   const updateObject = useUpdateServiceObject();
   const deleteObject = useDeleteServiceObject();
@@ -89,8 +91,8 @@ export default function ServiceObjects() {
     ],
     getItemId: (obj) => obj.id,
     onRowClick: (obj) => setViewingObject(obj),
-    onDelete: (id) => deleteObject.mutate(id),
-    onEdit: (obj) => { setEditingObject(obj); setIsFormVisible(true); },
+    onDelete: canEdit ? (id) => deleteObject.mutate(id) : undefined,
+    onEdit: canEdit ? (obj) => { setEditingObject(obj); setIsFormVisible(true); } : undefined,
   };
 
   if (objectsLoading || clientsLoading) {
@@ -106,8 +108,8 @@ export default function ServiceObjects() {
       <PageHeader
         title="Объекты обслуживания"
         description="Управление объектами клиентов"
-        buttonLabel="Добавить объект"
-        onButtonClick={() => setIsFormVisible(true)}
+        buttonLabel={canEdit ? "Добавить объект" : undefined}
+        onButtonClick={canEdit ? () => setIsFormVisible(true) : undefined}
       />
 
       <EntityList items={objects} config={objectsConfig} emptyMessage="Нет объектов обслуживания. Создайте первый объект." />

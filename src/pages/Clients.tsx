@@ -8,6 +8,7 @@ import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useClients, useCreateClient, useUpdateClient, useUpdateClientField, useDeleteClient } from "@/hooks/useClients";
+import { useCanEdit } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
 
 const getTypeLabel = (type: string) => {
@@ -23,6 +24,7 @@ const getTypeLabel = (type: string) => {
 
 export default function Clients() {
   const { data: clients = [], isLoading, error } = useClients();
+  const { canEdit } = useCanEdit("clients");
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const updateClientField = useUpdateClientField();
@@ -128,9 +130,9 @@ export default function Clients() {
     ],
     getItemId: (client) => client.id,
     onRowClick: (client) => setViewingClient(client),
-    onUpdate: handleUpdateField,
-    onDelete: handleDeleteClient,
-    onEdit: handleEditClient,
+    onUpdate: canEdit ? handleUpdateField : undefined,
+    onDelete: canEdit ? handleDeleteClient : undefined,
+    onEdit: canEdit ? handleEditClient : undefined,
   };
 
   if (isLoading) {
@@ -154,8 +156,8 @@ export default function Clients() {
       <PageHeader
         title="Клиенты"
         description="Управление базой клиентов компании"
-        buttonLabel="Добавить клиента"
-        onButtonClick={() => setIsFormOpen(true)}
+        buttonLabel={canEdit ? "Добавить клиента" : undefined}
+        onButtonClick={canEdit ? () => setIsFormOpen(true) : undefined}
       />
 
       <EntityList
