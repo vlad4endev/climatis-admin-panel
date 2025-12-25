@@ -35,28 +35,12 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
     return option?.label || field.label;
   };
 
-  // Different colors for different filter types on mobile
-  const getFilterColor = (index: number, hasValue: boolean) => {
-    const colors = [
-      { bg: 'bg-blue-500/20', text: 'text-blue-600', activeBg: 'bg-blue-500', activeText: 'text-white' },
-      { bg: 'bg-purple-500/20', text: 'text-purple-600', activeBg: 'bg-purple-500', activeText: 'text-white' },
-      { bg: 'bg-orange-500/20', text: 'text-orange-600', activeBg: 'bg-orange-500', activeText: 'text-white' },
-      { bg: 'bg-green-500/20', text: 'text-green-600', activeBg: 'bg-green-500', activeText: 'text-white' },
-      { bg: 'bg-rose-500/20', text: 'text-rose-600', activeBg: 'bg-rose-500', activeText: 'text-white' },
-    ];
-    const color = colors[index % colors.length];
-    return hasValue 
-      ? `${color.activeBg} ${color.activeText}` 
-      : `${color.bg} ${color.text}`;
-  };
-
   return (
     <div className="flex items-center gap-2 w-full">
-      {selectFields.map((field, index) => {
+      {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
         const displayValue = getDisplayValue(field, currentValue);
         const abbreviation = getAbbreviation(field.label);
-        const hasValue = !!currentValue;
 
         if (field.options) {
           return (
@@ -69,11 +53,8 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                   <span className="hidden sm:inline truncate">
                     {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
-                  <span 
-                    className={`sm:hidden text-[10px] font-bold leading-none rounded-full w-5 h-5 flex items-center justify-center ${getFilterColor(index, hasValue)}`} 
-                    title={displayValue}
-                  >
-                    {currentValue ? getAbbreviation(displayValue) : abbreviation}
+                  <span className="sm:hidden text-[10px] font-semibold leading-none" title={displayValue}>
+                    {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
                   </span>
                 </SelectTrigger>
                 <SelectContent>
