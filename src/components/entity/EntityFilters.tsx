@@ -39,23 +39,24 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
         const displayValue = getDisplayValue(field, currentValue);
-        const abbreviation = getAbbreviation(field.label);
 
         if (field.options) {
           return (
-            <div key={field.key} className="flex-1 min-w-0">
+            <div key={field.key} className="sm:flex-1 sm:min-w-0 w-9 shrink-0 sm:w-auto">
               <Select
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                <SelectTrigger className="h-9 sm:px-3 px-0 sm:justify-between justify-center" hideChevron={true}>
-                  <span className="hidden sm:inline truncate">
-                    {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
+                <SelectTrigger className="h-9 sm:px-3 px-0 w-full">
+                  <span className="hidden sm:flex items-center gap-2 truncate min-w-0">
+                    <span className="truncate">
+                      {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
                   </span>
-                  <span className="sm:hidden text-xs font-semibold" title={displayValue}>
+                  <span className="sm:hidden w-full flex items-center justify-center text-xs font-semibold" title={displayValue}>
                     {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
                   </span>
-                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0 hidden sm:block" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Все {field.label}</SelectItem>
