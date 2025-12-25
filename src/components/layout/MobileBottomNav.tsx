@@ -113,7 +113,7 @@ export function MobileBottomNav() {
             className={cn(
               "flex flex-col items-center justify-center flex-1 h-full gap-1 text-xs transition-colors",
               isActive(item.url)
-                ? "text-primary font-bold"
+                ? "text-primary font-extrabold"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -150,7 +150,7 @@ export function MobileBottomNav() {
                     className={cn(
                       "flex flex-col items-center justify-center gap-2 p-3 rounded-lg transition-colors",
                       isActive(item.url)
-                        ? "bg-primary/10 text-primary font-bold"
+                        ? "bg-primary/10 text-primary font-extrabold"
                         : "hover:bg-muted"
                     )}
                   >
