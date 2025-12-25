@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -7,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { EntityField, FilterValue } from "./types";
 
 interface EntityFiltersProps {
@@ -49,13 +48,14 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                <SelectTrigger className="h-9 sm:px-3 px-2">
+                <SelectTrigger className="h-9 sm:px-3 px-0 sm:justify-between justify-center" hideChevron={true}>
                   <span className="hidden sm:inline truncate">
                     {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
-                  <span className="sm:hidden text-[10px] font-semibold leading-none" title={displayValue}>
+                  <span className="sm:hidden text-xs font-semibold" title={displayValue}>
                     {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
                   </span>
+                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0 hidden sm:block" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Все {field.label}</SelectItem>
