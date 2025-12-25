@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Filter } from "lucide-react";
 import { EntityField, FilterValue } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -30,6 +30,8 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
         const selectedOption = field.options?.find(o => o.value === currentValue);
         const SelectedIcon = selectedOption?.icon;
+        // Get first icon from options as default placeholder icon
+        const PlaceholderIcon = field.options?.[0]?.icon;
 
         if (field.options) {
           return (
@@ -39,10 +41,23 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
                 <SelectTrigger className="h-9">
-                  {isMobile && currentValue && SelectedIcon ? (
-                    <div className="flex items-center gap-1.5">
-                      <SelectedIcon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{selectedOption?.label}</span>
+                  {isMobile ? (
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {currentValue && SelectedIcon ? (
+                        <>
+                          <SelectedIcon className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{selectedOption?.label}</span>
+                        </>
+                      ) : (
+                        <>
+                          {PlaceholderIcon ? (
+                            <PlaceholderIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          ) : (
+                            <Filter className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="truncate text-muted-foreground">{field.label}</span>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <SelectValue placeholder={field.label} />
