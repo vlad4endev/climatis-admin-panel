@@ -50,11 +50,11 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
                 <SelectTrigger className="h-9">
-                  <span className="hidden sm:inline">
-                    <SelectValue placeholder={field.label} />
+                  <span className="hidden sm:inline truncate">
+                    {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
                   <span className="sm:hidden text-xs font-medium" title={displayValue}>
-                    {currentValue ? getAbbreviation(displayValue) : abbreviation}
+                    {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
                   </span>
                 </SelectTrigger>
                 <SelectContent>
