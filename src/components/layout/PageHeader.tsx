@@ -16,7 +16,7 @@ export function PageHeader({ title, description, buttonLabel, onButtonClick }: P
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
           {description && (
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{description}</p>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base hidden sm:block">{description}</p>
           )}
         </div>
         {buttonLabel && onButtonClick && (
