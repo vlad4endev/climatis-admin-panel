@@ -114,7 +114,7 @@ export function useUserPermissions(userId: string | null) {
 
 export function useMyPermissions() {
   const { user } = useAuth();
-  const { data: isAdmin } = useIsAdmin();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   
   return useQuery({
     queryKey: ["my_permissions", user?.id, isAdmin],
@@ -141,7 +141,8 @@ export function useMyPermissions() {
       });
       return permMap;
     },
-    enabled: !!user?.id,
+    // Wait for isAdmin to be loaded before running this query
+    enabled: !!user?.id && !isAdminLoading,
   });
 }
 
