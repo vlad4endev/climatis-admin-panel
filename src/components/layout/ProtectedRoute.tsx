@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2, ShieldAlert } from "lucide-react";
-import { useMyPermissions, PermissionLevel } from "@/hooks/useUserRoles";
+import { useMyPermissions, useIsAdmin, PermissionLevel } from "@/hooks/useUserRoles";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,9 +22,11 @@ const routeToSectionKey = (pathname: string): string | null => {
 export function ProtectedRoute({ children, requiredPermission = "view" }: ProtectedRouteProps) {
   const { loading, user } = useAuth();
   const location = useLocation();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   const { data: permissions, isLoading: permissionsLoading } = useMyPermissions();
 
-  if (loading || permissionsLoading) {
+  // Wait for all auth and permission data to load
+  if (loading || isAdminLoading || permissionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
