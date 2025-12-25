@@ -56,7 +56,7 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 </SelectTrigger>
                 {/* Mobile version - custom button without chevron */}
                 <SelectPrimitive.Trigger
-                  className="h-8 w-full flex sm:hidden items-center justify-center rounded-md border border-input bg-background text-[10px] font-bold ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2"
+                  className="h-8 w-full flex sm:hidden items-center justify-center rounded-md border border-input bg-background text-xs font-bold uppercase ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2"
                   title={displayValue}
                 >
                   {abbreviation}
