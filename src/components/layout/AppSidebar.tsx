@@ -104,15 +104,18 @@ export function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
-  const { data: isAdmin } = useIsAdmin();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   const { data: permissions, isLoading: permissionsLoading } = useMyPermissions();
   const { user, signOut } = useAuth();
   
-  // Filter items based on permissions
-  const visibleClientsItems = filterItemsByPermission(clientsItems, permissions);
-  const visibleRequestsItems = filterItemsByPermission(requestsItems, permissions);
-  const visibleStaffItems = filterItemsByPermission(staffItems, permissions);
-  const visibleWarehouseItems = filterItemsByPermission(warehouseItems, permissions);
+  // Wait for both admin status and permissions to load before filtering
+  const isLoadingPermissions = isAdminLoading || permissionsLoading;
+  
+  // Filter items based on permissions (only after loading is complete)
+  const visibleClientsItems = isLoadingPermissions ? [] : filterItemsByPermission(clientsItems, permissions);
+  const visibleRequestsItems = isLoadingPermissions ? [] : filterItemsByPermission(requestsItems, permissions);
+  const visibleStaffItems = isLoadingPermissions ? [] : filterItemsByPermission(staffItems, permissions);
+  const visibleWarehouseItems = isLoadingPermissions ? [] : filterItemsByPermission(warehouseItems, permissions);
   
   const isWarehouseActive = visibleWarehouseItems.some(item => location.pathname === item.url);
 
