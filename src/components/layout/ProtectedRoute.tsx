@@ -1,7 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2, ShieldAlert } from "lucide-react";
-import { useMyPermissions, useIsAdmin, PermissionLevel } from "@/hooks/useUserRoles";
+import { useMyPermissions, useIsAdmin, PermissionLevel, SECTIONS } from "@/hooks/useUserRoles";
+import { AppLayout } from "./AppLayout";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,6 +18,19 @@ const routeToSectionKey = (pathname: string): string | null => {
     "spare-parts", "warehouse-categories", "stock-movements"
   ];
   return validSections.includes(path) ? path : null;
+};
+
+// Get first accessible section for redirect
+const getFirstAccessibleSection = (permissions: Map<string, PermissionLevel> | undefined): string | null => {
+  if (!permissions) return null;
+  
+  for (const section of SECTIONS) {
+    const perm = permissions.get(section.key);
+    if (perm === "view" || perm === "edit") {
+      return `/${section.key}`;
+    }
+  }
+  return null;
 };
 
 export function ProtectedRoute({ children, requiredPermission = "view" }: ProtectedRouteProps) {
@@ -45,25 +59,36 @@ export function ProtectedRoute({ children, requiredPermission = "view" }: Protec
   if (sectionKey && permissions) {
     const userPermission = permissions.get(sectionKey);
     
-    // No access at all
+    // No access at all - show message but keep sidebar visible
     if (!userPermission || userPermission === "none") {
+      // Try to redirect to first accessible section
+      const firstAccessible = getFirstAccessibleSection(permissions);
+      if (firstAccessible && location.pathname !== firstAccessible) {
+        return <Navigate to={firstAccessible} replace />;
+      }
+      
+      // No accessible sections - show message with sidebar
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground">
-          <ShieldAlert className="h-16 w-16" />
-          <h1 className="text-xl font-semibold">Нет доступа</h1>
-          <p className="text-sm">У вас нет прав для просмотра этого раздела</p>
-        </div>
+        <AppLayout>
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground py-20">
+            <ShieldAlert className="h-16 w-16" />
+            <h1 className="text-xl font-semibold">Нет доступа</h1>
+            <p className="text-sm">У вас нет прав для просмотра этого раздела</p>
+          </div>
+        </AppLayout>
       );
     }
     
     // Check if edit permission is required but user only has view
     if (requiredPermission === "edit" && userPermission === "view") {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground">
-          <ShieldAlert className="h-16 w-16" />
-          <h1 className="text-xl font-semibold">Только просмотр</h1>
-          <p className="text-sm">У вас нет прав для редактирования в этом разделе</p>
-        </div>
+        <AppLayout>
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground py-20">
+            <ShieldAlert className="h-16 w-16" />
+            <h1 className="text-xl font-semibold">Только просмотр</h1>
+            <p className="text-sm">У вас нет прав для редактирования в этом разделе</p>
+          </div>
+        </AppLayout>
       );
     }
   }

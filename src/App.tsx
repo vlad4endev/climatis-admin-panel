@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useMyPermissions, useIsAdmin, SECTIONS } from "@/hooks/useUserRoles";
+import { Loader2 } from "lucide-react";
 import Auth from "./pages/Auth";
 import Clients from "./pages/Clients";
 import ServiceObjects from "./pages/ServiceObjects";
@@ -25,6 +27,38 @@ import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
+// Component to redirect to first accessible section
+function RedirectToFirstAccessible() {
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
+  const { data: permissions, isLoading: permissionsLoading } = useMyPermissions();
+  
+  if (isAdminLoading || permissionsLoading) {
+    return (
+      <div className="flex items-center justify-center h-full py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  // Admin goes to clients
+  if (isAdmin) {
+    return <Navigate to="/clients" replace />;
+  }
+  
+  // Find first accessible section
+  if (permissions) {
+    for (const section of SECTIONS) {
+      const perm = permissions.get(section.key);
+      if (perm === "view" || perm === "edit") {
+        return <Navigate to={`/${section.key}`} replace />;
+      }
+    }
+  }
+  
+  // No accessible sections - redirect to clients (will show access denied)
+  return <Navigate to="/clients" replace />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -33,7 +67,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/clients" replace />} />
+            <Route path="/" element={<ProtectedRoute><AppLayout><RedirectToFirstAccessible /></AppLayout></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
