@@ -49,12 +49,12 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                <SelectTrigger className="h-9 sm:px-3 px-2">
+                <SelectTrigger className="h-9 sm:px-3 px-1.5">
                   <span className="hidden sm:inline truncate">
                     {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
-                  <span className="sm:hidden text-[10px] font-semibold leading-none" title={displayValue}>
-                    {currentValue ? getAbbreviation(displayValue) : getAbbreviation(field.label)}
+                  <span className="sm:hidden text-[9px] font-bold leading-none flex-shrink-0" title={displayValue}>
+                    {getAbbreviation(field.label)}
                   </span>
                 </SelectTrigger>
                 <SelectContent>
