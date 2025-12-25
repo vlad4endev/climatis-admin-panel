@@ -15,19 +15,41 @@ import { useState } from "react";
 // Map URL paths to section keys
 const urlToSectionKey = (url: string): string => url.replace("/", "");
 
+// Admin main items (fixed order)
+const adminMainItems = [
+  { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Заявки", url: "/requests", icon: Inbox },
+  { title: "Расчеты", url: "/estimates", icon: Coins },
+  { title: "Задания", url: "/assignments", icon: ClipboardCheck },
+];
+
+// Admin additional items for "more" menu
+const adminMoreItems = [
+  { title: "Объекты", url: "/service-objects", icon: MapPin },
+  { title: "Документы", url: "/documents", icon: ScrollText },
+  { title: "Сотрудники", url: "/employees", icon: UserCircle },
+  { title: "Бригады", url: "/teams", icon: UsersRound },
+  { title: "Задачи", url: "/tasks", icon: ListTodo },
+  { title: "Разделы в складе", url: "/warehouse-categories", icon: FolderTree },
+  { title: "Комплектующие", url: "/spare-parts", icon: Package },
+  { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
+  { title: "Пользователи", url: "/users", icon: Shield },
+];
+
+// All items for regular users
 const allItems = [
-  { title: "Клиенты", url: "/clients", icon: Users, group: "clients" },
-  { title: "Объекты", url: "/service-objects", icon: MapPin, group: "clients" },
-  { title: "Заявки", url: "/requests", icon: Inbox, group: "requests" },
-  { title: "Документы", url: "/documents", icon: ScrollText, group: "requests" },
-  { title: "Расчеты", url: "/estimates", icon: Coins, group: "requests" },
-  { title: "Задания", url: "/assignments", icon: ClipboardCheck, group: "requests" },
-  { title: "Сотрудники", url: "/employees", icon: UserCircle, group: "staff" },
-  { title: "Бригады", url: "/teams", icon: UsersRound, group: "staff" },
-  { title: "Задачи", url: "/tasks", icon: ListTodo, group: "staff" },
-  { title: "Разделы в складе", url: "/warehouse-categories", icon: FolderTree, group: "warehouse" },
-  { title: "Комплектующие", url: "/spare-parts", icon: Package, group: "warehouse" },
-  { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight, group: "warehouse" },
+  { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Объекты", url: "/service-objects", icon: MapPin },
+  { title: "Заявки", url: "/requests", icon: Inbox },
+  { title: "Документы", url: "/documents", icon: ScrollText },
+  { title: "Расчеты", url: "/estimates", icon: Coins },
+  { title: "Задания", url: "/assignments", icon: ClipboardCheck },
+  { title: "Сотрудники", url: "/employees", icon: UserCircle },
+  { title: "Бригады", url: "/teams", icon: UsersRound },
+  { title: "Задачи", url: "/tasks", icon: ListTodo },
+  { title: "Разделы в складе", url: "/warehouse-categories", icon: FolderTree },
+  { title: "Комплектующие", url: "/spare-parts", icon: Package },
+  { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];
 
 // Helper to check if user can see an item
@@ -48,15 +70,21 @@ export function MobileBottomNav() {
 
   const isLoading = isAdminLoading || permissionsLoading;
 
-  // Filter items based on permissions
-  const visibleItems = isLoading ? [] : allItems.filter(item => canViewItem(item.url, permissions));
+  // For admin: fixed main items, all other items in more menu
+  // For regular user: first 4 accessible items in main, rest in more
+  let mainItems: typeof allItems = [];
+  let moreItems: typeof allItems = [];
 
-  // Show first 4 items in bottom bar, rest in "more" menu
-  const mainItems = visibleItems.slice(0, 4);
-  const moreItems = visibleItems.slice(4);
-
-  // Add users for admin
-  const adminItem = isAdmin ? { title: "Пользователи", url: "/users", icon: Shield, group: "admin" } : null;
+  if (!isLoading) {
+    if (isAdmin) {
+      mainItems = adminMainItems;
+      moreItems = adminMoreItems;
+    } else {
+      const visibleItems = allItems.filter(item => canViewItem(item.url, permissions));
+      mainItems = visibleItems.slice(0, 4);
+      moreItems = visibleItems.slice(4);
+    }
+  }
 
   const handleNavigate = (url: string) => {
     navigate(url);
@@ -69,7 +97,7 @@ export function MobileBottomNav() {
     setSheetOpen(false);
   };
 
-  if (isLoading || visibleItems.length === 0) {
+  if (isLoading || mainItems.length === 0) {
     return null;
   }
 
@@ -95,13 +123,13 @@ export function MobileBottomNav() {
         ))}
 
         {/* More menu if there are additional items */}
-        {(moreItems.length > 0 || adminItem) && (
+        {moreItems.length > 0 && (
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <button
                 className={cn(
                   "flex flex-col items-center justify-center flex-1 h-full gap-1 text-xs transition-colors",
-                  moreItems.some(item => isActive(item.url)) || (adminItem && isActive(adminItem.url))
+                  moreItems.some(item => isActive(item.url))
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
@@ -130,21 +158,6 @@ export function MobileBottomNav() {
                     <span className="text-xs text-center">{item.title}</span>
                   </button>
                 ))}
-                
-                {adminItem && (
-                  <button
-                    onClick={() => handleNavigate(adminItem.url)}
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-2 p-3 rounded-lg transition-colors",
-                      isActive(adminItem.url)
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    )}
-                  >
-                    <adminItem.icon className="h-6 w-6" />
-                    <span className="text-xs text-center">{adminItem.title}</span>
-                  </button>
-                )}
               </div>
 
               <button
