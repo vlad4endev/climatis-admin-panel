@@ -7,10 +7,12 @@ import { Employee } from "@/types/employee";
 import { EmployeeForm } from "@/components/employees/EmployeeForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from "@/hooks/useEmployees";
+import { useCanEdit } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
 
 export default function Employees() {
   const { data: employees = [], isLoading, error } = useEmployees();
+  const { canEdit } = useCanEdit("employees");
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
   const deleteEmployee = useDeleteEmployee();
@@ -27,11 +29,11 @@ export default function Employees() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingEmployee(item),
-    onEdit: (item) => {
+    onEdit: canEdit ? (item) => {
       setEditingEmployee(item);
       setIsDialogOpen(true);
-    },
-    onDelete: (id) => deleteEmployee.mutate(id),
+    } : undefined,
+    onDelete: canEdit ? (id) => deleteEmployee.mutate(id) : undefined,
   };
 
   const handleSubmit = async (data: Omit<Employee, 'id' | 'createdAt'>) => {
@@ -66,8 +68,8 @@ export default function Employees() {
         <PageHeader
           title="Сотрудники"
           description="Управление сотрудниками компании"
-          buttonLabel="Добавить сотрудника"
-          onButtonClick={() => setIsDialogOpen(true)}
+          buttonLabel={canEdit ? "Добавить сотрудника" : undefined}
+          onButtonClick={canEdit ? () => setIsDialogOpen(true) : undefined}
         />
         <EntityList items={employees} config={config} emptyMessage="Нет сотрудников. Добавьте первого сотрудника." />
       </div>

@@ -8,11 +8,13 @@ import { TeamForm } from "@/components/teams/TeamForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useTeams, useCreateTeam, useUpdateTeam, useDeleteTeam } from "@/hooks/useTeams";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useCanEdit } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
 
 export default function Teams() {
   const { data: teams = [], isLoading: teamsLoading } = useTeams();
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
+  const { canEdit } = useCanEdit("teams");
   const createTeam = useCreateTeam();
   const updateTeam = useUpdateTeam();
   const deleteTeam = useDeleteTeam();
@@ -39,8 +41,8 @@ export default function Teams() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingTeam(item),
-    onEdit: (item) => { setEditingTeam(item); setIsDialogOpen(true); },
-    onDelete: (id) => deleteTeam.mutate(id),
+    onEdit: canEdit ? (item) => { setEditingTeam(item); setIsDialogOpen(true); } : undefined,
+    onDelete: canEdit ? (id) => deleteTeam.mutate(id) : undefined,
   };
 
   const handleSubmit = async (data: Omit<Team, 'id' | 'createdAt' | 'leaderName' | 'memberNames'>) => {
@@ -67,8 +69,8 @@ export default function Teams() {
         <PageHeader
           title="Бригады"
           description="Управление рабочими бригадами"
-          buttonLabel="Добавить бригаду"
-          onButtonClick={() => setIsDialogOpen(true)}
+          buttonLabel={canEdit ? "Добавить бригаду" : undefined}
+          onButtonClick={canEdit ? () => setIsDialogOpen(true) : undefined}
         />
         <EntityList items={teams} config={config} emptyMessage="Нет бригад. Добавьте первую бригаду." />
       </div>
