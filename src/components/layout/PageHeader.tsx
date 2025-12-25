@@ -11,12 +11,12 @@ interface PageHeaderProps {
 export function PageHeader({ title, description, buttonLabel, onButtonClick }: PageHeaderProps) {
 
   return (
-    <div className="space-y-4 mb-6">
-      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
+    <div className="space-y-2 sm:space-y-4 mb-2 sm:mb-6">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+          <h1 className="text-xl sm:text-3xl font-bold truncate">{title}</h1>
           {description && (
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{description}</p>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base hidden sm:block">{description}</p>
           )}
         </div>
         {buttonLabel && onButtonClick && (
