@@ -72,8 +72,8 @@ export function ServiceObjectContactsEditor({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Закреплённые контакты</h4>
-        {!readOnly && availableContacts.length > 0 && (
+        <h4 className="text-sm font-medium">Контактные лица объекта</h4>
+        {!readOnly && availableContacts.length > 0 && assignedContacts.length > 0 && (
           <Button
             type="button"
             variant="outline"
@@ -96,7 +96,36 @@ export function ServiceObjectContactsEditor({
       </div>
 
       {/* Закреплённые контакты */}
-      {assignedContacts.length === 0 ? (
+      {assignedContacts.length === 0 && !readOnly && availableContacts.length > 0 ? (
+        <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
+          <p className="text-sm text-muted-foreground mb-2">
+            Выберите контактных лиц организации:
+          </p>
+          {availableContacts.map((contact) => (
+            <div
+              key={contact.id}
+              className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
+              onClick={() => handleToggleContact(contact.id, false)}
+            >
+              <Checkbox
+                checked={false}
+                disabled={assignContact.isPending}
+              />
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <span className="truncate">{contact.name}</span>
+                {contact.isMain && (
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    Основной
+                  </Badge>
+                )}
+                {contact.phone && (
+                  <span className="text-sm text-muted-foreground">{contact.phone}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : assignedContacts.length === 0 ? (
         <div className="text-sm text-muted-foreground p-3 border rounded-lg border-dashed">
           Нет закреплённых контактов
         </div>
@@ -151,7 +180,7 @@ export function ServiceObjectContactsEditor({
         </div>
       )}
 
-      {/* Выбор контактов для добавления */}
+      {/* Выбор контактов для добавления (когда уже есть закреплённые) */}
       {isAdding && availableContacts.length > 0 && (
         <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
           <p className="text-sm text-muted-foreground mb-2">
