@@ -10,6 +10,7 @@ import { useMyPermissions, useIsAdmin, SECTIONS } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
 import Auth from "./pages/Auth";
 import Clients from "./pages/Clients";
+import Contacts from "./pages/Contacts";
 import ServiceObjects from "./pages/ServiceObjects";
 import Documents from "./pages/Documents";
 import Employees from "./pages/Employees";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
+            <Route path="/contacts" element={<ProtectedRoute><AppLayout><Contacts /></AppLayout></ProtectedRoute>} />
             <Route path="/service-objects" element={<ProtectedRoute><AppLayout><ServiceObjects /></AppLayout></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute><AppLayout><Documents /></AppLayout></ProtectedRoute>} />
             <Route path="/employees" element={<ProtectedRoute><AppLayout><Employees /></AppLayout></ProtectedRoute>} />

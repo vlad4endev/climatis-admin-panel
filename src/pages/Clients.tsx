@@ -61,7 +61,7 @@ export default function Clients() {
     fields: [
       {
         key: 'companyName',
-        label: 'Название компании',
+        label: 'Название организации',
         type: 'text',
         render: (value) => (
           <div className="flex items-center gap-2">
@@ -89,11 +89,6 @@ export default function Clients() {
         searchable: true,
         editable: true,
         render: (value) => value ? <span className="text-sm">{value}</span> : <span className="text-muted-foreground text-sm">—</span>,
-      },
-      {
-        key: 'mainContactName',
-        label: 'Контактное лицо',
-        type: 'text',
       },
       {
         key: 'phone',
@@ -154,16 +149,16 @@ export default function Clients() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Клиенты"
-        description="Управление базой клиентов компании"
-        buttonLabel={canEdit ? "Добавить клиента" : undefined}
+        title="Организации"
+        description="Управление базой организаций компании"
+        buttonLabel={canEdit ? "Добавить организацию" : undefined}
         onButtonClick={canEdit ? () => setIsFormOpen(true) : undefined}
       />
 
       <EntityList
         items={clients}
         config={clientsConfig}
-        emptyMessage="Нет клиентов. Создайте первого клиента."
+        emptyMessage="Нет организаций. Создайте первую организацию."
         defaultViewMode="table"
       />
 
@@ -174,7 +169,7 @@ export default function Clients() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingClient ? "Редактировать клиента" : "Добавить клиента"}
+              {editingClient ? "Редактировать организацию" : "Добавить организацию"}
             </DialogTitle>
           </DialogHeader>
           <ClientForm

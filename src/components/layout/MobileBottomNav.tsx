@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, Shield, MoreHorizontal, LogOut } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, Shield, MoreHorizontal, LogOut, Contact } from "lucide-react";
 import { useIsAdmin, useMyPermissions, PermissionLevel } from "@/hooks/useUserRoles";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ const urlToSectionKey = (url: string): string => url.replace("/", "");
 
 // Admin main items (fixed order)
 const adminMainItems = [
-  { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Организации", url: "/clients", icon: Users },
   { title: "Заявки", url: "/requests", icon: Inbox },
   { title: "Расчеты", url: "/estimates", icon: Coins },
   { title: "Задания", url: "/assignments", icon: ClipboardCheck },
@@ -25,6 +25,7 @@ const adminMainItems = [
 
 // Admin additional items for "more" menu
 const adminMoreItems = [
+  { title: "Контактные лица", url: "/contacts", icon: Contact },
   { title: "Объекты", url: "/service-objects", icon: MapPin },
   { title: "Документы", url: "/documents", icon: ScrollText },
   { title: "Сотрудники", url: "/employees", icon: UserCircle },
@@ -38,7 +39,8 @@ const adminMoreItems = [
 
 // All items for regular users
 const allItems = [
-  { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Организации", url: "/clients", icon: Users },
+  { title: "Контактные лица", url: "/contacts", icon: Contact },
   { title: "Объекты", url: "/service-objects", icon: MapPin },
   { title: "Заявки", url: "/requests", icon: Inbox },
   { title: "Документы", url: "/documents", icon: ScrollText },
