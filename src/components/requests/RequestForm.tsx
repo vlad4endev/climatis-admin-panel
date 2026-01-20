@@ -95,11 +95,7 @@ export function RequestForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="requestNumber">Номер заявки *</Label>
-          <Input id="requestNumber" {...register("requestNumber", { required: true })} />
-        </div>
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="status">Статус *</Label>
           <Select value={selectedStatus} onValueChange={(value) => setValue("status", value as any)}>
@@ -115,9 +111,6 @@ export function RequestForm({
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="type">Тип заявки *</Label>
           <Select value={selectedType} onValueChange={(value) => setValue("type", value as any)}>
