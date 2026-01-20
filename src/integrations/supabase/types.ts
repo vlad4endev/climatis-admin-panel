@@ -583,6 +583,42 @@ export type Database = {
         }
         Relationships: []
       }
+      service_object_contacts: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          service_object_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          service_object_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          service_object_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_object_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_object_contacts_service_object_id_fkey"
+            columns: ["service_object_id"]
+            isOneToOne: false
+            referencedRelation: "service_objects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_objects: {
         Row: {
           access_description: string | null
