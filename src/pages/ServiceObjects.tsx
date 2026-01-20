@@ -24,11 +24,11 @@ export default function ServiceObjects() {
   const [editingObject, setEditingObject] = useState<ServiceObject | null>(null);
   const [viewingObject, setViewingObject] = useState<ServiceObject | null>(null);
 
-  const handleSubmit = async (objectData: Omit<ServiceObject, "id" | "createdAt" | "clientName">) => {
+  const handleSubmit = async (objectData: Omit<ServiceObject, "id" | "createdAt" | "clientName">, contactId?: string) => {
     if (editingObject) {
-      await updateObject.mutateAsync({ id: editingObject.id, ...objectData });
+      await updateObject.mutateAsync({ id: editingObject.id, ...objectData, contactId });
     } else {
-      await createObject.mutateAsync(objectData);
+      await createObject.mutateAsync({ ...objectData, contactId });
     }
     setIsFormVisible(false);
     setEditingObject(null);

@@ -44,7 +44,7 @@ export function useCreateServiceObject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (obj: Omit<ServiceObject, "id" | "createdAt" | "clientName">) => {
+    mutationFn: async ({ contactId, ...obj }: Omit<ServiceObject, "id" | "createdAt" | "clientName"> & { contactId?: string }) => {
       const { data, error } = await supabase
         .from("service_objects")
         .insert({
@@ -58,6 +58,17 @@ export function useCreateServiceObject() {
         .single();
 
       if (error) throw error;
+
+      // Привязываем контакт, если указан
+      if (contactId && data) {
+        await supabase
+          .from("service_object_contacts")
+          .insert({
+            service_object_id: data.id,
+            contact_id: contactId,
+          });
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -72,7 +83,7 @@ export function useUpdateServiceObject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...obj }: Omit<ServiceObject, "createdAt" | "clientName">) => {
+    mutationFn: async ({ id, contactId, ...obj }: Omit<ServiceObject, "createdAt" | "clientName"> & { contactId?: string }) => {
       const { error } = await supabase
         .from("service_objects")
         .update({
@@ -85,6 +96,21 @@ export function useUpdateServiceObject() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Обновляем контакт: удаляем старые и добавляем новый
+      await supabase
+        .from("service_object_contacts")
+        .delete()
+        .eq("service_object_id", id);
+
+      if (contactId) {
+        await supabase
+          .from("service_object_contacts")
+          .insert({
+            service_object_id: id,
+            contact_id: contactId,
+          });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });

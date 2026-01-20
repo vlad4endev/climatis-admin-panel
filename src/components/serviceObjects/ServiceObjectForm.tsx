@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +34,7 @@ const formSchema = z.object({
 
 interface ServiceObjectFormProps {
   clients: Client[];
-  onSubmit: (data: Omit<ServiceObject, "id" | "createdAt" | "clientName">) => void;
+  onSubmit: (data: Omit<ServiceObject, "id" | "createdAt" | "clientName">, contactId?: string) => void;
   onCancel: () => void;
   initialData?: ServiceObject;
   readOnly?: boolean;
@@ -46,6 +47,10 @@ export function ServiceObjectForm({
   initialData,
   readOnly = false,
 }: ServiceObjectFormProps) {
+  const [selectedContactId, setSelectedContactId] = useState<string>(
+    initialData?.assignedContacts?.[0]?.id || ""
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,6 +62,14 @@ export function ServiceObjectForm({
     },
   });
 
+  // Сброс контакта при смене организации
+  const watchedClientId = form.watch("clientId");
+  useEffect(() => {
+    if (watchedClientId !== initialData?.clientId) {
+      setSelectedContactId("");
+    }
+  }, [watchedClientId, initialData?.clientId]);
+
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit({
       clientId: values.clientId,
@@ -64,7 +77,7 @@ export function ServiceObjectForm({
       address: values.address,
       accessDescription: values.accessDescription || "",
       notes: values.notes || "",
-    });
+    }, selectedContactId || undefined);
   };
 
   return (
@@ -98,8 +111,9 @@ export function ServiceObjectForm({
 
           {/* Контактное лицо — сразу после организации */}
           <ServiceObjectContactsEditor
-            serviceObjectId={initialData?.id}
             clientId={form.watch("clientId") || initialData?.clientId}
+            selectedContactId={selectedContactId}
+            onContactChange={setSelectedContactId}
             readOnly={readOnly}
           />
 
