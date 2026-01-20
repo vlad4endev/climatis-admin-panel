@@ -113,6 +113,9 @@ export function useAssignContactToServiceObject() {
       queryClient.invalidateQueries({
         queryKey: ["service_object_contacts", variables.serviceObjectId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["service_objects"],
+      });
       toast.success("Контакт закреплён за объектом");
     },
     onError: (error: Error) => {
@@ -143,6 +146,9 @@ export function useRemoveContactFromServiceObject() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["service_object_contacts", variables.serviceObjectId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["service_objects"],
       });
       toast.success("Контакт откреплён от объекта");
     },

@@ -11,7 +11,10 @@ export function useServiceObjects() {
         .from("service_objects")
         .select(`
           *,
-          client:clients(id, company_name)
+          client:clients(id, company_name),
+          service_object_contacts(
+            contact:contacts(id, name, phone, is_main)
+          )
         `)
         .order("created_at", { ascending: false });
 
@@ -26,6 +29,12 @@ export function useServiceObjects() {
         accessDescription: row.access_description || "",
         notes: row.notes || "",
         createdAt: new Date(row.created_at),
+        assignedContacts: row.service_object_contacts?.map((soc: any) => ({
+          id: soc.contact?.id || "",
+          name: soc.contact?.name || "",
+          phone: soc.contact?.phone || "",
+          isMain: soc.contact?.is_main || false,
+        })) || [],
       }));
     },
   });

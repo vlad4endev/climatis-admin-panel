@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ServiceObject } from "@/types/serviceObject";
 import { ServiceObjectForm } from "@/components/serviceObjects/ServiceObjectForm";
 import { ServiceObjectViewDialog } from "@/components/serviceObjects/ServiceObjectViewDialog";
-import { MapPin, Building2, User, Loader2 } from "lucide-react";
+import { MapPin, Building2, User, Loader2, Users } from "lucide-react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +49,7 @@ export default function ServiceObjects() {
       },
       {
         key: 'clientName',
-        label: 'Клиент',
+        label: 'Организация',
         type: 'select',
         editable: false,
         options: clients.map(c => ({ value: c.id, label: c.companyName })),
@@ -60,6 +60,31 @@ export default function ServiceObjects() {
             <Badge variant="outline">{obj.clientName}</Badge>
           </div>
         ),
+      },
+      {
+        key: 'assignedContacts',
+        label: 'Контактные лица',
+        type: 'text',
+        editable: false,
+        searchable: false,
+        render: (_, obj) => {
+          const contacts = obj.assignedContacts || [];
+          if (contacts.length === 0) {
+            return <span className="text-muted-foreground">—</span>;
+          }
+          return (
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="flex flex-wrap gap-1">
+                {contacts.map((contact) => (
+                  <Badge key={contact.id} variant="secondary" className="text-xs">
+                    {contact.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          );
+        },
       },
       {
         key: 'address',
