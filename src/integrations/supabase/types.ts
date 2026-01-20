@@ -344,7 +344,7 @@ export type Database = {
             foreignKeyName: "estimates_created_by_id_fkey"
             columns: ["created_by_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {

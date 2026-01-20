@@ -12,7 +12,7 @@ export function useEstimates() {
         .select(`
           *,
           request:requests(id, request_number),
-          creator:profiles(id, full_name),
+          creator:employees(id, full_name),
           materials:estimate_materials(
             id,
             material_name,
