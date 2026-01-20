@@ -73,6 +73,7 @@ export default function Contacts() {
         label: 'Организация',
         type: 'select',
         options: clientOptions,
+        getValue: (item) => item.clientName || '',
         render: (value, item) => (
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -118,6 +119,7 @@ export default function Contacts() {
     onUpdate: canEdit ? handleUpdateField : undefined,
     onDelete: canEdit ? handleDeleteContact : undefined,
     onEdit: canEdit ? handleEditContact : undefined,
+    searchPlaceholder: "Поиск по ФИО, организации, телефону, email, примечаниям...",
   };
 
   if (isLoading) {
