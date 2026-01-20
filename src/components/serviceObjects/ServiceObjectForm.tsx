@@ -76,11 +76,11 @@ export function ServiceObjectForm({
             name="clientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Клиент {!readOnly && '*'}</FormLabel>
+                <FormLabel>Организация {!readOnly && '*'}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={readOnly}>
                   <FormControl>
                     <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
-                      <SelectValue placeholder="Выберите клиента" />
+                      <SelectValue placeholder="Выберите организацию" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -94,6 +94,13 @@ export function ServiceObjectForm({
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          {/* Контактное лицо — сразу после организации */}
+          <ServiceObjectContactsEditor
+            serviceObjectId={initialData?.id}
+            clientId={form.watch("clientId") || initialData?.clientId}
+            readOnly={readOnly}
           />
 
           <FormField
@@ -176,14 +183,6 @@ export function ServiceObjectForm({
             )}
           />
 
-          {/* Контактные лица */}
-          <div className="pt-4 border-t">
-            <ServiceObjectContactsEditor
-              serviceObjectId={initialData?.id}
-              clientId={form.watch("clientId") || initialData?.clientId}
-              readOnly={readOnly}
-            />
-          </div>
         </div>
 
         {!readOnly && (
