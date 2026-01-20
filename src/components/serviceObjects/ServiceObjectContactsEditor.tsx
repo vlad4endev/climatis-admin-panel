@@ -1,19 +1,24 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, User, Phone, Mail, Star, UserPlus, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 import {
   useContactsByClient,
   useServiceObjectContacts,
   useAssignContactToServiceObject,
   useRemoveContactFromServiceObject,
 } from "@/hooks/useServiceObjectContacts";
-import { cn } from "@/lib/utils";
 
 interface ServiceObjectContactsEditorProps {
-  serviceObjectId: string | undefined;
-  clientId: string | undefined;
+  serviceObjectId?: string;
+  clientId?: string;
   readOnly?: boolean;
 }
 
@@ -22,197 +27,147 @@ export function ServiceObjectContactsEditor({
   clientId,
   readOnly = false,
 }: ServiceObjectContactsEditorProps) {
-  const [isAdding, setIsAdding] = useState(false);
-
-  const { data: clientContacts = [], isLoading: isLoadingClient } =
-    useContactsByClient(clientId);
-  const { data: assignedContacts = [], isLoading: isLoadingAssigned } =
-    useServiceObjectContacts(serviceObjectId);
-
+  const { data: assignedContacts = [], isLoading: assignedLoading } = useServiceObjectContacts(serviceObjectId);
+  const { data: clientContacts = [], isLoading: clientContactsLoading } = useContactsByClient(clientId);
   const assignContact = useAssignContactToServiceObject();
   const removeContact = useRemoveContactFromServiceObject();
+  
+  const [selectedContactId, setSelectedContactId] = useState<string>("");
 
-  const assignedIds = new Set(assignedContacts.map((c) => c.id));
-  const availableContacts = clientContacts.filter((c) => !assignedIds.has(c.id));
-
-  const handleToggleContact = (contactId: string, isAssigned: boolean) => {
-    if (!serviceObjectId) return;
-
-    if (isAssigned) {
-      removeContact.mutate({ serviceObjectId, contactId });
+  // Инициализация выбранного контакта
+  useEffect(() => {
+    if (assignedContacts.length > 0) {
+      setSelectedContactId(assignedContacts[0].id);
+    } else if (clientContacts.length === 1) {
+      // Если у клиента только один контакт — автовыбор
+      setSelectedContactId(clientContacts[0].id);
     } else {
-      assignContact.mutate({ serviceObjectId, contactId });
+      setSelectedContactId("");
+    }
+  }, [assignedContacts, clientContacts]);
+
+  // Обработка смены контакта
+  const handleContactChange = async (newContactId: string) => {
+    if (!serviceObjectId || readOnly) return;
+    
+    setSelectedContactId(newContactId);
+
+    // Удаляем текущий привязанный контакт (если есть)
+    if (assignedContacts.length > 0) {
+      await removeContact.mutateAsync({
+        serviceObjectId,
+        contactId: assignedContacts[0].id,
+      });
+    }
+
+    // Добавляем новый
+    if (newContactId) {
+      await assignContact.mutateAsync({
+        serviceObjectId,
+        contactId: newContactId,
+      });
     }
   };
 
   if (!clientId) {
     return (
-      <div className="text-sm text-muted-foreground p-4 border rounded-lg">
-        Сначала выберите организацию
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Контактное лицо</Label>
+        <div className="text-sm text-muted-foreground p-3 border rounded-lg border-dashed">
+          Сначала выберите организацию
+        </div>
       </div>
     );
   }
 
   if (!serviceObjectId) {
     return (
-      <div className="text-sm text-muted-foreground p-4 border rounded-lg">
-        Сначала сохраните объект, чтобы закрепить контактные лица
-      </div>
-    );
-  }
-
-  if (isLoadingClient || isLoadingAssigned) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Контактные лица объекта</h4>
-        {!readOnly && availableContacts.length > 0 && assignedContacts.length > 0 && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAdding(!isAdding)}
-          >
-            {isAdding ? (
-              <>
-                <X className="h-4 w-4 mr-1" />
-                Скрыть
-              </>
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-1" />
-                Добавить
-              </>
-            )}
-          </Button>
-        )}
-      </div>
-
-      {/* Закреплённые контакты */}
-      {assignedContacts.length === 0 && !readOnly && availableContacts.length > 0 ? (
-        <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">
-            Выберите контактных лиц организации:
-          </p>
-          {availableContacts.map((contact) => (
-            <div
-              key={contact.id}
-              className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
-              onClick={() => handleToggleContact(contact.id, false)}
-            >
-              <Checkbox
-                checked={false}
-                disabled={assignContact.isPending}
-              />
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="truncate">{contact.name}</span>
-                {contact.isMain && (
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    Основной
-                  </Badge>
-                )}
-                {contact.phone && (
-                  <span className="text-sm text-muted-foreground">{contact.phone}</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : assignedContacts.length === 0 ? (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Контактное лицо</Label>
         <div className="text-sm text-muted-foreground p-3 border rounded-lg border-dashed">
-          Нет закреплённых контактов
+          Сначала сохраните объект, чтобы выбрать контактное лицо
         </div>
-      ) : (
-        <div className="space-y-2">
-          {assignedContacts.map((contact) => (
-            <div
-              key={contact.id}
-              className={cn(
-                "flex items-center justify-between p-3 border rounded-lg bg-card",
-                contact.isMain && "border-primary/50 bg-primary/5"
-              )}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium truncate">{contact.name}</span>
-                    {contact.isMain && (
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 shrink-0" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    {contact.phone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {contact.phone}
-                      </span>
-                    )}
-                    {contact.email && (
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {contact.email}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {!readOnly && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleToggleContact(contact.id, true)}
-                  disabled={removeContact.isPending}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Выбор контактов для добавления (когда уже есть закреплённые) */}
-      {isAdding && availableContacts.length > 0 && (
-        <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">
-            Доступные контакты организации:
-          </p>
-          {availableContacts.map((contact) => (
-            <div
-              key={contact.id}
-              className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
-              onClick={() => handleToggleContact(contact.id, false)}
-            >
-              <Checkbox
-                checked={false}
-                disabled={assignContact.isPending}
-              />
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="truncate">{contact.name}</span>
-                {contact.isMain && (
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    Основной
-                  </Badge>
-                )}
-              </div>
-            </div>
-          ))}
+  if (clientContactsLoading || assignedLoading) {
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Контактное лицо</Label>
+        <div className="flex items-center gap-2 p-3">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm text-muted-foreground">Загрузка...</span>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {clientContacts.length === 0 && (
+  if (clientContacts.length === 0) {
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Контактное лицо</Label>
         <div className="text-sm text-muted-foreground p-3 border rounded-lg border-dashed">
           У организации нет контактных лиц
         </div>
+      </div>
+    );
+  }
+
+  const selectedContact = clientContacts.find(c => c.id === selectedContactId);
+  const isSingleContact = clientContacts.length === 1;
+  const isDisabled = readOnly || isSingleContact || assignContact.isPending || removeContact.isPending;
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">Контактное лицо</Label>
+      
+      {isSingleContact ? (
+        // Только один контакт — показываем как текст
+        <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/30">
+          <span>{clientContacts[0].name}</span>
+          {clientContacts[0].isMain && (
+            <Badge variant="secondary" className="text-xs">Основной</Badge>
+          )}
+          {clientContacts[0].phone && (
+            <span className="text-sm text-muted-foreground ml-auto">{clientContacts[0].phone}</span>
+          )}
+        </div>
+      ) : (
+        // Несколько контактов — выпадающий список
+        <Select
+          value={selectedContactId}
+          onValueChange={handleContactChange}
+          disabled={isDisabled}
+        >
+          <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+            <SelectValue placeholder="Выберите контактное лицо">
+              {selectedContact && (
+                <div className="flex items-center gap-2">
+                  <span>{selectedContact.name}</span>
+                  {selectedContact.isMain && (
+                    <Badge variant="secondary" className="text-xs">Основной</Badge>
+                  )}
+                </div>
+              )}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {clientContacts.map((contact) => (
+              <SelectItem key={contact.id} value={contact.id}>
+                <div className="flex items-center gap-2">
+                  <span>{contact.name}</span>
+                  {contact.isMain && (
+                    <Badge variant="secondary" className="text-xs">Основной</Badge>
+                  )}
+                  {contact.phone && (
+                    <span className="text-muted-foreground ml-2">{contact.phone}</span>
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
     </div>
   );
