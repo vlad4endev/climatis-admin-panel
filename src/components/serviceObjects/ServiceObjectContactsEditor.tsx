@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -9,65 +9,39 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import {
-  useContactsByClient,
-  useServiceObjectContacts,
-  useAssignContactToServiceObject,
-  useRemoveContactFromServiceObject,
-} from "@/hooks/useServiceObjectContacts";
+import { useContactsByClient } from "@/hooks/useServiceObjectContacts";
 
 interface ServiceObjectContactsEditorProps {
-  serviceObjectId?: string;
   clientId?: string;
+  selectedContactId?: string;
+  onContactChange?: (contactId: string) => void;
   readOnly?: boolean;
 }
 
 export function ServiceObjectContactsEditor({
-  serviceObjectId,
   clientId,
+  selectedContactId = "",
+  onContactChange,
   readOnly = false,
 }: ServiceObjectContactsEditorProps) {
-  const { data: assignedContacts = [], isLoading: assignedLoading } = useServiceObjectContacts(serviceObjectId);
   const { data: clientContacts = [], isLoading: clientContactsLoading } = useContactsByClient(clientId);
-  const assignContact = useAssignContactToServiceObject();
-  const removeContact = useRemoveContactFromServiceObject();
-  
-  const [selectedContactId, setSelectedContactId] = useState<string>("");
 
-  // Инициализация выбранного контакта
+  // Автовыбор единственного контакта
   useEffect(() => {
-    if (assignedContacts.length > 0) {
-      setSelectedContactId(assignedContacts[0].id);
-    } else if (clientContacts.length === 1) {
-      // Если у клиента только один контакт — автовыбор
-      setSelectedContactId(clientContacts[0].id);
-    } else {
-      setSelectedContactId("");
+    if (clientContacts.length === 1 && !selectedContactId && onContactChange) {
+      onContactChange(clientContacts[0].id);
     }
-  }, [assignedContacts, clientContacts]);
+  }, [clientContacts, selectedContactId, onContactChange]);
 
-  // Обработка смены контакта
-  const handleContactChange = async (newContactId: string) => {
-    if (!serviceObjectId || readOnly) return;
-    
-    setSelectedContactId(newContactId);
-
-    // Удаляем текущий привязанный контакт (если есть)
-    if (assignedContacts.length > 0) {
-      await removeContact.mutateAsync({
-        serviceObjectId,
-        contactId: assignedContacts[0].id,
-      });
+  // Сброс выбора при смене клиента
+  useEffect(() => {
+    if (clientId && selectedContactId && clientContacts.length > 0) {
+      const contactBelongsToClient = clientContacts.some(c => c.id === selectedContactId);
+      if (!contactBelongsToClient && onContactChange) {
+        onContactChange("");
+      }
     }
-
-    // Добавляем новый
-    if (newContactId) {
-      await assignContact.mutateAsync({
-        serviceObjectId,
-        contactId: newContactId,
-      });
-    }
-  };
+  }, [clientId, clientContacts, selectedContactId, onContactChange]);
 
   if (!clientId) {
     return (
@@ -80,18 +54,7 @@ export function ServiceObjectContactsEditor({
     );
   }
 
-  if (!serviceObjectId) {
-    return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Контактное лицо</Label>
-        <div className="text-sm text-muted-foreground p-3 border rounded-lg border-dashed">
-          Сначала сохраните объект, чтобы выбрать контактное лицо
-        </div>
-      </div>
-    );
-  }
-
-  if (clientContactsLoading || assignedLoading) {
+  if (clientContactsLoading) {
     return (
       <div className="space-y-2">
         <Label className="text-sm font-medium">Контактное лицо</Label>
@@ -116,7 +79,6 @@ export function ServiceObjectContactsEditor({
 
   const selectedContact = clientContacts.find(c => c.id === selectedContactId);
   const isSingleContact = clientContacts.length === 1;
-  const isDisabled = readOnly || isSingleContact || assignContact.isPending || removeContact.isPending;
 
   return (
     <div className="space-y-2">
@@ -137,8 +99,8 @@ export function ServiceObjectContactsEditor({
         // Несколько контактов — выпадающий список
         <Select
           value={selectedContactId}
-          onValueChange={handleContactChange}
-          disabled={isDisabled}
+          onValueChange={onContactChange}
+          disabled={readOnly}
         >
           <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
             <SelectValue placeholder="Выберите контактное лицо">

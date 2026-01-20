@@ -6,9 +6,8 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ServiceObject } from "@/types/serviceObject";
-import { Building2, MapPin, User } from "lucide-react";
+import { Building2, MapPin, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ServiceObjectContactsEditor } from "./ServiceObjectContactsEditor";
 
 interface ServiceObjectViewDialogProps {
   item: ServiceObject | null;
@@ -22,6 +21,8 @@ export function ServiceObjectViewDialog({
   onOpenChange,
 }: ServiceObjectViewDialogProps) {
   if (!item) return null;
+
+  const contacts = item.assignedContacts || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,6 +52,26 @@ export function ServiceObjectViewDialog({
             </div>
           </div>
 
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">
+              Контактное лицо
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              {contacts.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {contacts.map((contact) => (
+                    <Badge key={contact.id} variant="secondary">
+                      {contact.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </div>
+          </div>
+
           <Separator />
 
           <div>
@@ -76,14 +97,6 @@ export function ServiceObjectViewDialog({
               {item.notes || "—"}
             </div>
           </div>
-
-          <Separator />
-
-          <ServiceObjectContactsEditor
-            serviceObjectId={item.id}
-            clientId={item.clientId}
-            readOnly
-          />
         </div>
       </DialogContent>
     </Dialog>
