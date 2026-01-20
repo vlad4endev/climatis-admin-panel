@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ServiceObject } from "@/types/serviceObject";
 import { ServiceObjectForm } from "@/components/serviceObjects/ServiceObjectForm";
+import { ServiceObjectViewDialog } from "@/components/serviceObjects/ServiceObjectViewDialog";
 import { MapPin, Building2, User, Loader2 } from "lucide-react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -128,12 +128,10 @@ export default function ServiceObjects() {
         </DialogContent>
       </Dialog>
 
-      <EntityViewDialog
+      <ServiceObjectViewDialog
         item={viewingObject}
         open={!!viewingObject}
         onOpenChange={(open) => !open && setViewingObject(null)}
-        config={objectsConfig}
-        title={viewingObject?.objectName}
       />
     </div>
   );

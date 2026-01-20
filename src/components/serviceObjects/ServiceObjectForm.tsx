@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { ServiceObject } from "@/types/serviceObject";
 import { Client } from "@/types/client";
+import { ServiceObjectContactsEditor } from "./ServiceObjectContactsEditor";
 
 const formSchema = z.object({
   clientId: z.string().min(1, "Выберите клиента"),
@@ -174,6 +175,15 @@ export function ServiceObjectForm({
               </FormItem>
             )}
           />
+
+          {/* Контактные лица */}
+          <div className="pt-4 border-t">
+            <ServiceObjectContactsEditor
+              serviceObjectId={initialData?.id}
+              clientId={form.watch("clientId") || initialData?.clientId}
+              readOnly={readOnly}
+            />
+          </div>
         </div>
 
         {!readOnly && (
