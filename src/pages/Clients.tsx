@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Client } from "@/types/client";
 import { ClientForm } from "@/components/clients/ClientForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Mail, Phone, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
@@ -87,28 +87,15 @@ export default function Clients() {
         label: 'Подразделение',
         type: 'text',
         searchable: true,
-        editable: true,
         render: (value) => value ? <span className="text-sm">{value}</span> : <span className="text-muted-foreground text-sm">—</span>,
       },
       {
-        key: 'phone',
-        label: 'Телефон',
-        type: 'phone',
+        key: 'requisites',
+        label: 'Реквизиты',
+        type: 'textarea',
         render: (value) => (
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span>{value}</span>
-          </div>
-        ),
-      },
-      {
-        key: 'email',
-        label: 'Email',
-        type: 'email',
-        render: (value) => (
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <span>{value}</span>
+          <div className="max-w-md text-sm text-muted-foreground line-clamp-2">
+            {value || "—"}
           </div>
         ),
       },
@@ -118,14 +105,13 @@ export default function Clients() {
         type: 'textarea',
         render: (value) => (
           <div className="max-w-md text-sm text-muted-foreground line-clamp-2">
-            {value}
+            {value || "—"}
           </div>
         ),
       },
     ],
     getItemId: (client) => client.id,
     onRowClick: (client) => setViewingClient(client),
-    onUpdate: canEdit ? handleUpdateField : undefined,
     onDelete: canEdit ? handleDeleteClient : undefined,
     onEdit: canEdit ? handleEditClient : undefined,
   };

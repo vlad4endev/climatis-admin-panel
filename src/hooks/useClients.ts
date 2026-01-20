@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Client, AdditionalContact } from "@/types/client";
+import { Client } from "@/types/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 
@@ -13,10 +13,7 @@ const transformToClient = (row: ClientRow): Client => ({
   companyName: row.company_name,
   type: row.type,
   division: row.division || "",
-  mainContactName: row.main_contact_name,
-  phone: row.phone,
-  email: row.email || "",
-  additionalContacts: (row.additional_contacts as unknown as AdditionalContact[]) || [],
+  requisites: (row as any).requisites || "",
   notes: row.notes || "",
   createdAt: new Date(row.created_at),
 });
@@ -28,10 +25,12 @@ const transformToInsert = (
   company_name: client.companyName,
   type: client.type,
   division: client.division || "",
-  main_contact_name: client.mainContactName,
-  phone: client.phone,
-  email: client.email || "",
-  additional_contacts: client.additionalContacts as unknown as Database["public"]["Tables"]["clients"]["Insert"]["additional_contacts"],
+  // These fields are now managed in contacts table, but still required by DB
+  main_contact_name: "-",
+  phone: "-",
+  email: "",
+  additional_contacts: [],
+  requisites: client.requisites || "",
   notes: client.notes || "",
 });
 
@@ -63,7 +62,7 @@ export function useCreateClient() {
       
       const { data, error } = await supabase
         .from("clients")
-        .insert(insertData)
+        .insert(insertData as any)
         .select()
         .single();
 
@@ -76,11 +75,11 @@ export function useCreateClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Клиент успешно создан");
+      toast.success("Организация успешно создана");
     },
     onError: (error) => {
       console.error("Create client error:", error);
-      toast.error("Ошибка при создании клиента");
+      toast.error("Ошибка при создании организации");
     },
   });
 }
@@ -97,7 +96,7 @@ export function useUpdateClient() {
 
       const { data, error } = await supabase
         .from("clients")
-        .update(updateData)
+        .update(updateData as any)
         .eq("id", id)
         .select()
         .single();
@@ -111,11 +110,11 @@ export function useUpdateClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Клиент обновлён");
+      toast.success("Организация обновлена");
     },
     onError: (error) => {
       console.error("Update client error:", error);
-      toast.error("Ошибка при обновлении клиента");
+      toast.error("Ошибка при обновлении организации");
     },
   });
 }
@@ -136,12 +135,9 @@ export function useUpdateClientField() {
       // Map frontend field names to database column names
       const fieldMap: Record<string, string> = {
         companyName: "company_name",
-        mainContactName: "main_contact_name",
-        additionalContacts: "additional_contacts",
         type: "type",
         division: "division",
-        phone: "phone",
-        email: "email",
+        requisites: "requisites",
         notes: "notes",
       };
 
@@ -182,11 +178,11 @@ export function useDeleteClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Клиент удалён");
+      toast.success("Организация удалена");
     },
     onError: (error) => {
       console.error("Delete client error:", error);
-      toast.error("Ошибка при удалении клиента");
+      toast.error("Ошибка при удалении организации");
     },
   });
 }

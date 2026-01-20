@@ -83,6 +83,7 @@ export type Database = {
           main_contact_name: string
           notes: string | null
           phone: string
+          requisites: string | null
           type: Database["public"]["Enums"]["client_type"]
           updated_at: string
         }
@@ -96,6 +97,7 @@ export type Database = {
           main_contact_name: string
           notes?: string | null
           phone: string
+          requisites?: string | null
           type?: Database["public"]["Enums"]["client_type"]
           updated_at?: string
         }
@@ -109,6 +111,7 @@ export type Database = {
           main_contact_name?: string
           notes?: string | null
           phone?: string
+          requisites?: string | null
           type?: Database["public"]["Enums"]["client_type"]
           updated_at?: string
         }
