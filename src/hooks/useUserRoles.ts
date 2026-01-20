@@ -22,7 +22,8 @@ export interface SectionPermission {
 }
 
 export const SECTIONS = [
-  { key: "clients", label: "Клиенты" },
+  { key: "clients", label: "Организации" },
+  { key: "contacts", label: "Контактные лица" },
   { key: "service-objects", label: "Объекты обслуживания" },
   { key: "documents", label: "Документы" },
   { key: "requests", label: "Заявки" },
