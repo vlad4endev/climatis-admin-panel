@@ -20,6 +20,7 @@ export interface EntityListConfig<T = any> {
   onEdit?: (item: T) => void;
   onRowClick?: (item: T) => void;
   customActions?: (item: T) => React.ReactNode;
+  searchPlaceholder?: string;
 }
 
 export type ViewMode = 'table' | 'card' | 'kanban';
