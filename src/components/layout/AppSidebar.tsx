@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut, Contact } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -28,7 +28,8 @@ import { Button } from "@/components/ui/button";
 const urlToSectionKey = (url: string): string => url.replace("/", "");
 
 const clientsItems = [
-  { title: "Клиенты", url: "/clients", icon: Users },
+  { title: "Организации", url: "/clients", icon: Users },
+  { title: "Контактные лица", url: "/contacts", icon: UserCircle },
   { title: "Объекты", url: "/service-objects", icon: MapPin },
 ];
 

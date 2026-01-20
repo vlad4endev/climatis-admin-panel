@@ -78,7 +78,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="companyName">Название компании {!readOnly && '*'}</Label>
+        <Label htmlFor="companyName">Название организации {!readOnly && '*'}</Label>
         <Input
           id="companyName"
           value={companyName}
@@ -239,7 +239,7 @@ export function ClientForm({ client, onSubmit, onCancel, readOnly = false }: Cli
       {!readOnly && (
         <div className="flex gap-3 pt-4">
           <Button type="submit" className="flex-1">
-            {client ? "Сохранить" : "Создать клиента"}
+            {client ? "Сохранить" : "Создать организацию"}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
