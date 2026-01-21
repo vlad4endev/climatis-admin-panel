@@ -128,3 +128,21 @@ export function getAttachmentUrl(filePath: string): string {
     .getPublicUrl(filePath);
   return data.publicUrl;
 }
+
+export async function downloadAttachment(filePath: string, fileName: string): Promise<void> {
+  const { data, error } = await supabase.storage
+    .from("estimate-attachments")
+    .download(filePath);
+
+  if (error) throw error;
+
+  // Create blob URL and trigger download
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
