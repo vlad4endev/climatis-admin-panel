@@ -201,10 +201,7 @@ export default function ActivityLogs() {
                       </TableCell>
                       <TableCell className="font-medium">{log.elementName || '—'}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getActionIcon(log.action)}
-                          <span className="text-sm">{getActionLabel(log.action)}</span>
-                        </div>
+                        {getActionIcon(log.action)}
                       </TableCell>
                       <TableCell className="max-w-[300px]">
                         {humanChanges.length > 0 ? (
