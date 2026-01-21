@@ -5,34 +5,57 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SparePart } from "@/types/sparePart";
+import { WarehouseCategory } from "@/types/warehouseCategory";
 
 interface SparePartFormProps {
   sparePart?: SparePart;
-  onSubmit: (data: Partial<SparePart>) => void;
+  categories: WarehouseCategory[];
+  onSubmit: (data: Partial<SparePart> & { categoryId?: string }) => void;
   onCancel: () => void;
   readOnly?: boolean;
 }
 
-export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false }: SparePartFormProps) {
+export function SparePartForm({ sparePart, categories, onSubmit, onCancel, readOnly = false }: SparePartFormProps) {
+  // Find the category ID for the existing spare part
+  const initialCategoryId = sparePart?.category 
+    ? categories.find(c => c.name === sparePart.category)?.id || ""
+    : "";
+
   const { register, handleSubmit, setValue, watch } = useForm({
-    defaultValues: sparePart || {
-      name: "",
-      internalArticle: "",
-      category: "Кондиционирование",
-      unit: "шт" as const,
-      currentStock: 0,
-      minStock: 0,
-      purchasePrice: 0,
-      retailPrice: 0,
-      notes: "",
+    defaultValues: {
+      name: sparePart?.name || "",
+      internalArticle: sparePart?.internalArticle || "",
+      categoryId: initialCategoryId,
+      unit: sparePart?.unit || "шт" as const,
+      currentStock: sparePart?.currentStock ?? 0,
+      minStock: sparePart?.minStock ?? 0,
+      purchasePrice: sparePart?.purchasePrice ?? 0,
+      retailPrice: sparePart?.retailPrice ?? 0,
+      notes: sparePart?.notes || "",
     },
   });
 
   const unit = watch("unit");
-  const category = watch("category");
+  const categoryId = watch("categoryId");
+
+  const onFormSubmit = (data: any) => {
+    // Transform form data to include categoryId
+    onSubmit({
+      name: data.name,
+      internalArticle: data.internalArticle,
+      category: categories.find(c => c.id === data.categoryId)?.name || "",
+      categoryId: data.categoryId,
+      unit: data.unit,
+      currentStock: data.currentStock,
+      minStock: data.minStock,
+      purchasePrice: data.purchasePrice,
+      retailPrice: data.retailPrice,
+      notes: data.notes,
+    });
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="name">Наименование {!readOnly && '*'}</Label>
         <Input 
@@ -56,15 +79,17 @@ export function SparePartForm({ sparePart, onSubmit, onCancel, readOnly = false 
       </div>
 
       <div>
-        <Label htmlFor="category">Раздел {!readOnly && '*'}</Label>
-        <Select value={category} onValueChange={(value) => setValue("category", value)} disabled={readOnly}>
+        <Label htmlFor="category">Категория {!readOnly && '*'}</Label>
+        <Select value={categoryId} onValueChange={(value) => setValue("categoryId", value)} disabled={readOnly}>
           <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
-            <SelectValue placeholder="Выберите раздел" />
+            <SelectValue placeholder="Выберите категорию" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Кондиционирование">Кондиционирование</SelectItem>
-            <SelectItem value="Кабельная продукция">Кабельная продукция</SelectItem>
-            <SelectItem value="Вентиляция">Вентиляция</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

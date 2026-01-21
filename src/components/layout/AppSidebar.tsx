@@ -47,7 +47,7 @@ const staffItems = [
 ];
 
 const warehouseItems = [
-  { title: "Разделы в складе", url: "/warehouse-categories", icon: FolderTree },
+  { title: "Категории", url: "/warehouse-categories", icon: FolderTree },
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
 ];

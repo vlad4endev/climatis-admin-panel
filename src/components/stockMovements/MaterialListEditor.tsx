@@ -56,16 +56,15 @@ export function MaterialListEditor({ materials, onChange, spareParts }: Material
     setSearchValues(newSearchValues);
   };
 
-  const updateMaterial = (index: number, field: keyof StockMovementMaterial, value: any) => {
+  const updateMaterial = (index: number, updates: Partial<StockMovementMaterial>) => {
     const updated = materials.map((material, i) =>
-      i === index ? { ...material, [field]: value } : material
+      i === index ? { ...material, ...updates } : material
     );
     onChange(updated);
   };
 
   const selectMaterial = (index: number, sparePart: { id: string; name: string }) => {
-    updateMaterial(index, "materialId", sparePart.id);
-    updateMaterial(index, "materialName", sparePart.name);
+    updateMaterial(index, { materialId: sparePart.id, materialName: sparePart.name });
     setSearchValues({ ...searchValues, [index]: sparePart.name });
     setActiveDropdown(null);
   };
@@ -133,7 +132,7 @@ export function MaterialListEditor({ materials, onChange, spareParts }: Material
             <Input
               type="number"
               value={material.quantity}
-              onChange={(e) => updateMaterial(index, "quantity", parseFloat(e.target.value) || 0)}
+              onChange={(e) => updateMaterial(index, { quantity: parseFloat(e.target.value) || 0 })}
               className="h-9"
             />
             <Button

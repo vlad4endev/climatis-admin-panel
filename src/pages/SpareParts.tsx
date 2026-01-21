@@ -156,6 +156,7 @@ export default function SpareParts() {
           </DialogHeader>
           <SparePartForm
             sparePart={editingPart}
+            categories={categories}
             onSubmit={handleSubmit}
             onCancel={() => {
               setIsFormOpen(false);
