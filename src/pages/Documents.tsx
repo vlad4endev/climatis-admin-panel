@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { Document, CONTRACT_TYPES, DOCUMENT_STATUSES } from "@/types/document";
 import { Badge } from "@/components/ui/badge";
 import { DocumentForm } from "@/components/documents/DocumentForm";
+import { DocumentViewDialog } from "@/components/documents/DocumentViewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useDocuments, useCreateDocument, useUpdateDocument, useDeleteDocument } from "@/hooks/useDocuments";
 import { useClients } from "@/hooks/useClients";
@@ -78,7 +78,6 @@ export default function Documents() {
       { key: 'objectName', label: 'Объект', type: 'text', sortable: true, render: (value) => value || '—' },
       { key: 'responseConditions', label: 'Условия реагирования', type: 'textarea' },
       { key: 'notes', label: 'Примечания', type: 'textarea' },
-      { key: 'fileName', label: 'Файл', type: 'text', render: (value) => value || '—' },
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingDocument(item),
@@ -132,12 +131,10 @@ export default function Documents() {
         </DialogContent>
       </Dialog>
 
-      <EntityViewDialog
-        item={viewingDocument}
+      <DocumentViewDialog
+        document={viewingDocument}
         open={!!viewingDocument}
         onOpenChange={(open) => !open && setViewingDocument(null)}
-        config={config}
-        title={viewingDocument?.contractNumber}
       />
     </>
   );

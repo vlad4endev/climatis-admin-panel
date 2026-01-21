@@ -12,8 +12,6 @@ export interface Document {
   objectName?: string;
   responseConditions: string;
   notes: string;
-  fileName?: string;
-  filePath?: string;
   status: DocumentStatus;
 }
 
