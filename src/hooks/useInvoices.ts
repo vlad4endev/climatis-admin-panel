@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/types/invoice";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useInvoices() {
   return useQuery({
@@ -56,6 +57,15 @@ export function useCreateInvoice() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'invoices',
+        elementId: data.id,
+        elementName: data.invoice_number,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -71,6 +81,13 @@ export function useUpdateInvoice() {
 
   return useMutation({
     mutationFn: async ({ id, ...invoice }: Partial<Invoice> & { id: string }) => {
+      // Get current number for logging
+      const { data: current } = await supabase
+        .from("invoices")
+        .select("invoice_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("invoices")
         .update({
@@ -84,6 +101,15 @@ export function useUpdateInvoice() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'invoices',
+        elementId: id,
+        elementName: current?.invoice_number || 'Счёт',
+        action: 'update',
+        changes: { status: invoice.status, amount: invoice.amount },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -98,8 +124,23 @@ export function useDeleteInvoice() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: invoice } = await supabase
+        .from("invoices")
+        .select("invoice_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase.from("invoices").delete().eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'invoices',
+        elementId: id,
+        elementName: invoice?.invoice_number || 'Счёт',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });

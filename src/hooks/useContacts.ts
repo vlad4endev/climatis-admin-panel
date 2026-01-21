@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/contact";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 interface ContactRow {
   id: string;
@@ -91,6 +92,14 @@ export function useCreateContact() {
         throw error;
       }
 
+      // Log activity
+      await logActivity({
+        section: 'contacts',
+        elementId: data.id,
+        elementName: data.name,
+        action: 'create',
+      });
+
       return transformToContact(data as ContactRow);
     },
     onSuccess: () => {
@@ -131,6 +140,15 @@ export function useUpdateContact() {
         throw error;
       }
 
+      // Log activity
+      await logActivity({
+        section: 'contacts',
+        elementId: id,
+        elementName: data.name,
+        action: 'update',
+        changes: { name: contact.name, phone: contact.phone, email: contact.email },
+      });
+
       return transformToContact(data as ContactRow);
     },
     onSuccess: () => {
@@ -169,6 +187,13 @@ export function useUpdateContactField() {
 
       const dbField = fieldMap[field] || field;
 
+      // Get current name for logging
+      const { data: current } = await supabase
+        .from("contacts")
+        .select("name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("contacts")
         .update({ [dbField]: value })
@@ -178,6 +203,15 @@ export function useUpdateContactField() {
         console.error("Error updating contact field:", error);
         throw error;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'contacts',
+        elementId: id,
+        elementName: current?.name || 'Контакт',
+        action: 'update',
+        changes: { [field]: value },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
@@ -195,6 +229,13 @@ export function useDeleteContact() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: contact } = await supabase
+        .from("contacts")
+        .select("name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("contacts")
         .update({ deleted_at: new Date().toISOString() })
@@ -204,6 +245,14 @@ export function useDeleteContact() {
         console.error("Error deleting contact:", error);
         throw error;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'contacts',
+        elementId: id,
+        elementName: contact?.name || 'Контакт',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });

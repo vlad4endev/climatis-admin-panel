@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Task } from "@/types/task";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useTasks() {
   return useQuery({
@@ -89,6 +90,14 @@ export function useCreateTask() {
         await supabase.from("task_checklist_items").insert(itemsToInsert);
       }
 
+      // Log activity
+      await logActivity({
+        section: 'tasks',
+        elementId: taskData.id,
+        elementName: taskData.title,
+        action: 'create',
+      });
+
       return taskData;
     },
     onSuccess: () => {
@@ -134,6 +143,15 @@ export function useUpdateTask() {
           await supabase.from("task_checklist_items").insert(itemsToInsert);
         }
       }
+
+      // Log activity
+      await logActivity({
+        section: 'tasks',
+        elementId: id,
+        elementName: task.title || 'Задача',
+        action: 'update',
+        changes: { title: task.title, status: task.status },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
@@ -148,11 +166,26 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("title")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("tasks")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'tasks',
+        elementId: id,
+        elementName: task?.title || 'Задача',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });

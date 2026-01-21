@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SparePart } from "@/types/sparePart";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useSpareParts() {
   return useQuery({
@@ -57,6 +58,15 @@ export function useCreateSparePart() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'spareParts',
+        elementId: data.id,
+        elementName: data.name,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -88,6 +98,15 @@ export function useUpdateSparePart() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'spareParts',
+        elementId: id,
+        elementName: part.name,
+        action: 'update',
+        changes: { name: part.name, currentStock: part.currentStock, retailPrice: part.retailPrice },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
@@ -102,8 +121,23 @@ export function useDeleteSparePart() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: part } = await supabase
+        .from("spare_parts")
+        .select("name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase.from("spare_parts").delete().eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'spareParts',
+        elementId: id,
+        elementName: part?.name || 'Материал',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spare_parts"] });

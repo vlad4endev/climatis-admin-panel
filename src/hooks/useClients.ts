@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Client } from "@/types/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
+import { logActivity } from "@/lib/activityLogger";
 
 type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 type ClientInsert = Database["public"]["Tables"]["clients"]["Insert"];
@@ -72,6 +73,14 @@ export function useCreateClient() {
         throw error;
       }
 
+      // Log activity
+      await logActivity({
+        section: 'clients',
+        elementId: data.id,
+        elementName: data.company_name,
+        action: 'create',
+      });
+
       return transformToClient(data);
     },
     onSuccess: () => {
@@ -106,6 +115,15 @@ export function useUpdateClient() {
         console.error("Error updating client:", error);
         throw error;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'clients',
+        elementId: id,
+        elementName: data.company_name,
+        action: 'update',
+        changes: { companyName: client.companyName, type: client.type, division: client.division },
+      });
 
       return transformToClient(data);
     },
@@ -144,6 +162,13 @@ export function useUpdateClientField() {
 
       const dbField = fieldMap[field] || field;
 
+      // Get current name for logging
+      const { data: current } = await supabase
+        .from("clients")
+        .select("company_name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("clients")
         .update({ [dbField]: value })
@@ -153,6 +178,15 @@ export function useUpdateClientField() {
         console.error("Error updating client field:", error);
         throw error;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'clients',
+        elementId: id,
+        elementName: current?.company_name || 'Контрагент',
+        action: 'update',
+        changes: { [field]: value },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -170,6 +204,13 @@ export function useDeleteClient() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging before delete
+      const { data: client } = await supabase
+        .from("clients")
+        .select("company_name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("clients")
         .update({ deleted_at: new Date().toISOString() })
@@ -179,6 +220,14 @@ export function useDeleteClient() {
         console.error("Error deleting client:", error);
         throw error;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'clients',
+        elementId: id,
+        elementName: client?.company_name || 'Контрагент',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });

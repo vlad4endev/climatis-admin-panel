@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { StockMovement, StockMovementMaterial } from "@/types/stockMovement";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useStockMovements() {
   return useQuery({
@@ -79,6 +80,15 @@ export function useCreateStockMovement() {
         }
       }
 
+      // Log activity
+      const operationLabel = movement.operationType === 'приход' ? 'Приход' : 'Расход';
+      await logActivity({
+        section: 'stockMovements',
+        elementId: movementData.id,
+        elementName: `${operationLabel} ${movement.operationDate}`,
+        action: 'create',
+      });
+
       return movementData;
     },
     onSuccess: () => {
@@ -127,6 +137,16 @@ export function useUpdateStockMovement() {
             .insert(materialsToInsert);
         }
       }
+
+      // Log activity
+      const operationLabel = movement.operationType === 'приход' ? 'Приход' : 'Расход';
+      await logActivity({
+        section: 'stockMovements',
+        elementId: id,
+        elementName: `${operationLabel} ${movement.operationDate}`,
+        action: 'update',
+        changes: { operationType: movement.operationType, operationDate: movement.operationDate },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
@@ -141,6 +161,13 @@ export function useDeleteStockMovement() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get info for logging
+      const { data: movement } = await supabase
+        .from("stock_movements")
+        .select("operation_type, operation_date")
+        .eq("id", id)
+        .single();
+
       // Delete materials first
       await supabase
         .from("stock_movement_materials")
@@ -153,6 +180,15 @@ export function useDeleteStockMovement() {
         .eq("id", id);
       
       if (error) throw error;
+
+      // Log activity
+      const operationLabel = movement?.operation_type === 'приход' ? 'Приход' : 'Расход';
+      await logActivity({
+        section: 'stockMovements',
+        elementId: id,
+        elementName: `${operationLabel} ${movement?.operation_date || ''}`,
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });

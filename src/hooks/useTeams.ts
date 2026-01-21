@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Team } from "@/types/team";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useTeams() {
   return useQuery({
@@ -64,6 +65,14 @@ export function useCreateTeam() {
         if (membersError) throw membersError;
       }
 
+      // Log activity
+      await logActivity({
+        section: 'teams',
+        elementId: data.id,
+        elementName: data.name,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -103,6 +112,15 @@ export function useUpdateTeam() {
           })));
         if (membersError) throw membersError;
       }
+
+      // Log activity
+      await logActivity({
+        section: 'teams',
+        elementId: id,
+        elementName: team.name,
+        action: 'update',
+        changes: { name: team.name, competencies: team.competencies },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
@@ -117,9 +135,24 @@ export function useDeleteTeam() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: team } = await supabase
+        .from("teams")
+        .select("name")
+        .eq("id", id)
+        .single();
+
       // Hard delete for teams (no soft delete column)
       const { error } = await supabase.from("teams").delete().eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'teams',
+        elementId: id,
+        elementName: team?.name || 'Бригада',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });

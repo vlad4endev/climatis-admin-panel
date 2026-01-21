@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "@/types/employee";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useEmployees() {
   return useQuery({
@@ -41,6 +42,15 @@ export function useCreateEmployee() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'employees',
+        elementId: data.id,
+        elementName: data.full_name,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -66,6 +76,15 @@ export function useUpdateEmployee() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'employees',
+        elementId: id,
+        elementName: employee.fullName,
+        action: 'update',
+        changes: { fullName: employee.fullName, phone: employee.phone, position: employee.position },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
@@ -80,9 +99,24 @@ export function useDeleteEmployee() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: emp } = await supabase
+        .from("employees")
+        .select("full_name")
+        .eq("id", id)
+        .single();
+
       // Hard delete for employees (no soft delete column)
       const { error } = await supabase.from("employees").delete().eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'employees',
+        elementId: id,
+        elementName: emp?.full_name || 'Сотрудник',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });

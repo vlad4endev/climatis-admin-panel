@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Assignment } from "@/types/assignment";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useAssignments() {
   return useQuery({
@@ -89,6 +90,15 @@ export function useCreateAssignment() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'assignments',
+        elementId: data.id,
+        elementName: data.assignment_number,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -104,6 +114,13 @@ export function useUpdateAssignment() {
 
   return useMutation({
     mutationFn: async ({ id, ...assignment }: Partial<Assignment> & { id: string }) => {
+      // Get current number for logging
+      const { data: current } = await supabase
+        .from("assignments")
+        .select("assignment_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("assignments")
         .update({
@@ -114,6 +131,15 @@ export function useUpdateAssignment() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'assignments',
+        elementId: id,
+        elementName: current?.assignment_number || 'Наряд',
+        action: 'update',
+        changes: { status: assignment.status },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
@@ -128,11 +154,26 @@ export function useDeleteAssignment() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: assignment } = await supabase
+        .from("assignments")
+        .select("assignment_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("assignments")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'assignments',
+        elementId: id,
+        elementName: assignment?.assignment_number || 'Наряд',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
