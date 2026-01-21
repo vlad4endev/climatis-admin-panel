@@ -174,6 +174,7 @@ export type Database = {
           object_id: string | null
           response_conditions: string | null
           start_date: string
+          status: Database["public"]["Enums"]["document_status"]
           updated_at: string
         }
         Insert: {
@@ -188,6 +189,7 @@ export type Database = {
           object_id?: string | null
           response_conditions?: string | null
           start_date: string
+          status?: Database["public"]["Enums"]["document_status"]
           updated_at?: string
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           object_id?: string | null
           response_conditions?: string | null
           start_date?: string
+          status?: Database["public"]["Enums"]["document_status"]
           updated_at?: string
         }
         Relationships: [
@@ -1134,9 +1137,10 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      assignment_status: "new" | "assigned" | "completed"
+      assignment_status: "draft" | "new" | "assigned" | "completed"
       client_type: "legal_entity" | "individual_entrepreneur"
       contract_type: "maintenance" | "general" | "one-time"
+      document_status: "draft" | "active" | "completed" | "cancelled"
       estimate_status: "черновик" | "готов" | "согласован"
       estimate_type: "простой ремонт" | "сложный ремонт" | "по договору ТО"
       invoice_status: "подготовлен" | "выставлен" | "оплачен" | "отменён"
@@ -1144,6 +1148,7 @@ export type Database = {
       permission_level: "none" | "view" | "edit"
       request_priority: "urgent" | "normal"
       request_status:
+        | "draft"
         | "new"
         | "needs_calculation"
         | "awaiting_materials"
@@ -1299,9 +1304,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      assignment_status: ["new", "assigned", "completed"],
+      assignment_status: ["draft", "new", "assigned", "completed"],
       client_type: ["legal_entity", "individual_entrepreneur"],
       contract_type: ["maintenance", "general", "one-time"],
+      document_status: ["draft", "active", "completed", "cancelled"],
       estimate_status: ["черновик", "готов", "согласован"],
       estimate_type: ["простой ремонт", "сложный ремонт", "по договору ТО"],
       invoice_status: ["подготовлен", "выставлен", "оплачен", "отменён"],
@@ -1309,6 +1315,7 @@ export const Constants = {
       permission_level: ["none", "view", "edit"],
       request_priority: ["urgent", "normal"],
       request_status: [
+        "draft",
         "new",
         "needs_calculation",
         "awaiting_materials",
