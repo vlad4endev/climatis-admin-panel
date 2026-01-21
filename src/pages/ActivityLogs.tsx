@@ -267,7 +267,7 @@ export default function ActivityLogs() {
                 <>
                   <div>
                     <div className="text-xs text-muted-foreground mb-2">Что изменилось</div>
-                    <div className="bg-muted rounded-md p-3 space-y-1">
+                    <div className="bg-background/50 border rounded-md p-3 space-y-1">
                       {getHumanReadableChanges(selectedLog.changes).map((change, index) => (
                         <div key={index} className="text-sm">
                           • {change}
@@ -280,7 +280,7 @@ export default function ActivityLogs() {
                     <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                       Показать JSON
                     </summary>
-                    <div className="bg-muted rounded-md p-3 mt-2 font-mono overflow-auto max-h-32">
+                    <div className="bg-background/50 border rounded-md p-3 mt-2 font-mono overflow-auto max-h-32">
                       <pre>{JSON.stringify(selectedLog.changes, null, 2)}</pre>
                     </div>
                   </details>
