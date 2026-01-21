@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useActivityLogs, ActivityLog } from "@/hooks/useActivityLogs";
-import { getSectionLabel, getActionLabel } from "@/lib/activityLogger";
+import { getSectionLabel, getActionLabel, getHumanReadableChanges } from "@/lib/activityLogger";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ import { Loader2, Search, Plus, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SECTIONS = [
   { value: 'all', label: 'Все разделы' },
@@ -112,7 +113,6 @@ export default function ActivityLogs() {
     if (selectedLog?.elementId && selectedLog?.section) {
       const route = SECTION_ROUTES[selectedLog.section];
       if (route) {
-        // Navigate to the section - the element opening will be handled by the section
         navigate(route, { state: { openElementId: selectedLog.elementId } });
       }
     }
@@ -121,8 +121,9 @@ export default function ActivityLogs() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <PageHeader title="Логи" description="История изменений в системе" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
@@ -175,41 +176,59 @@ export default function ActivityLogs() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[180px]">Дата</TableHead>
-                <TableHead>Пользователь</TableHead>
-                <TableHead>Раздел</TableHead>
+                <TableHead className="w-[160px]">Дата</TableHead>
+                <TableHead className="w-[140px]">Пользователь</TableHead>
+                <TableHead className="w-[120px]">Раздел</TableHead>
                 <TableHead>Элемент</TableHead>
-                <TableHead className="w-[140px]">Действие</TableHead>
+                <TableHead className="w-[130px]">Действие</TableHead>
+                <TableHead>Изменения</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredLogs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     Нет записей в логах
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredLogs.map(log => (
-                  <TableRow 
-                    key={log.id} 
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleRowClick(log)}
-                  >
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(log.createdAt), 'dd.MM.yyyy HH:mm', { locale: ru })}
-                    </TableCell>
-                    <TableCell>{log.userName || '—'}</TableCell>
-                    <TableCell>{getSectionLabel(log.section)}</TableCell>
-                    <TableCell className="font-medium">{log.elementName || '—'}</TableCell>
-                    <TableCell>
-                      <Badge variant={getActionBadgeVariant(log.action) as any} className="gap-1">
-                        {getActionIcon(log.action)}
-                        {getActionLabel(log.action)}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredLogs.map(log => {
+                  const humanChanges = getHumanReadableChanges(log.changes);
+                  return (
+                    <TableRow 
+                      key={log.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(log)}
+                    >
+                      <TableCell className="text-muted-foreground text-sm">
+                        {format(new Date(log.createdAt), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                      </TableCell>
+                      <TableCell className="text-sm">{log.userName || '—'}</TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {getSectionLabel(log.section)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="font-medium">{log.elementName || '—'}</TableCell>
+                      <TableCell>
+                        <Badge variant={getActionBadgeVariant(log.action) as any} className="gap-1">
+                          {getActionIcon(log.action)}
+                          {getActionLabel(log.action)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-[300px]">
+                        {humanChanges.length > 0 ? (
+                          <span className="text-sm text-muted-foreground truncate block">
+                            {humanChanges.slice(0, 2).join(', ')}
+                            {humanChanges.length > 2 && ` и ещё ${humanChanges.length - 2}...`}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -218,7 +237,7 @@ export default function ActivityLogs() {
 
       {/* Log details dialog */}
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Детали записи</DialogTitle>
           </DialogHeader>
@@ -258,12 +277,27 @@ export default function ActivityLogs() {
               </div>
 
               {selectedLog.changes && Object.keys(selectedLog.changes).length > 0 && (
-                <div>
-                  <div className="text-xs text-muted-foreground mb-2">Изменения</div>
-                  <div className="bg-muted rounded-md p-3 text-xs font-mono overflow-auto max-h-48">
-                    <pre>{JSON.stringify(selectedLog.changes, null, 2)}</pre>
+                <>
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-2">Что изменилось</div>
+                    <div className="bg-muted rounded-md p-3 space-y-1">
+                      {getHumanReadableChanges(selectedLog.changes).map((change, index) => (
+                        <div key={index} className="text-sm">
+                          • {change}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  
+                  <details className="text-xs">
+                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                      Показать JSON
+                    </summary>
+                    <div className="bg-muted rounded-md p-3 mt-2 font-mono overflow-auto max-h-32">
+                      <pre>{JSON.stringify(selectedLog.changes, null, 2)}</pre>
+                    </div>
+                  </details>
+                </>
               )}
 
               {selectedLog.elementId && selectedLog.action !== 'delete' && (
