@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface EntityField<T = any> {
   key: string;
   label: string;
@@ -12,6 +14,13 @@ export interface EntityField<T = any> {
   cellClassName?: (item: T) => string;
 }
 
+export interface CardAction<T = any> {
+  icon: LucideIcon;
+  label: string;
+  onClick: (item: T, e: React.MouseEvent) => void;
+  disabled?: boolean | ((item: T) => boolean);
+}
+
 export interface EntityListConfig<T = any> {
   fields: EntityField<T>[];
   getItemId: (item: T) => string;
@@ -20,6 +29,7 @@ export interface EntityListConfig<T = any> {
   onEdit?: (item: T) => void;
   onRowClick?: (item: T) => void;
   customActions?: (item: T) => React.ReactNode;
+  cardActions?: CardAction<T>[];
   searchPlaceholder?: string;
 }
 

@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil, Trash2 } from "lucide-react";
 import { EntityListConfig } from "./types";
+import { CardActionsMenu } from "./CardActionsMenu";
 
 interface EntityCardViewProps<T> {
   items: T[];
@@ -19,33 +18,24 @@ export function EntityCardView<T>({ items, config }: EntityCardViewProps<T>) {
           : (item as any)[titleField.key];
 
         return (
-          <Card key={id} className="relative overflow-hidden">
+          <Card 
+            key={id} 
+            className="relative overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => config.onRowClick?.(item)}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-start justify-between gap-2">
                 <span className="flex-1 min-w-0 break-words">
                   {titleField.render ? titleField.render(titleValue, item) : String(titleValue)}
                 </span>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {config.onEdit && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => config.onEdit!(item)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {config.onDelete && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={() => config.onDelete!(id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <CardActionsMenu
+                    item={item}
+                    onEdit={config.onEdit}
+                    onDelete={config.onDelete}
+                    getItemId={config.getItemId}
+                    cardActions={config.cardActions}
+                  />
                 </div>
               </CardTitle>
             </CardHeader>
