@@ -19,9 +19,16 @@ interface TaskFormProps {
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => void;
   onCancel: () => void;
   readOnly?: boolean;
+  /** Режим исполнителя: можно только отмечать пункты и комментировать */
+  assigneeMode?: boolean;
 }
 
-export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOnly = false }: TaskFormProps) {
+export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOnly = false, assigneeMode = false }: TaskFormProps) {
+  // В режиме исполнителя нельзя редактировать основные поля и структуру чек-листа
+  const canEditFields = !readOnly && !assigneeMode;
+  const canToggleChecklist = !readOnly; // Исполнитель может отмечать пункты
+  const canEditChecklist = !readOnly && !assigneeMode; // Только редактор может изменять пункты
+  const canAddComments = !readOnly; // Оба могут комментировать
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [assigneeId, setAssigneeId] = useState(task?.assigneeId || "");
@@ -166,10 +173,10 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Введите название"
-              required={!readOnly}
-              readOnly={readOnly}
-              tabIndex={readOnly ? -1 : undefined}
-              className={readOnly ? "bg-input-readonly" : ""}
+              required={canEditFields}
+              readOnly={!canEditFields}
+              tabIndex={!canEditFields ? -1 : undefined}
+              className={!canEditFields ? "bg-input-readonly" : ""}
             />
           </div>
 
@@ -181,16 +188,16 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Подробное описание задачи"
               rows={3}
-              readOnly={readOnly}
-              tabIndex={readOnly ? -1 : undefined}
-              className={readOnly ? "bg-input-readonly" : ""}
+              readOnly={!canEditFields}
+              tabIndex={!canEditFields ? -1 : undefined}
+              className={!canEditFields ? "bg-input-readonly" : ""}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="assignee">Исполнитель</Label>
-            <Select value={assigneeId} onValueChange={setAssigneeId} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+            <Select value={assigneeId} onValueChange={setAssigneeId} disabled={!canEditFields}>
+              <SelectTrigger className={!canEditFields ? "bg-input-readonly" : ""}>
                 <SelectValue placeholder="Выберите исполнителя" />
               </SelectTrigger>
               <SelectContent>
@@ -205,8 +212,8 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
 
           <div className="space-y-2">
             <Label htmlFor="request">Связанная заявка</Label>
-            <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+            <Select value={requestId || "__none__"} onValueChange={(v) => setRequestId(v === "__none__" ? "" : v)} disabled={!canEditFields}>
+              <SelectTrigger className={!canEditFields ? "bg-input-readonly" : ""}>
                 <SelectValue placeholder="Выберите заявку (необязательно)" />
               </SelectTrigger>
               <SelectContent>
@@ -228,9 +235,9 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 type="date"
                 value={proposedDeadline}
                 onChange={(e) => setProposedDeadline(e.target.value)}
-                readOnly={readOnly}
-                tabIndex={readOnly ? -1 : undefined}
-                className={readOnly ? "bg-input-readonly" : ""}
+                readOnly={!canEditFields}
+                tabIndex={!canEditFields ? -1 : undefined}
+                className={!canEditFields ? "bg-input-readonly" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -240,17 +247,17 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                 type="date"
                 value={agreedDeadline}
                 onChange={(e) => setAgreedDeadline(e.target.value)}
-                readOnly={readOnly}
-                tabIndex={readOnly ? -1 : undefined}
-                className={readOnly ? "bg-input-readonly" : ""}
+                readOnly={!canEditFields}
+                tabIndex={!canEditFields ? -1 : undefined}
+                className={!canEditFields ? "bg-input-readonly" : ""}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="status">Статус</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as Task['status'])} disabled={readOnly}>
-              <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+            <Select value={status} onValueChange={(v) => setStatus(v as Task['status'])} disabled={!canEditFields}>
+              <SelectTrigger className={!canEditFields ? "bg-input-readonly" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -278,23 +285,23 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
             {checklist.map((item) => (
               <div
                 key={item.id}
-                draggable={!readOnly && editingItemId !== item.id}
+                draggable={canEditChecklist && editingItemId !== item.id}
                 onDragStart={() => handleDragStart(item.id)}
                 onDragOver={(e) => handleDragOver(e, item.id)}
                 onDragEnd={handleDragEnd}
                 className={`flex items-center gap-2 p-2 rounded-md bg-muted/30 group transition-all ${
                   draggedItemId === item.id ? 'opacity-50 scale-95' : ''
-                } ${!readOnly ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                } ${canEditChecklist ? 'cursor-grab active:cursor-grabbing' : ''}`}
               >
-                {!readOnly && (
+                {canEditChecklist && (
                   <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 )}
                 <Checkbox
                   checked={item.completed}
-                  onCheckedChange={() => !readOnly && handleToggleChecklistItem(item.id)}
-                  disabled={readOnly}
+                  onCheckedChange={() => canToggleChecklist && handleToggleChecklistItem(item.id)}
+                  disabled={!canToggleChecklist}
                 />
-                {editingItemId === item.id ? (
+                {editingItemId === item.id && canEditChecklist ? (
                   <div className="flex-1 flex items-center gap-2">
                     <Input
                       value={editingText}
@@ -333,11 +340,11 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
                   <>
                     <span 
                       className={`flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}
-                      onDoubleClick={() => !readOnly && handleStartEdit(item)}
+                      onDoubleClick={() => canEditChecklist && handleStartEdit(item)}
                     >
                       {item.text}
                     </span>
-                    {!readOnly && (
+                    {canEditChecklist && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           type="button"
@@ -365,7 +372,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
             ))}
           </div>
 
-          {!readOnly && (
+          {canEditChecklist && (
             <div className="flex gap-2">
               <Input
                 value={newChecklistItem}
@@ -417,7 +424,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
             )}
           </div>
 
-          {!readOnly && (
+          {canAddComments && (
             <div className="flex gap-2">
               <Textarea
                 value={newComment}
