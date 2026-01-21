@@ -31,6 +31,7 @@ export interface EntityListConfig<T = any> {
   customActions?: (item: T) => React.ReactNode;
   cardActions?: CardAction<T>[];
   searchPlaceholder?: string;
+  cardFooter?: (item: T) => React.ReactNode;
 }
 
 export type ViewMode = 'table' | 'card' | 'kanban';
