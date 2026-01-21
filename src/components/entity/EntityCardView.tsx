@@ -53,6 +53,7 @@ export function EntityCardView<T>({ items, config }: EntityCardViewProps<T>) {
                   </div>
                 );
               })}
+              {config.cardFooter && config.cardFooter(item)}
             </CardContent>
           </Card>
         );

@@ -11,7 +11,9 @@ import { useDocuments, useCreateDocument, useUpdateDocument, useDeleteDocument }
 import { useClients } from "@/hooks/useClients";
 import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useCanEdit } from "@/hooks/useUserRoles";
-import { Loader2 } from "lucide-react";
+import { useDocumentAttachmentCounts } from "@/hooks/useDocumentAttachmentCounts";
+import { DocumentAttachmentsCompact } from "@/components/documents/DocumentAttachmentsCompact";
+import { Loader2, Paperclip } from "lucide-react";
 
 export default function Documents() {
   const { data: documents = [], isLoading: documentsLoading } = useDocuments();
@@ -21,6 +23,10 @@ export default function Documents() {
   const createDocument = useCreateDocument();
   const updateDocument = useUpdateDocument();
   const deleteDocument = useDeleteDocument();
+
+  // Получаем счётчики вложений для всех документов
+  const documentIds = documents.map(d => d.id);
+  const { data: attachmentCounts = {} } = useDocumentAttachmentCounts(documentIds);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -78,11 +84,28 @@ export default function Documents() {
       { key: 'objectName', label: 'Объект', type: 'text', sortable: true, render: (value) => value || '—' },
       { key: 'responseConditions', label: 'Условия реагирования', type: 'textarea' },
       { key: 'notes', label: 'Примечания', type: 'textarea' },
+      {
+        key: 'attachments',
+        label: 'Файлы',
+        type: 'text',
+        sortable: false,
+        render: (_, item) => {
+          const count = attachmentCounts[item.id] || 0;
+          if (count === 0) return <span className="text-muted-foreground">—</span>;
+          return (
+            <div className="flex items-center gap-1.5 text-primary">
+              <Paperclip className="h-4 w-4" />
+              <span>{count}</span>
+            </div>
+          );
+        },
+      },
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingDocument(item),
     onEdit: canEdit ? (item) => { setEditingDocument(item); setIsDialogOpen(true); } : undefined,
     onDelete: canEdit ? (id) => deleteDocument.mutate(id) : undefined,
+    cardFooter: (item) => <DocumentAttachmentsCompact documentId={item.id} />,
   };
 
   const handleSubmit = async (data: Omit<Document, 'id' | 'clientName' | 'objectName'>) => {
