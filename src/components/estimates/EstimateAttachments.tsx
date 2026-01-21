@@ -1,12 +1,13 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, Upload, Trash2, FileText, FileSpreadsheet, File, Loader2, Download } from "lucide-react";
 import {
   useEstimateAttachments,
   useUploadEstimateAttachment,
   useDeleteEstimateAttachment,
-  getAttachmentUrl,
+  downloadAttachment,
 } from "@/hooks/useEstimateAttachments";
+import { useToast } from "@/hooks/use-toast";
 
 interface EstimateAttachmentsProps {
   estimateId: string | undefined;
@@ -30,6 +31,8 @@ function formatFileSize(bytes: number | null): string {
 
 export function EstimateAttachments({ estimateId, readOnly = false }: EstimateAttachmentsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   
   const { data: attachments = [], isLoading } = useEstimateAttachments(estimateId);
   const uploadMutation = useUploadEstimateAttachment();
@@ -130,7 +133,22 @@ export function EstimateAttachments({ estimateId, readOnly = false }: EstimateAt
         <div className="space-y-2">
           {attachments.map((attachment) => {
             const Icon = getFileIcon(attachment.fileType);
-            const url = getAttachmentUrl(attachment.filePath);
+            
+            const handleDownload = async () => {
+              setDownloadingId(attachment.id);
+              try {
+                await downloadAttachment(attachment.filePath, attachment.fileName);
+              } catch (error) {
+                console.error("Download error:", error);
+                toast({
+                  title: "Ошибка скачивания",
+                  description: "Не удалось скачать файл",
+                  variant: "destructive",
+                });
+              } finally {
+                setDownloadingId(null);
+              }
+            };
             
             return (
               <div
@@ -152,11 +170,14 @@ export function EstimateAttachments({ estimateId, readOnly = false }: EstimateAt
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-primary"
-                  asChild
+                  onClick={handleDownload}
+                  disabled={downloadingId === attachment.id}
                 >
-                  <a href={url} download={attachment.fileName} target="_blank" rel="noopener noreferrer">
+                  {downloadingId === attachment.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
                     <Download className="h-4 w-4" />
-                  </a>
+                  )}
                 </Button>
                 {!readOnly && (
                   <Button
