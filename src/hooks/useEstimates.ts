@@ -249,3 +249,81 @@ export function useDeleteEstimate() {
     onError: () => toast.error("Ошибка при удалении"),
   });
 }
+
+export function useCopyEstimate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (estimate: Estimate) => {
+      // Create new estimate with "Копия" prefix
+      const { data: estimateData, error: estimateError } = await supabase
+        .from("estimates")
+        .insert({
+          estimate_number: `Р-${new Date().getFullYear()}-TEMP`,
+          name: `Копия: ${estimate.name}`,
+          request_id: estimate.requestId || null,
+          estimate_date: new Date().toISOString().split('T')[0],
+          status: "черновик",
+          type: estimate.type,
+          created_by_id: estimate.createdById || null,
+          engineer_comment: estimate.engineerComment || null,
+          customer_calculation: JSON.parse(JSON.stringify(estimate.customerCalculation || DEFAULT_CUSTOMER_CALCULATION)),
+        })
+        .select()
+        .single();
+
+      if (estimateError) throw estimateError;
+
+      // Copy work blocks
+      if (estimate.workBlocks && estimate.workBlocks.length > 0) {
+        for (let i = 0; i < estimate.workBlocks.length; i++) {
+          const wb = estimate.workBlocks[i];
+          const { data: blockData, error: blockError } = await supabase
+            .from("work_blocks")
+            .insert({
+              estimate_id: estimateData.id,
+              description: wb.description,
+              sort_order: i,
+            })
+            .select()
+            .single();
+
+          if (blockError) throw blockError;
+
+          if (wb.rows && wb.rows.length > 0) {
+            const rowsToInsert = wb.rows.map(r => ({
+              work_block_id: blockData.id,
+              category: r.category,
+              plan_hours: r.planHours,
+              quantity: r.quantity,
+              rate: r.rate,
+            }));
+
+            await supabase.from("work_rows").insert(rowsToInsert);
+          }
+        }
+      }
+
+      // Copy materials
+      if (estimate.materials && estimate.materials.length > 0) {
+        const materialsToInsert = estimate.materials.map((m, i) => ({
+          estimate_id: estimateData.id,
+          material_name: m.materialName,
+          spare_part_id: m.materialId || null,
+          quantity: m.quantity,
+          price_per_unit: m.pricePerUnit,
+          sort_order: i,
+        }));
+
+        await supabase.from("estimate_materials").insert(materialsToInsert);
+      }
+
+      return estimateData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+      toast.success("Расчёт скопирован");
+    },
+    onError: () => toast.error("Ошибка при копировании расчёта"),
+  });
+}

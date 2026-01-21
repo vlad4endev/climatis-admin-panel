@@ -6,7 +6,7 @@ import { EntityListConfig } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
 import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
-import { ClipboardCheck, Printer } from "lucide-react";
+import { ClipboardCheck, Printer, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate } from "@/hooks/useEstimates";
+import { useEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate, useCopyEstimate } from "@/hooks/useEstimates";
 import { useRequests } from "@/hooks/useRequests";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useSpareParts } from "@/hooks/useSpareParts";
@@ -35,6 +35,7 @@ export default function Estimates() {
   const createMutation = useCreateEstimate();
   const updateMutation = useUpdateEstimate();
   const deleteMutation = useDeleteEstimate();
+  const copyMutation = useCopyEstimate();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
@@ -114,6 +115,18 @@ export default function Estimates() {
     },
     customActions: (estimate) => (
       <>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            copyMutation.mutate(estimate);
+          }}
+          title="Копировать расчёт"
+          disabled={copyMutation.isPending}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
