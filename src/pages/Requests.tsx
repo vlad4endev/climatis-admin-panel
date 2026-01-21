@@ -5,10 +5,11 @@ import { EntityListConfig } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
+import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest, useCopyRequest } from "@/hooks/useRequests";
 import { useClients } from "@/hooks/useClients";
 import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -28,6 +29,7 @@ export default function Requests() {
   const createRequest = useCreateRequest();
   const updateRequest = useUpdateRequest();
   const deleteRequest = useDeleteRequest();
+  const copyRequest = useCopyRequest();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
@@ -131,6 +133,20 @@ export default function Requests() {
     onRowClick: (item) => setViewingRequest(item),
     onDelete: canEdit ? (id) => deleteRequest.mutate(id) : undefined,
     onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
+    customActions: canEdit ? (item) => (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          copyRequest.mutate(item);
+        }}
+        title="Копировать заявку"
+        disabled={copyRequest.isPending}
+      >
+        <Copy className="h-4 w-4" />
+      </Button>
+    ) : undefined,
   };
 
   const handleSubmit = async (data: Partial<Request>) => {
