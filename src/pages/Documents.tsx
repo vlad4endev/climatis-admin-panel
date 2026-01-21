@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
-import { Document, CONTRACT_TYPES } from "@/types/document";
+import { Document, CONTRACT_TYPES, DOCUMENT_STATUSES } from "@/types/document";
+import { Badge } from "@/components/ui/badge";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useDocuments, useCreateDocument, useUpdateDocument, useDeleteDocument } from "@/hooks/useDocuments";
@@ -25,9 +26,35 @@ export default function Documents() {
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
 
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'draft': return 'secondary';
+      case 'active': return 'default';
+      case 'completed': return 'outline';
+      case 'cancelled': return 'destructive';
+      default: return 'secondary';
+    }
+  };
+
   const config: EntityListConfig<Document> = {
     fields: [
       { key: 'contractNumber', label: 'Номер договора', type: 'text', sortable: true },
+      {
+        key: 'status',
+        label: 'Статус',
+        type: 'select',
+        options: DOCUMENT_STATUSES.map(s => ({ value: s.value, label: s.label })),
+        sortable: true,
+        filterable: true,
+        render: (value) => {
+          const status = DOCUMENT_STATUSES.find(s => s.value === value);
+          return (
+            <Badge variant={getStatusBadgeVariant(value)}>
+              {status?.label || value}
+            </Badge>
+          );
+        },
+      },
       { key: 'startDate', label: 'Дата начала', type: 'date', sortable: true },
       { key: 'endDate', label: 'Дата окончания', type: 'date', sortable: true },
       {

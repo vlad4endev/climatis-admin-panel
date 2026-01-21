@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 interface RequestFormProps {
   initialData?: Request;
@@ -28,13 +31,22 @@ export function RequestForm({
   employees,
   teams
 }: RequestFormProps) {
+  const queryClient = useQueryClient();
   const [clientSearch, setClientSearch] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [currentId, setCurrentId] = useState<string | null>(initialData?.id || null);
+  const [isSaving, setIsSaving] = useState(false);
   const clientInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isCreatingRef = useRef(false);
 
-  const { register, handleSubmit, setValue, watch } = useForm({
-    defaultValues: initialData || {},
+  const { register, handleSubmit, setValue, watch, getValues } = useForm({
+    defaultValues: initialData || {
+      status: 'draft',
+      type: 'repair',
+      priority: 'normal',
+    },
   });
 
   const selectedClientId = watch("clientId");
@@ -54,6 +66,120 @@ export function RequestForm({
 
   // Get selected client name
   const selectedClient = clients.find((client) => client.id === selectedClientId);
+
+  // Auto-save function
+  const autoSave = useCallback(async (fieldData?: Partial<Request>) => {
+    if (isCreatingRef.current) return;
+    
+    const formValues = getValues();
+    const dataToSave = fieldData ? { ...formValues, ...fieldData } : formValues;
+    
+    // Validate required fields before creating
+    if (!currentId && (!dataToSave.clientId || !dataToSave.objectId)) {
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      if (currentId) {
+        // Update existing request
+        const { error } = await supabase
+          .from("requests")
+          .update({
+            status: dataToSave.status,
+            type: dataToSave.type,
+            priority: dataToSave.priority,
+            client_id: dataToSave.clientId,
+            object_id: dataToSave.objectId,
+            contract_id: dataToSave.contractId || null,
+            contract_conditions: dataToSave.contractConditions || null,
+            problem_description: dataToSave.problemDescription || '',
+            comments: dataToSave.comments || '',
+            desired_date: dataToSave.desiredDate || null,
+            planned_visit_date: dataToSave.plannedVisitDate || null,
+            responsible_manager_id: dataToSave.responsibleManagerId || null,
+            assigned_team_id: dataToSave.assignedTeamId || null,
+            assigned_engineer_id: dataToSave.assignedEngineerId || null,
+            actual_start_time: dataToSave.actualStartTime || null,
+            actual_end_time: dataToSave.actualEndTime || null,
+            hours_spent: dataToSave.hoursSpent || null,
+          })
+          .eq("id", currentId);
+        
+        if (error) throw error;
+      } else {
+        // Create new request
+        isCreatingRef.current = true;
+        const { data, error } = await supabase
+          .from("requests")
+          .insert({
+            status: dataToSave.status || 'draft',
+            type: dataToSave.type || 'repair',
+            priority: dataToSave.priority || 'normal',
+            client_id: dataToSave.clientId,
+            object_id: dataToSave.objectId,
+            contract_id: dataToSave.contractId || null,
+            contract_conditions: dataToSave.contractConditions || null,
+            problem_description: dataToSave.problemDescription || '',
+            comments: dataToSave.comments || '',
+            desired_date: dataToSave.desiredDate || null,
+            planned_visit_date: dataToSave.plannedVisitDate || null,
+            responsible_manager_id: dataToSave.responsibleManagerId || null,
+            assigned_team_id: dataToSave.assignedTeamId || null,
+            assigned_engineer_id: dataToSave.assignedEngineerId || null,
+          } as any)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        if (data) {
+          setCurrentId(data.id);
+        }
+        isCreatingRef.current = false;
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+    } catch (error) {
+      console.error("Auto-save error:", error);
+      isCreatingRef.current = false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [currentId, getValues, queryClient]);
+
+  // Debounced save
+  const debouncedSave = useCallback((fieldData?: Partial<Request>) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => autoSave(fieldData), 500);
+  }, [autoSave]);
+
+  // Handle blur for input fields
+  const handleBlur = useCallback(() => {
+    debouncedSave();
+  }, [debouncedSave]);
+
+  // Handle select change with auto-save
+  const handleSelectChange = useCallback((field: string, value: string, additionalFields?: Record<string, any>) => {
+    setValue(field as any, value);
+    if (additionalFields) {
+      Object.entries(additionalFields).forEach(([key, val]) => {
+        setValue(key as any, val);
+      });
+    }
+    debouncedSave({ [field]: value, ...additionalFields });
+  }, [setValue, debouncedSave]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -95,10 +221,17 @@ export function RequestForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {isSaving && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Сохранение...
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="status">Статус *</Label>
-          <Select value={selectedStatus} onValueChange={(value) => setValue("status", value as any)}>
+          <Select value={selectedStatus} onValueChange={(value) => handleSelectChange("status", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите статус" />
             </SelectTrigger>
@@ -113,7 +246,7 @@ export function RequestForm({
         </div>
         <div>
           <Label htmlFor="type">Тип заявки *</Label>
-          <Select value={selectedType} onValueChange={(value) => setValue("type", value as any)}>
+          <Select value={selectedType} onValueChange={(value) => handleSelectChange("type", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите тип" />
             </SelectTrigger>
@@ -128,7 +261,7 @@ export function RequestForm({
         </div>
         <div>
           <Label htmlFor="priority">Срочность *</Label>
-          <Select value={selectedPriority} onValueChange={(value) => setValue("priority", value as any)}>
+          <Select value={selectedPriority} onValueChange={(value) => handleSelectChange("priority", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите срочность" />
             </SelectTrigger>
@@ -173,6 +306,7 @@ export function RequestForm({
                     setValue("clientName", client.companyName);
                     setClientSearch(client.companyName);
                     setShowClientDropdown(false);
+                    debouncedSave({ clientId: client.id, clientName: client.companyName });
                   }}
                 >
                   {client.companyName}
@@ -195,8 +329,7 @@ export function RequestForm({
             value={selectedObjectId} 
             onValueChange={(value) => {
               const obj = serviceObjects.find(o => o.id === value);
-              setValue("objectId", value);
-              setValue("objectName", obj?.objectName || "");
+              handleSelectChange("objectId", value, { objectName: obj?.objectName || "" });
             }}
             disabled={!selectedClientId}
           >
@@ -222,9 +355,10 @@ export function RequestForm({
           value={selectedContractId} 
           onValueChange={(value) => {
             const contract = documents.find(d => d.id === value);
-            setValue("contractId", value);
-            setValue("contractNumber", contract?.contractNumber || "");
-            setValue("contractConditions", contract?.responseConditions || "");
+            handleSelectChange("contractId", value, {
+              contractNumber: contract?.contractNumber || "",
+              contractConditions: contract?.responseConditions || "",
+            });
           }}
           disabled={!selectedClientId}
         >
@@ -258,22 +392,32 @@ export function RequestForm({
 
       <div>
         <Label htmlFor="problemDescription">Описание проблемы *</Label>
-        <Textarea id="problemDescription" {...register("problemDescription", { required: true })} rows={3} />
+        <Textarea 
+          id="problemDescription" 
+          {...register("problemDescription", { required: true })} 
+          rows={3} 
+          onBlur={handleBlur}
+        />
       </div>
 
       <div>
         <Label htmlFor="comments">Комментарии</Label>
-        <Textarea id="comments" {...register("comments")} rows={2} />
+        <Textarea 
+          id="comments" 
+          {...register("comments")} 
+          rows={2} 
+          onBlur={handleBlur}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="desiredDate">Желаемая дата выполнения</Label>
-          <Input type="date" id="desiredDate" {...register("desiredDate")} />
+          <Input type="date" id="desiredDate" {...register("desiredDate")} onBlur={handleBlur} />
         </div>
         <div>
           <Label htmlFor="plannedVisitDate">Плановая дата выезда</Label>
-          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} />
+          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} onBlur={handleBlur} />
         </div>
       </div>
 
@@ -282,8 +426,7 @@ export function RequestForm({
           <Label htmlFor="responsibleManagerId">Ответственный менеджер</Label>
           <Select value={selectedManagerId} onValueChange={(value) => {
             const manager = employees.find(e => e.id === value);
-            setValue("responsibleManagerId", value);
-            setValue("responsibleManagerName", manager?.fullName || "");
+            handleSelectChange("responsibleManagerId", value, { responsibleManagerName: manager?.fullName || "" });
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите менеджера" />
@@ -301,8 +444,7 @@ export function RequestForm({
           <Label htmlFor="assignedTeamId">Назначенная бригада</Label>
           <Select value={selectedTeamId} onValueChange={(value) => {
             const team = teams.find(t => t.id === value);
-            setValue("assignedTeamId", value);
-            setValue("assignedTeamName", team?.teamName || "");
+            handleSelectChange("assignedTeamId", value, { assignedTeamName: team?.teamName || "" });
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите бригаду" />
@@ -320,8 +462,7 @@ export function RequestForm({
           <Label htmlFor="assignedEngineerId">Назначенный инженер</Label>
           <Select value={selectedEngineerId} onValueChange={(value) => {
             const engineer = employees.find(e => e.id === value);
-            setValue("assignedEngineerId", value);
-            setValue("assignedEngineerName", engineer?.fullName || "");
+            handleSelectChange("assignedEngineerId", value, { assignedEngineerName: engineer?.fullName || "" });
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Выберите инженера" />
@@ -340,24 +481,21 @@ export function RequestForm({
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="actualStartTime">Фактическое начало работ</Label>
-          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} />
+          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} onBlur={handleBlur} />
         </div>
         <div>
           <Label htmlFor="actualEndTime">Фактическое окончание работ</Label>
-          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} />
+          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} onBlur={handleBlur} />
         </div>
         <div>
           <Label htmlFor="hoursSpent">Количество часов</Label>
-          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} />
+          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} onBlur={handleBlur} />
         </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit">
-          {initialData ? "Сохранить" : "Создать"}
+          Закрыть
         </Button>
       </div>
     </form>

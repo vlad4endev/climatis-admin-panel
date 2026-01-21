@@ -1,3 +1,5 @@
+export type DocumentStatus = 'draft' | 'active' | 'completed' | 'cancelled';
+
 export interface Document {
   id: string;
   contractNumber: string;
@@ -11,7 +13,15 @@ export interface Document {
   responseConditions: string;
   notes: string;
   fileName?: string;
+  status: DocumentStatus;
 }
+
+export const DOCUMENT_STATUSES: { value: DocumentStatus; label: string }[] = [
+  { value: 'draft', label: 'Черновик' },
+  { value: 'active', label: 'Активный' },
+  { value: 'completed', label: 'Завершён' },
+  { value: 'cancelled', label: 'Отменён' },
+];
 
 export const CONTRACT_TYPES = [
   { value: 'maintenance', label: 'ТО' },
