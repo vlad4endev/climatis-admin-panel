@@ -36,6 +36,7 @@ import {
 } from "@/types/estimate";
 import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
+import { EstimateAttachments } from "./EstimateAttachments";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -277,10 +278,11 @@ export function EstimateForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general">Основное</TabsTrigger>
           <TabsTrigger value="works">Работы</TabsTrigger>
           <TabsTrigger value="materials">Материалы</TabsTrigger>
+          <TabsTrigger value="attachments">Документы</TabsTrigger>
           <TabsTrigger value="customer">Для заказчика</TabsTrigger>
         </TabsList>
 
@@ -474,6 +476,10 @@ export function EstimateForm({
             availableMaterials={availableMaterials}
             readOnly={readOnly}
           />
+        </TabsContent>
+
+        <TabsContent value="attachments" className="space-y-4 mt-4">
+          <EstimateAttachments estimateId={currentId || estimate?.id} readOnly={readOnly} />
         </TabsContent>
 
         <TabsContent value="customer" className="space-y-4 mt-4">
