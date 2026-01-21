@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logActivity } from "@/lib/activityLogger";
 
 export interface DocumentAttachment {
   id: string;
@@ -68,9 +69,26 @@ export function useUploadDocumentAttachment() {
         });
 
       if (dbError) throw dbError;
+      
+      // Get document name for logging
+      const { data: doc } = await supabase
+        .from("documents")
+        .select("contract_number")
+        .eq("id", documentId)
+        .single();
+      
+      // Log activity
+      await logActivity({
+        section: 'documents',
+        elementId: documentId,
+        elementName: doc?.contract_number || 'Документ',
+        action: 'update',
+        changes: { addedFile: file.name },
+      });
     },
     onSuccess: (_, { documentId }) => {
       queryClient.invalidateQueries({ queryKey: ["document-attachments", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["document-attachment-counts"] });
       toast({ title: "Файл загружен" });
     },
     onError: (error) => {
@@ -89,7 +107,14 @@ export function useDeleteDocumentAttachment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, filePath, documentId }: { id: string; filePath: string; documentId: string }) => {
+    mutationFn: async ({ id, filePath, documentId, fileName }: { id: string; filePath: string; documentId: string; fileName?: string }) => {
+      // Get document name for logging
+      const { data: doc } = await supabase
+        .from("documents")
+        .select("contract_number")
+        .eq("id", documentId)
+        .single();
+      
       // Delete from storage
       const { error: storageError } = await supabase.storage
         .from("document-files")
@@ -104,11 +129,21 @@ export function useDeleteDocumentAttachment() {
         .eq("id", id);
 
       if (dbError) throw dbError;
+      
+      // Log activity
+      await logActivity({
+        section: 'documents',
+        elementId: documentId,
+        elementName: doc?.contract_number || 'Документ',
+        action: 'update',
+        changes: { removedFile: fileName || filePath },
+      });
 
       return documentId;
     },
     onSuccess: (documentId) => {
       queryClient.invalidateQueries({ queryKey: ["document-attachments", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["document-attachment-counts"] });
       toast({ title: "Файл удалён" });
     },
     onError: (error) => {

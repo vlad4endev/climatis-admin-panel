@@ -17,6 +17,7 @@ import { ServiceObject } from "@/types/serviceObject";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { logActivity } from "@/lib/activityLogger";
 import { DocumentAttachments } from "./DocumentAttachments";
 
 interface DocumentFormProps {
@@ -80,6 +81,15 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
           .eq("id", currentId);
         
         if (error) throw error;
+        
+        // Log activity for update
+        await logActivity({
+          section: 'documents',
+          elementId: currentId,
+          elementName: dataToSave.contractNumber || 'Документ',
+          action: 'update',
+          changes: fieldData,
+        });
       } else {
         // Создаём новый документ
         isCreatingRef.current = true;
@@ -102,6 +112,14 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
         if (error) throw error;
         if (data) {
           setCurrentId(data.id);
+          
+          // Log activity for create
+          await logActivity({
+            section: 'documents',
+            elementId: data.id,
+            elementName: data.contract_number,
+            action: 'create',
+          });
         }
         isCreatingRef.current = false;
       }
