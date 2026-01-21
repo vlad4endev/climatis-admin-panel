@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EntityList } from "@/components/entity/EntityList";
-import { EntityListConfig } from "@/components/entity/types";
+import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
 import { AssignmentForm } from "@/components/assignments/AssignmentForm";
 import { AssignmentPrintView } from "@/components/assignments/AssignmentPrintView";
@@ -92,6 +92,14 @@ export default function Assignments() {
     }
   };
 
+  const cardActions: CardAction<Assignment>[] = [
+    {
+      icon: Printer,
+      label: "Печать",
+      onClick: (item) => triggerPrint(item),
+    },
+  ];
+
   const config: EntityListConfig<Assignment> = {
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingAssignment(item),
@@ -138,6 +146,7 @@ export default function Assignments() {
       setEditingAssignment(assignment);
       setIsFormOpen(true);
     },
+    cardActions,
     customActions: (item) => (
       <Button
         variant="ghost"

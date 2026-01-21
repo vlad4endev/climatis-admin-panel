@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { EntityList } from "@/components/entity/EntityList";
-import { EntityListConfig } from "@/components/entity/types";
+import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
 import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
@@ -69,6 +69,24 @@ export default function Estimates() {
     onAfterPrint: () => setPrintingEstimate(undefined),
   });
 
+  const handleCreateAssignment = (estimate: Estimate) => {
+    const assignmentData = {
+      requestId: estimate.requestId,
+      requestNumber: estimate.requestName?.split(' - ')[0] || "",
+      estimateId: estimate.id,
+      estimateName: estimate.name,
+      workBlocks: estimate.workBlocks || [],
+      materials: estimate.materials || [],
+      comments: estimate.engineerComment || "",
+    };
+    sessionStorage.setItem('newAssignmentFromEstimate', JSON.stringify(assignmentData));
+    navigate('/assignments?create=true');
+    toast({
+      title: "Переход к созданию задания",
+      description: `На основе расчёта "${estimate.name}"`,
+    });
+  };
+
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
     switch (status) {
       case "черновик": return "draft";
@@ -77,6 +95,29 @@ export default function Estimates() {
       default: return "default";
     }
   };
+
+  const cardActions: CardAction<Estimate>[] = [
+    {
+      icon: Copy,
+      label: "Копировать",
+      onClick: (item) => copyMutation.mutate(item),
+      disabled: copyMutation.isPending,
+    },
+    {
+      icon: Printer,
+      label: "Печать",
+      onClick: (item) => {
+        setPrintingEstimate(item);
+        setTimeout(() => handlePrint(), 100);
+      },
+    },
+    {
+      icon: ClipboardCheck,
+      label: "Создать задание",
+      onClick: (item) => handleCreateAssignment(item),
+      disabled: (item) => item.status === "черновик",
+    },
+  ];
 
   const config: EntityListConfig<Estimate> = {
     getItemId: (item) => item.id,
@@ -113,6 +154,7 @@ export default function Estimates() {
       setEditingEstimate(estimate);
       setIsFormOpen(true);
     },
+    cardActions,
     customActions: (estimate) => (
       <>
         <Button
@@ -153,24 +195,6 @@ export default function Estimates() {
         </Button>
       </>
     ),
-  };
-
-  const handleCreateAssignment = (estimate: Estimate) => {
-    const assignmentData = {
-      requestId: estimate.requestId,
-      requestNumber: estimate.requestName?.split(' - ')[0] || "",
-      estimateId: estimate.id,
-      estimateName: estimate.name,
-      workBlocks: estimate.workBlocks || [],
-      materials: estimate.materials || [],
-      comments: estimate.engineerComment || "",
-    };
-    sessionStorage.setItem('newAssignmentFromEstimate', JSON.stringify(assignmentData));
-    navigate('/assignments?create=true');
-    toast({
-      title: "Переход к созданию задания",
-      description: `На основе расчёта "${estimate.name}"`,
-    });
   };
 
   const handleSubmit = (data: Partial<Estimate>) => {

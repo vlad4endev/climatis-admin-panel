@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
-import { EntityListConfig } from "@/components/entity/types";
+import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
@@ -34,6 +34,15 @@ export default function Requests() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
+
+  const cardActions: CardAction<Request>[] = canEdit ? [
+    {
+      icon: Copy,
+      label: "Копировать",
+      onClick: (item) => copyRequest.mutate(item),
+      disabled: copyRequest.isPending,
+    },
+  ] : [];
 
   const config: EntityListConfig<Request> = {
     fields: [
@@ -133,6 +142,7 @@ export default function Requests() {
     onRowClick: (item) => setViewingRequest(item),
     onDelete: canEdit ? (id) => deleteRequest.mutate(id) : undefined,
     onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
+    cardActions,
     customActions: canEdit ? (item) => (
       <Button
         variant="ghost"
