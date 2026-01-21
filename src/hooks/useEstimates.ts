@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Estimate, WorkBlock, Material, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useEstimates() {
   return useQuery({
@@ -135,6 +136,14 @@ export function useCreateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      // Log activity
+      await logActivity({
+        section: 'estimates',
+        elementId: estimateData.id,
+        elementName: estimateData.name || estimateData.estimate_number,
+        action: 'create',
+      });
+
       return estimateData;
     },
     onSuccess: () => {
@@ -221,6 +230,15 @@ export function useUpdateEstimate() {
 
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
+
+      // Log activity
+      await logActivity({
+        section: 'estimates',
+        elementId: id,
+        elementName: estimate.name || 'Расчёт',
+        action: 'update',
+        changes: { name: estimate.name, status: estimate.status, type: estimate.type },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
@@ -235,11 +253,26 @@ export function useDeleteEstimate() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: est } = await supabase
+        .from("estimates")
+        .select("name, estimate_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("estimates")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'estimates',
+        elementId: id,
+        elementName: est?.name || est?.estimate_number || 'Расчёт',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
@@ -317,6 +350,15 @@ export function useCopyEstimate() {
 
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
+
+      // Log activity
+      await logActivity({
+        section: 'estimates',
+        elementId: estimateData.id,
+        elementName: `Копия: ${estimate.name}`,
+        action: 'create',
+        changes: { copiedFrom: estimate.name },
+      });
 
       return estimateData;
     },

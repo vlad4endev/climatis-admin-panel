@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceObject } from "@/types/serviceObject";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useServiceObjects() {
   return useQuery({
@@ -70,6 +71,14 @@ export function useCreateServiceObject() {
           });
       }
 
+      // Log activity
+      await logActivity({
+        section: 'serviceObjects',
+        elementId: data.id,
+        elementName: data.object_name,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -112,6 +121,15 @@ export function useUpdateServiceObject() {
             contact_id: contactId,
           });
       }
+
+      // Log activity
+      await logActivity({
+        section: 'serviceObjects',
+        elementId: id,
+        elementName: obj.objectName,
+        action: 'update',
+        changes: { objectName: obj.objectName, address: obj.address },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });
@@ -126,11 +144,26 @@ export function useDeleteServiceObject() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: obj } = await supabase
+        .from("service_objects")
+        .select("object_name")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("service_objects")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'serviceObjects',
+        elementId: id,
+        elementName: obj?.object_name || 'Объект',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });

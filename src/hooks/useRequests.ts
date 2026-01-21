@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Request } from "@/types/request";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useRequests() {
   return useQuery({
@@ -83,6 +84,15 @@ export function useCreateRequest() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'requests',
+        elementId: data.id,
+        elementName: data.request_number,
+        action: 'create',
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -101,6 +111,13 @@ export function useUpdateRequest() {
 
   return useMutation({
     mutationFn: async ({ id, ...request }: Partial<Request> & { id: string }) => {
+      // Get current request number for logging
+      const { data: current } = await supabase
+        .from("requests")
+        .select("request_number")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("requests")
         .update({
@@ -125,6 +142,15 @@ export function useUpdateRequest() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'requests',
+        elementId: id,
+        elementName: current?.request_number || 'Заявка',
+        action: 'update',
+        changes: { status: request.status, priority: request.priority, type: request.type },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
@@ -139,12 +165,27 @@ export function useDeleteRequest() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get name for logging
+      const { data: req } = await supabase
+        .from("requests")
+        .select("request_number")
+        .eq("id", id)
+        .single();
+
       // Soft delete - set deleted_at timestamp
       const { error } = await supabase
         .from("requests")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'requests',
+        elementId: id,
+        elementName: req?.request_number || 'Заявка',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
@@ -183,6 +224,16 @@ export function useCopyRequest() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        section: 'requests',
+        elementId: data.id,
+        elementName: data.request_number,
+        action: 'create',
+        changes: { copiedFrom: request.requestNumber },
+      });
+
       return data;
     },
     onSuccess: () => {
