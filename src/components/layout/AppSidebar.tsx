@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut, Contact, Trash2 } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut, Contact, Trash2, History } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -280,7 +280,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Admin section - Users & Trash */}
+        {/* Admin section - Users, Logs & Trash */}
         {isAdmin && (
           <>
             <Separator className="my-2 bg-sidebar-border" />
@@ -289,6 +289,10 @@ export function AppSidebar() {
                 <SidebarMenu>
                   <MenuItemComponent 
                     item={{ title: "Пользователи", url: "/users", icon: Shield }} 
+                    open={open} 
+                  />
+                  <MenuItemComponent 
+                    item={{ title: "Логи", url: "/activity-logs", icon: History }} 
                     open={open} 
                   />
                   <MenuItemComponent 

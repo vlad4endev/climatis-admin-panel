@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Document } from "@/types/document";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLogger";
 
 export function useDocuments() {
   return useQuery({
@@ -59,6 +60,15 @@ export function useCreateDocument() {
         .single();
 
       if (error) throw error;
+      
+      // Log activity
+      await logActivity({
+        section: 'documents',
+        elementId: data.id,
+        elementName: data.contract_number,
+        action: 'create',
+      });
+      
       return data;
     },
     onSuccess: () => {
@@ -90,6 +100,14 @@ export function useUpdateDocument() {
         .eq("id", id);
 
       if (error) throw error;
+      
+      // Log activity
+      await logActivity({
+        section: 'documents',
+        elementId: id,
+        elementName: doc.contractNumber,
+        action: 'update',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
@@ -104,11 +122,26 @@ export function useDeleteDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get document name first
+      const { data: doc } = await supabase
+        .from("documents")
+        .select("contract_number")
+        .eq("id", id)
+        .single();
+      
       const { error } = await supabase
         .from("documents")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+      
+      // Log activity
+      await logActivity({
+        section: 'documents',
+        elementId: id,
+        elementName: doc?.contract_number || 'Документ',
+        action: 'delete',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
