@@ -11,13 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Document, CONTRACT_TYPES, DOCUMENT_STATUSES, DocumentStatus } from "@/types/document";
+import { Document, CONTRACT_TYPES, DOCUMENT_STATUSES } from "@/types/document";
 import { Client } from "@/types/client";
 import { ServiceObject } from "@/types/serviceObject";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Loader2, Download, Upload, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { DocumentAttachments } from "./DocumentAttachments";
 
 interface DocumentFormProps {
   initialData?: Partial<Document>;
@@ -32,9 +32,6 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
   const queryClient = useQueryClient();
   const [currentId, setCurrentId] = useState<string | null>(initialData?.id || null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [currentFilePath, setCurrentFilePath] = useState<string | undefined>(initialData?.filePath);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isCreatingRef = useRef(false);
 
@@ -48,8 +45,6 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
       objectId: initialData?.objectId || '',
       responseConditions: initialData?.responseConditions || '',
       notes: initialData?.notes || '',
-      fileName: initialData?.fileName || '',
-      filePath: initialData?.filePath || '',
       status: initialData?.status || 'draft',
     },
   });
@@ -80,8 +75,6 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             object_id: dataToSave.objectId || null,
             response_conditions: dataToSave.responseConditions,
             notes: dataToSave.notes,
-            file_name: dataToSave.fileName || null,
-            file_path: dataToSave.filePath || currentFilePath || null,
             status: dataToSave.status,
           })
           .eq("id", currentId);
@@ -101,8 +94,6 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
             object_id: dataToSave.objectId || null,
             response_conditions: dataToSave.responseConditions || '',
             notes: dataToSave.notes || '',
-            file_name: dataToSave.fileName || null,
-            file_path: dataToSave.filePath || null,
             status: 'draft',
           })
           .select()
@@ -151,50 +142,6 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
       }
     };
   }, []);
-
-  // Скачивание файла
-  const handleDownload = async () => {
-    if (!currentFilePath) return;
-    
-    setIsDownloading(true);
-    try {
-      const { data, error } = await supabase.storage
-        .from('document-files')
-        .download(currentFilePath);
-      
-      if (error) throw error;
-      
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = watch('fileName') || 'document';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Ошибка скачивания файла');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  // Удаление файла
-  const handleDeleteFile = async () => {
-    if (currentFilePath) {
-      try {
-        await supabase.storage.from('document-files').remove([currentFilePath]);
-      } catch (error) {
-        console.error('Error removing file:', error);
-      }
-    }
-    
-    setValue('fileName', '');
-    setValue('filePath', '');
-    setCurrentFilePath(undefined);
-    debouncedSave({ fileName: '', filePath: '' } as Partial<Document>);
-  };
 
   const onSubmitForm = (data: any) => {
     const selectedClient = clients.find(c => c.id === data.clientId);
@@ -368,104 +315,8 @@ export function DocumentForm({ initialData, onSubmit, onCancel, clients, service
         />
       </div>
 
-      {!readOnly && (
-        <div className="space-y-2">
-          <Label htmlFor="file">Файл договора</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="file"
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx"
-              className="flex-1"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                
-                setIsUploading(true);
-                try {
-                  const fileExt = file.name.split('.').pop();
-                  const filePath = `${crypto.randomUUID()}.${fileExt}`;
-                  
-                  const { error: uploadError } = await supabase.storage
-                    .from('document-files')
-                    .upload(filePath, file);
-                  
-                  if (uploadError) throw uploadError;
-                  
-                  setValue('fileName', file.name);
-                  setValue('filePath', filePath);
-                  setCurrentFilePath(filePath);
-                  debouncedSave({ fileName: file.name, filePath });
-                  toast.success('Файл загружен');
-                } catch (error) {
-                  console.error('Upload error:', error);
-                  toast.error('Ошибка загрузки файла');
-                } finally {
-                  setIsUploading(false);
-                  e.target.value = '';
-                }
-              }}
-              disabled={isUploading}
-            />
-            {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
-          </div>
-          {(watch('fileName') || currentFilePath) && (
-            <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
-              <span className="text-sm flex-1 truncate">{watch('fileName')}</span>
-              {currentFilePath && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handleDownload}
-                  disabled={isDownloading}
-                >
-                  {isDownloading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive"
-                onClick={handleDeleteFile}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {readOnly && (watch('fileName') || currentFilePath) && (
-        <div className="space-y-2">
-          <Label>Файл договора</Label>
-          <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
-            <span className="text-sm flex-1 truncate">{watch('fileName')}</span>
-            {currentFilePath && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleDownload}
-                disabled={isDownloading}
-              >
-                {isDownloading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Прикреплённые документы - как в Расчётах */}
+      <DocumentAttachments documentId={currentId || undefined} readOnly={readOnly} />
 
       {!readOnly && (
         <div className="flex justify-end gap-2">
