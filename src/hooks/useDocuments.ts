@@ -31,8 +31,6 @@ export function useDocuments() {
         objectName: row.object?.object_name || undefined,
         responseConditions: row.response_conditions || "",
         notes: row.notes || "",
-        fileName: row.file_name || undefined,
-        filePath: row.file_path || undefined,
         status: row.status || 'draft',
       }));
     },
@@ -55,8 +53,6 @@ export function useCreateDocument() {
           object_id: doc.objectId || null,
           response_conditions: doc.responseConditions,
           notes: doc.notes,
-          file_name: doc.fileName || null,
-          file_path: doc.filePath || null,
           status: doc.status || 'draft',
         })
         .select()
@@ -89,8 +85,6 @@ export function useUpdateDocument() {
           object_id: doc.objectId || null,
           response_conditions: doc.responseConditions,
           notes: doc.notes,
-          file_name: doc.fileName || null,
-          file_path: doc.filePath || null,
           status: doc.status,
         })
         .eq("id", id);
