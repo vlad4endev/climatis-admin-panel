@@ -78,12 +78,12 @@ export default function WarehouseCategories() {
     <div className="space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Разделы в складе</h1>
+          <h1 className="text-3xl font-bold">Категории</h1>
           <p className="text-muted-foreground mt-2">Управление категориями номенклатуры</p>
         </div>
         <Button onClick={handleAdd} className="gap-2">
           <Plus className="h-4 w-4" />
-          Добавить раздел
+          Добавить категорию
         </Button>
       </div>
 
@@ -97,7 +97,7 @@ export default function WarehouseCategories() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle className="text-xl truncate" title={category.name}>{category.name}</CardTitle>
-                  <CardDescription>Раздел склада</CardDescription>
+                  <CardDescription>Категория склада</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -138,7 +138,7 @@ export default function WarehouseCategories() {
         <Card>
           <CardHeader>
             <CardTitle>Статистика склада</CardTitle>
-            <CardDescription>Общая информация по всем разделам</CardDescription>
+            <CardDescription>Общая информация по всем категориям</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
@@ -162,11 +162,11 @@ export default function WarehouseCategories() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingCategory ? "Редактировать раздел" : "Новый раздел"}</DialogTitle>
-            <DialogDescription>{editingCategory ? "Измените название раздела" : "Добавьте новый раздел"}</DialogDescription>
+            <DialogTitle>{editingCategory ? "Редактировать категорию" : "Новая категория"}</DialogTitle>
+            <DialogDescription>{editingCategory ? "Измените название категории" : "Добавьте новую категорию"}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label htmlFor="categoryName">Название раздела</Label>
+            <Label htmlFor="categoryName">Название категории</Label>
             <Input
               id="categoryName"
               value={formName}
@@ -186,9 +186,9 @@ export default function WarehouseCategories() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Удалить раздел?</AlertDialogTitle>
+            <AlertDialogTitle>Удалить категорию?</AlertDialogTitle>
             <AlertDialogDescription>
-              Вы уверены, что хотите удалить раздел "{deletingCategory?.name}"?
+              Вы уверены, что хотите удалить категорию "{deletingCategory?.name}"?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
