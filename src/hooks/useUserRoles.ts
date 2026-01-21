@@ -22,20 +22,23 @@ export interface SectionPermission {
 }
 
 export const SECTIONS = [
+  // Клиенты и объекты
   { key: "clients", label: "Организации" },
   { key: "contacts", label: "Контактные лица" },
-  { key: "service-objects", label: "Объекты обслуживания" },
-  { key: "documents", label: "Документы" },
+  { key: "service-objects", label: "Объекты" },
+  // Заявки и документы
   { key: "requests", label: "Заявки" },
-  { key: "estimates", label: "Сметы" },
-  { key: "invoices", label: "Счета" },
-  { key: "assignments", label: "Наряды" },
-  { key: "tasks", label: "Задачи" },
+  { key: "documents", label: "Документы" },
+  { key: "estimates", label: "Расчёты" },
+  { key: "assignments", label: "Задания" },
+  // Сотрудники
   { key: "employees", label: "Сотрудники" },
   { key: "teams", label: "Бригады" },
-  { key: "spare-parts", label: "Запчасти" },
-  { key: "warehouse-categories", label: "Категории склада" },
-  { key: "stock-movements", label: "Движение товаров" },
+  { key: "tasks", label: "Задачи" },
+  // Склад
+  { key: "warehouse-categories", label: "Категории" },
+  { key: "spare-parts", label: "Комплектующие" },
+  { key: "stock-movements", label: "Расход/Приход" },
 ] as const;
 
 export function useIsAdmin() {
