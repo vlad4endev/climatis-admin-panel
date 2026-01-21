@@ -197,21 +197,17 @@ export default function Estimates() {
     ),
   };
 
-  const handleSubmit = (data: Partial<Estimate>) => {
-    if (editingEstimate) {
-      updateMutation.mutate({ id: editingEstimate.id, ...data }, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          setEditingEstimate(undefined);
-        }
-      });
-    } else {
-      createMutation.mutate(data, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          setEditingEstimate(undefined);
-        }
-      });
+  const handleSubmit = async (data: Partial<Estimate>) => {
+    try {
+      if (editingEstimate) {
+        await updateMutation.mutateAsync({ id: editingEstimate.id, ...data });
+      } else {
+        await createMutation.mutateAsync(data);
+      }
+      setIsFormOpen(false);
+      setEditingEstimate(undefined);
+    } catch (error) {
+      // Error is handled by mutation's onError
     }
   };
 

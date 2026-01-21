@@ -162,28 +162,24 @@ export default function Assignments() {
     ),
   };
 
-  const handleSubmit = (data: Partial<Assignment>) => {
-    if (newAssignmentData) {
-      createMutation.mutate({
-        status: data.status || "new",
-        requestId: newAssignmentData.requestId,
-        estimateId: newAssignmentData.estimateId,
-        teamId: data.teamId,
-        comments: data.comments || "",
-      }, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          setEditingAssignment(undefined);
-          setNewAssignmentData(null);
-        }
-      });
-    } else if (editingAssignment?.id) {
-      updateMutation.mutate({ id: editingAssignment.id, ...data }, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          setEditingAssignment(undefined);
-        }
-      });
+  const handleSubmit = async (data: Partial<Assignment>) => {
+    try {
+      if (newAssignmentData) {
+        await createMutation.mutateAsync({
+          status: data.status || "new",
+          requestId: newAssignmentData.requestId,
+          estimateId: newAssignmentData.estimateId,
+          teamId: data.teamId,
+          comments: data.comments || "",
+        });
+        setNewAssignmentData(null);
+      } else if (editingAssignment?.id) {
+        await updateMutation.mutateAsync({ id: editingAssignment.id, ...data });
+      }
+      setIsFormOpen(false);
+      setEditingAssignment(undefined);
+    } catch (error) {
+      // Error is handled by mutation's onError
     }
   };
 
