@@ -179,6 +179,7 @@ export type Database = {
           deleted_at: string | null
           end_date: string
           file_name: string | null
+          file_path: string | null
           id: string
           notes: string | null
           object_id: string | null
@@ -195,6 +196,7 @@ export type Database = {
           deleted_at?: string | null
           end_date: string
           file_name?: string | null
+          file_path?: string | null
           id?: string
           notes?: string | null
           object_id?: string | null
@@ -211,6 +213,7 @@ export type Database = {
           deleted_at?: string | null
           end_date?: string
           file_name?: string | null
+          file_path?: string | null
           id?: string
           notes?: string | null
           object_id?: string | null
