@@ -1,4 +1,5 @@
 export type RequestStatus = 
+  | "draft"
   | "new"
   | "needs_calculation"
   | "awaiting_materials"
@@ -11,6 +12,7 @@ export type RequestType = "repair" | "maintenance" | "installation";
 export type RequestPriority = "urgent" | "normal";
 
 export const REQUEST_STATUSES: { value: RequestStatus; label: string }[] = [
+  { value: "draft", label: "Черновик" },
   { value: "new", label: "Новая" },
   { value: "needs_calculation", label: "Требует расчёта" },
   { value: "awaiting_materials", label: "Ожидает материалов" },

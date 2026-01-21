@@ -1,8 +1,9 @@
 import { WorkBlock, Material } from "./estimate";
 
-export type AssignmentStatus = "new" | "assigned" | "completed";
+export type AssignmentStatus = "draft" | "new" | "assigned" | "completed";
 
 export const ASSIGNMENT_STATUSES: { value: AssignmentStatus; label: string }[] = [
+  { value: "draft", label: "Черновик" },
   { value: "new", label: "Новое" },
   { value: "assigned", label: "Передано" },
   { value: "completed", label: "Выполнено" },
