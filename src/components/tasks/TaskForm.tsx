@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Task, TaskChecklistItem, TaskComment } from "@/types/task";
 import { Employee } from "@/types/employee";
 import { Request } from "@/types/request";
-import { Plus, Trash2, Send } from "lucide-react";
+import { Plus, Trash2, Send, GripVertical, Pencil, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface TaskFormProps {
@@ -33,6 +33,10 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
   const [comments, setComments] = useState<TaskComment[]>(task?.comments || []);
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const dragOverItemId = useRef<string | null>(null);
 
   const selectedEmployee = employees.find(e => e.id === assigneeId);
   const selectedRequest = requests.find(r => r.id === requestId);
@@ -59,6 +63,57 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
 
   const handleRemoveChecklistItem = (id: string) => {
     setChecklist(checklist.filter(item => item.id !== id));
+  };
+
+  const handleStartEdit = (item: TaskChecklistItem) => {
+    setEditingItemId(item.id);
+    setEditingText(item.text);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingItemId || !editingText.trim()) return;
+    setChecklist(checklist.map(item =>
+      item.id === editingItemId ? { ...item, text: editingText.trim() } : item
+    ));
+    setEditingItemId(null);
+    setEditingText("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null);
+    setEditingText("");
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggedItemId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    dragOverItemId.current = id;
+  };
+
+  const handleDragEnd = () => {
+    if (!draggedItemId || !dragOverItemId.current || draggedItemId === dragOverItemId.current) {
+      setDraggedItemId(null);
+      return;
+    }
+
+    const draggedIndex = checklist.findIndex(item => item.id === draggedItemId);
+    const overIndex = checklist.findIndex(item => item.id === dragOverItemId.current);
+    
+    if (draggedIndex === -1 || overIndex === -1) {
+      setDraggedItemId(null);
+      return;
+    }
+
+    const newChecklist = [...checklist];
+    const [draggedItem] = newChecklist.splice(draggedIndex, 1);
+    newChecklist.splice(overIndex, 0, draggedItem);
+    
+    setChecklist(newChecklist);
+    setDraggedItemId(null);
+    dragOverItemId.current = null;
   };
 
   const handleAddComment = () => {
@@ -223,26 +278,88 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
             {checklist.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 p-2 rounded-md bg-muted/30 group"
+                draggable={!readOnly && editingItemId !== item.id}
+                onDragStart={() => handleDragStart(item.id)}
+                onDragOver={(e) => handleDragOver(e, item.id)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center gap-2 p-2 rounded-md bg-muted/30 group transition-all ${
+                  draggedItemId === item.id ? 'opacity-50 scale-95' : ''
+                } ${!readOnly ? 'cursor-grab active:cursor-grabbing' : ''}`}
               >
+                {!readOnly && (
+                  <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                )}
                 <Checkbox
                   checked={item.completed}
                   onCheckedChange={() => !readOnly && handleToggleChecklistItem(item.id)}
                   disabled={readOnly}
                 />
-                <span className={`flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
-                  {item.text}
-                </span>
-                {!readOnly && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleRemoveChecklistItem(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                {editingItemId === item.id ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <Input
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      className="h-8"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleSaveEdit();
+                        } else if (e.key === 'Escape') {
+                          handleCancelEdit();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-primary hover:text-primary/80"
+                      onClick={handleSaveEdit}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={handleCancelEdit}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span 
+                      className={`flex-1 ${item.completed ? 'line-through text-muted-foreground' : ''}`}
+                      onDoubleClick={() => !readOnly && handleStartEdit(item)}
+                    >
+                      {item.text}
+                    </span>
+                    {!readOnly && (
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleStartEdit(item)}
+                        >
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleRemoveChecklistItem(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}
