@@ -55,6 +55,7 @@ export function useContacts() {
             company_name
           )
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -194,7 +195,10 @@ export function useDeleteContact() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("contacts").delete().eq("id", id);
+      const { error } = await supabase
+        .from("contacts")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
 
       if (error) {
         console.error("Error deleting contact:", error);
@@ -203,7 +207,8 @@ export function useDeleteContact() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      toast.success("Контактное лицо удалено");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Контактное лицо перемещено в корзину");
     },
     onError: (error) => {
       console.error("Delete contact error:", error);

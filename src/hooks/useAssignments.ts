@@ -29,6 +29,7 @@ export function useAssignments() {
             materials:estimate_materials(*)
           )
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -127,12 +128,16 @@ export function useDeleteAssignment() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("assignments").delete().eq("id", id);
+      const { error } = await supabase
+        .from("assignments")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
-      toast.success("Задание удалено");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Задание перемещено в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });

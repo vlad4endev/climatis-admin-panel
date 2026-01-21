@@ -80,6 +80,7 @@ export function useDeleteEmployee() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Hard delete for employees (no soft delete column)
       const { error } = await supabase.from("employees").delete().eq("id", id);
       if (error) throw error;
     },

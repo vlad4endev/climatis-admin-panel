@@ -28,6 +28,7 @@ export function useEstimates() {
             rows:work_rows(*)
           )
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -234,26 +235,16 @@ export function useDeleteEstimate() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Delete related items first
-      const { data: oldBlocks } = await supabase
-        .from("work_blocks")
-        .select("id")
-        .eq("estimate_id", id);
-
-      if (oldBlocks) {
-        for (const block of oldBlocks) {
-          await supabase.from("work_rows").delete().eq("work_block_id", block.id);
-        }
-      }
-      await supabase.from("work_blocks").delete().eq("estimate_id", id);
-      await supabase.from("estimate_materials").delete().eq("estimate_id", id);
-
-      const { error } = await supabase.from("estimates").delete().eq("id", id);
+      const { error } = await supabase
+        .from("estimates")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
-      toast.success("Расчёт удалён");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Расчёт перемещён в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });

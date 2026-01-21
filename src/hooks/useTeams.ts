@@ -117,6 +117,7 @@ export function useDeleteTeam() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Hard delete for teams (no soft delete column)
       const { error } = await supabase.from("teams").delete().eq("id", id);
       if (error) throw error;
     },

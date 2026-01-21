@@ -16,6 +16,7 @@ export function useServiceObjects() {
             contact:contacts(id, name, phone, is_main)
           )
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -125,12 +126,16 @@ export function useDeleteServiceObject() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("service_objects").delete().eq("id", id);
+      const { error } = await supabase
+        .from("service_objects")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });
-      toast.success("Объект удалён");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Объект перемещён в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });
