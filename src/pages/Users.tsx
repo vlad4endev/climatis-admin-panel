@@ -72,6 +72,7 @@ export default function Users() {
             <TableHeader>
               <TableRow>
                 <TableHead>Имя</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Роль</TableHead>
                 <TableHead>Дата регистрации</TableHead>
                 <TableHead className="text-right">Действия</TableHead>
@@ -82,6 +83,9 @@ export default function Users() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
                     {user.fullName || "Без имени"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {user.email || "—"}
                   </TableCell>
                   <TableCell>
                     <Select

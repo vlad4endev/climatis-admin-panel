@@ -76,11 +76,22 @@ export function useAllUsers() {
       
       if (rolesError) throw rolesError;
 
+      // Get emails from edge function
+      let emailMap: Record<string, string> = {};
+      try {
+        const { data, error } = await supabase.functions.invoke("get-users-emails");
+        if (!error && data) {
+          emailMap = data;
+        }
+      } catch (e) {
+        console.error("Failed to fetch user emails:", e);
+      }
+
       const rolesMap = new Map(roles?.map(r => [r.user_id, r.role as AppRole]) || []);
 
       return (profiles || []).map((p): UserWithRole => ({
         id: p.id,
-        email: "", // Will be filled if needed
+        email: emailMap[p.id] || "",
         fullName: p.full_name,
         role: rolesMap.get(p.id) || "user",
         createdAt: p.created_at,
