@@ -18,6 +18,7 @@ export function useRequests() {
           assigned_team:teams(id, name),
           assigned_engineer:employees!requests_assigned_engineer_id_fkey(id, full_name)
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -138,12 +139,17 @@ export function useDeleteRequest() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("requests").delete().eq("id", id);
+      // Soft delete - set deleted_at timestamp
+      const { error } = await supabase
+        .from("requests")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
-      toast.success("Заявка удалена");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Заявка перемещена в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });

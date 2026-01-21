@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, Shield, MoreHorizontal, LogOut, Contact } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, Shield, MoreHorizontal, LogOut, Contact, Trash2 } from "lucide-react";
 import { useIsAdmin, useMyPermissions, PermissionLevel } from "@/hooks/useUserRoles";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,7 @@ const adminMoreItems = [
   { title: "Комплектующие", url: "/spare-parts", icon: Package },
   { title: "Расход/Приход", url: "/stock-movements", icon: ArrowLeftRight },
   { title: "Пользователи", url: "/users", icon: Shield },
+  { title: "Корзина", url: "/trash", icon: Trash2 },
 ];
 
 // All items for regular users

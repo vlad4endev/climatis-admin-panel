@@ -21,6 +21,7 @@ export function useTasks() {
             author:profiles(id, full_name)
           )
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -147,16 +148,16 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Delete related items first
-      await supabase.from("task_checklist_items").delete().eq("task_id", id);
-      await supabase.from("task_comments").delete().eq("task_id", id);
-
-      const { error } = await supabase.from("tasks").delete().eq("id", id);
+      const { error } = await supabase
+        .from("tasks")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("Задача удалена");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Задача перемещена в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });

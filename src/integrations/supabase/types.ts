@@ -19,6 +19,7 @@ export type Database = {
           assignment_number: string
           comments: string | null
           created_at: string
+          deleted_at: string | null
           estimate_id: string
           id: string
           request_id: string
@@ -30,6 +31,7 @@ export type Database = {
           assignment_number: string
           comments?: string | null
           created_at?: string
+          deleted_at?: string | null
           estimate_id: string
           id?: string
           request_id: string
@@ -41,6 +43,7 @@ export type Database = {
           assignment_number?: string
           comments?: string | null
           created_at?: string
+          deleted_at?: string | null
           estimate_id?: string
           id?: string
           request_id?: string
@@ -77,6 +80,7 @@ export type Database = {
           additional_contacts: Json | null
           company_name: string
           created_at: string
+          deleted_at: string | null
           division: string | null
           email: string | null
           id: string
@@ -91,6 +95,7 @@ export type Database = {
           additional_contacts?: Json | null
           company_name: string
           created_at?: string
+          deleted_at?: string | null
           division?: string | null
           email?: string | null
           id?: string
@@ -105,6 +110,7 @@ export type Database = {
           additional_contacts?: Json | null
           company_name?: string
           created_at?: string
+          deleted_at?: string | null
           division?: string | null
           email?: string | null
           id?: string
@@ -121,6 +127,7 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          deleted_at: string | null
           email: string | null
           id: string
           is_main: boolean
@@ -132,6 +139,7 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           is_main?: boolean
@@ -143,6 +151,7 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           is_main?: boolean
@@ -167,6 +176,7 @@ export type Database = {
           contract_number: string
           contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string
+          deleted_at: string | null
           end_date: string
           file_name: string | null
           id: string
@@ -182,6 +192,7 @@ export type Database = {
           contract_number: string
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
+          deleted_at?: string | null
           end_date: string
           file_name?: string | null
           id?: string
@@ -197,6 +208,7 @@ export type Database = {
           contract_number?: string
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
+          deleted_at?: string | null
           end_date?: string
           file_name?: string | null
           id?: string
@@ -304,6 +316,7 @@ export type Database = {
           created_at: string
           created_by_id: string | null
           customer_calculation: Json | null
+          deleted_at: string | null
           engineer_comment: string | null
           estimate_date: string
           estimate_number: string
@@ -318,6 +331,7 @@ export type Database = {
           created_at?: string
           created_by_id?: string | null
           customer_calculation?: Json | null
+          deleted_at?: string | null
           engineer_comment?: string | null
           estimate_date?: string
           estimate_number: string
@@ -332,6 +346,7 @@ export type Database = {
           created_at?: string
           created_by_id?: string | null
           customer_calculation?: Json | null
+          deleted_at?: string | null
           engineer_comment?: string | null
           estimate_date?: string
           estimate_number?: string
@@ -455,6 +470,7 @@ export type Database = {
           contract_conditions: string | null
           contract_id: string | null
           created_at: string
+          deleted_at: string | null
           desired_date: string | null
           hours_spent: number | null
           id: string
@@ -478,6 +494,7 @@ export type Database = {
           contract_conditions?: string | null
           contract_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           desired_date?: string | null
           hours_spent?: number | null
           id?: string
@@ -501,6 +518,7 @@ export type Database = {
           contract_conditions?: string | null
           contract_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           desired_date?: string | null
           hours_spent?: number | null
           id?: string
@@ -628,6 +646,7 @@ export type Database = {
           address: string | null
           client_id: string
           created_at: string
+          deleted_at: string | null
           id: string
           notes: string | null
           object_name: string
@@ -638,6 +657,7 @@ export type Database = {
           address?: string | null
           client_id: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           notes?: string | null
           object_name: string
@@ -648,6 +668,7 @@ export type Database = {
           address?: string | null
           client_id?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           notes?: string | null
           object_name?: string
@@ -873,6 +894,7 @@ export type Database = {
           assignee_id: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           description: string | null
           id: string
           proposed_deadline: string | null
@@ -886,6 +908,7 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           proposed_deadline?: string | null
@@ -899,6 +922,7 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           proposed_deadline?: string | null

@@ -41,6 +41,7 @@ export function useClients() {
       const { data, error } = await supabase
         .from("clients")
         .select("*")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -169,7 +170,10 @@ export function useDeleteClient() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
+      const { error } = await supabase
+        .from("clients")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
 
       if (error) {
         console.error("Error deleting client:", error);
@@ -178,7 +182,8 @@ export function useDeleteClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Организация удалена");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Организация перемещена в корзину");
     },
     onError: (error) => {
       console.error("Delete client error:", error);

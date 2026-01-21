@@ -14,6 +14,7 @@ export function useDocuments() {
           client:clients(id, company_name),
           object:service_objects(id, object_name)
         `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -106,12 +107,16 @@ export function useDeleteDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("documents").delete().eq("id", id);
+      const { error } = await supabase
+        .from("documents")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      toast.success("Договор удалён");
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      toast.success("Договор перемещён в корзину");
     },
     onError: () => toast.error("Ошибка при удалении"),
   });
