@@ -13,6 +13,7 @@ export interface Document {
   responseConditions: string;
   notes: string;
   fileName?: string;
+  filePath?: string;
   status: DocumentStatus;
 }
 
