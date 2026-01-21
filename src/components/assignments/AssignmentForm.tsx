@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
-import { calculateWorkBlockTotal, calculateAllBlocksTotal, calculateWorkRowTotal } from "@/types/estimate";
+import { calculateWorkBlockTotal, calculateAllBlocksTotal } from "@/types/estimate";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { useCreateAssignment, useUpdateAssignment } from "@/hooks/useAssignments";
 
 interface AssignmentFormProps {
   assignment?: Assignment;
@@ -31,7 +34,7 @@ export function AssignmentForm({
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       assignmentNumber: assignment?.assignmentNumber || "",
-      status: assignment?.status || "new",
+      status: assignment?.status || "draft",
       teamId: assignment?.teamId || "",
       comments: assignment?.comments || "",
     },
@@ -39,6 +42,50 @@ export function AssignmentForm({
 
   const status = watch("status");
   const teamId = watch("teamId");
+
+  // Auto-save setup
+  const createMutation = useCreateAssignment();
+  const updateMutation = useUpdateAssignment();
+
+  const { handleFieldChange, setCurrentId } = useAutoSave<Partial<Assignment>>({
+    queryKey: ["assignments"],
+    createFn: async (data) => {
+      return new Promise((resolve, reject) => {
+        createMutation.mutate({
+          assignmentNumber: data.assignmentNumber || `ЗД-${Date.now()}`,
+          status: (data.status as any) || "draft",
+          teamId: data.teamId || "",
+          teamName: teams.find(t => t.id === data.teamId)?.teamName || "",
+          comments: data.comments,
+          requestId: assignment?.requestId || "",
+          estimateId: assignment?.estimateId || "",
+        }, {
+          onSuccess: (result: any) => resolve({ id: result?.id || "" }),
+          onError: reject,
+        });
+      });
+    },
+    updateFn: async (id, data) => {
+      return new Promise((resolve, reject) => {
+        updateMutation.mutate({
+          id,
+          ...data,
+          teamName: data.teamId ? teams.find(t => t.id === data.teamId)?.teamName : undefined,
+        }, {
+          onSuccess: () => resolve(),
+          onError: reject,
+        });
+      });
+    },
+    debounceMs: 800,
+  });
+
+  // Initialize currentId if editing existing assignment
+  useEffect(() => {
+    if (assignment?.id) {
+      setCurrentId(assignment.id);
+    }
+  }, [assignment?.id, setCurrentId]);
 
   const handleFormSubmit = (data: any) => {
     const team = teams.find(t => t.id === data.teamId);

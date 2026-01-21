@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { useCreateEstimate, useUpdateEstimate } from "@/hooks/useEstimates";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { FileDown, FileText } from "lucide-react";
@@ -82,6 +84,52 @@ export function EstimateForm({
   const type = watch("type");
   const requestId = watch("requestId");
   const createdById = watch("createdById");
+
+  // Auto-save setup
+  const createMutation = useCreateEstimate();
+  const updateMutation = useUpdateEstimate();
+
+  const { handleFieldChange, setCurrentId, currentId } = useAutoSave<Partial<Estimate>>({
+    queryKey: ["estimates"],
+    createFn: async (data) => {
+      return new Promise((resolve, reject) => {
+        createMutation.mutate({
+          name: data.name || "Новый расчёт",
+          estimateNumber: data.estimateNumber || `РС-${Date.now()}`,
+          estimateDate: data.estimateDate || new Date().toISOString().split("T")[0],
+          status: (data.status as any) || "черновик",
+          type: (data.type as any) || "простой ремонт",
+          createdById: data.createdById || "",
+          createdByName: employees.find(e => e.id === data.createdById)?.fullName || "",
+          requestId: data.requestId,
+          engineerComment: data.engineerComment,
+        }, {
+          onSuccess: (result: any) => resolve({ id: result?.id || "" }),
+          onError: reject,
+        });
+      });
+    },
+    updateFn: async (id, data) => {
+      return new Promise((resolve, reject) => {
+        updateMutation.mutate({
+          id,
+          ...data,
+          createdByName: data.createdById ? employees.find(e => e.id === data.createdById)?.fullName : undefined,
+        }, {
+          onSuccess: () => resolve(),
+          onError: reject,
+        });
+      });
+    },
+    debounceMs: 800,
+  });
+
+  // Initialize currentId if editing existing estimate
+  useEffect(() => {
+    if (estimate?.id) {
+      setCurrentId(estimate.id);
+    }
+  }, [estimate?.id, setCurrentId]);
 
   // Sort requests by creation date (newest first)
   const sortedRequests = [...requests].sort(
