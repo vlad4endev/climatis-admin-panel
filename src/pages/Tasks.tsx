@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Task } from "@/types/task";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
-import { EntityViewDialog } from "@/components/entity/EntityViewDialog";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle } from "lucide-react";
@@ -11,6 +10,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/useTasks";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useRequests } from "@/hooks/useRequests";
+import { useCanEdit } from "@/hooks/useUserRoles";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const statusOptions = [
@@ -47,6 +47,7 @@ export default function Tasks() {
   const { data: tasks = [], isLoading } = useTasks();
   const { data: employees = [] } = useEmployees();
   const { data: requests = [] } = useRequests();
+  const { canEdit, canView, isLoading: permissionsLoading } = useCanEdit("tasks");
   
   const createMutation = useCreateTask();
   const updateMutation = useUpdateTask();
@@ -54,7 +55,9 @@ export default function Tasks() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
-  const [viewingTask, setViewingTask] = useState<Task | null>(null);
+
+  // Режим исполнителя: есть доступ на просмотр, но нет на редактирование
+  const isAssigneeMode = canView && !canEdit;
 
   const assigneeOptions = employees.map(e => ({ value: e.fullName, label: e.fullName }));
 
@@ -65,11 +68,11 @@ export default function Tasks() {
         label: "Задача",
         type: "text",
         searchable: true,
-        editable: true,
+        editable: canEdit,
         render: (value, item) => (
           <div className="flex items-center gap-2">
             {item.status === "выполнена" && (
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
             )}
             <span className="font-medium">{value}</span>
           </div>
@@ -118,7 +121,7 @@ export default function Tasks() {
         type: "select",
         options: statusOptions,
         filterable: true,
-        editable: true,
+        editable: canEdit,
         render: (value) => (
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(value)}`}>
             {value}
@@ -150,18 +153,22 @@ export default function Tasks() {
       }
     ],
     getItemId: (task) => task.id,
-    onRowClick: (task) => setViewingTask(task),
-    onEdit: (task) => {
+    onRowClick: (task) => {
+      // Для пользователей с правом просмотра открываем форму (в режиме исполнителя они смогут отмечать пункты)
       setEditingTask(task);
       setIsDialogOpen(true);
     },
-    onDelete: (id) => deleteMutation.mutate(id),
-    onUpdate: (id, field, value) => {
+    onEdit: canEdit ? (task) => {
+      setEditingTask(task);
+      setIsDialogOpen(true);
+    } : undefined,
+    onDelete: canEdit ? (id) => deleteMutation.mutate(id) : undefined,
+    onUpdate: canEdit ? (id, field, value) => {
       const task = tasks.find(t => t.id === id);
       if (task) {
         updateMutation.mutate({ id, ...task, [field]: value });
       }
-    },
+    } : undefined,
   };
 
   const handleSubmit = (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
@@ -182,7 +189,7 @@ export default function Tasks() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || permissionsLoading) {
     return (
       <div className="space-y-6">
         <PageHeader title="Задачи" description="Управление задачами сотрудников" buttonLabel="Добавить задачу" onButtonClick={() => {}} />
@@ -196,8 +203,8 @@ export default function Tasks() {
       <PageHeader
         title="Задачи"
         description="Управление задачами сотрудников"
-        buttonLabel="Добавить задачу"
-        onButtonClick={() => { setEditingTask(undefined); setIsDialogOpen(true); }}
+        buttonLabel={canEdit ? "Добавить задачу" : undefined}
+        onButtonClick={canEdit ? () => { setEditingTask(undefined); setIsDialogOpen(true); } : undefined}
       />
 
       <EntityList
@@ -213,7 +220,9 @@ export default function Tasks() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingTask ? "Редактирование задачи" : "Новая задача"}
+              {editingTask 
+                ? (isAssigneeMode ? "Просмотр задачи" : "Редактирование задачи") 
+                : "Новая задача"}
             </DialogTitle>
           </DialogHeader>
           <TaskForm
@@ -241,17 +250,11 @@ export default function Tasks() {
             }))}
             onSubmit={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
+            assigneeMode={isAssigneeMode}
           />
         </DialogContent>
       </Dialog>
 
-      <EntityViewDialog
-        item={viewingTask}
-        open={!!viewingTask}
-        onOpenChange={(open) => !open && setViewingTask(null)}
-        config={config}
-        title={viewingTask?.title}
-      />
     </div>
   );
 }
