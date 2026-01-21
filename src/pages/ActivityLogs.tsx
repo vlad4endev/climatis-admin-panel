@@ -3,7 +3,6 @@ import { useActivityLogs, ActivityLog } from "@/hooks/useActivityLogs";
 import { getSectionLabel, getActionLabel, getHumanReadableChanges } from "@/lib/activityLogger";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -20,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -51,19 +50,10 @@ const ACTIONS = [
 
 function getActionIcon(action: string) {
   switch (action) {
-    case 'create': return <Plus className="h-4 w-4" />;
-    case 'update': return <Pencil className="h-4 w-4" />;
-    case 'delete': return <Trash2 className="h-4 w-4" />;
+    case 'create': return <Plus className="h-4 w-4 text-primary" />;
+    case 'update': return <Pencil className="h-4 w-4 text-muted-foreground" />;
+    case 'delete': return <Trash2 className="h-4 w-4 text-destructive" />;
     default: return null;
-  }
-}
-
-function getActionBadgeVariant(action: string) {
-  switch (action) {
-    case 'create': return 'default';
-    case 'update': return 'secondary';
-    case 'delete': return 'destructive';
-    default: return 'outline';
   }
 }
 
@@ -197,7 +187,7 @@ export default function ActivityLogs() {
                   return (
                     <TableRow 
                       key={log.id} 
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="cursor-pointer hover:bg-table-row-hover"
                       onClick={() => handleRowClick(log)}
                     >
                       <TableCell className="text-muted-foreground text-sm">
@@ -211,10 +201,10 @@ export default function ActivityLogs() {
                       </TableCell>
                       <TableCell className="font-medium">{log.elementName || '—'}</TableCell>
                       <TableCell>
-                        <Badge variant={getActionBadgeVariant(log.action) as any} className="gap-1">
+                        <div className="flex items-center gap-2">
                           {getActionIcon(log.action)}
-                          {getActionLabel(log.action)}
-                        </Badge>
+                          <span className="text-sm">{getActionLabel(log.action)}</span>
+                        </div>
                       </TableCell>
                       <TableCell className="max-w-[300px]">
                         {humanChanges.length > 0 ? (
@@ -264,10 +254,10 @@ export default function ActivityLogs() {
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground mb-1">Действие</div>
-                  <Badge variant={getActionBadgeVariant(selectedLog.action) as any} className="gap-1">
+                  <div className="flex items-center gap-2">
                     {getActionIcon(selectedLog.action)}
-                    {getActionLabel(selectedLog.action)}
-                  </Badge>
+                    <span className="text-sm">{getActionLabel(selectedLog.action)}</span>
+                  </div>
                 </div>
               </div>
 
