@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Upload, Trash2, FileText, FileSpreadsheet, File, Loader2 } from "lucide-react";
+import { Paperclip, Upload, Trash2, FileText, FileSpreadsheet, File, Loader2, Download } from "lucide-react";
 import {
   useEstimateAttachments,
   useUploadEstimateAttachment,
@@ -139,19 +139,25 @@ export function EstimateAttachments({ estimateId, readOnly = false }: EstimateAt
               >
                 <Icon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium hover:underline truncate block"
-                  >
+                  <span className="text-sm font-medium truncate block">
                     {attachment.fileName}
-                  </a>
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {formatFileSize(attachment.fileSize)}
                     {attachment.createdAt && ` • ${new Date(attachment.createdAt).toLocaleDateString("ru-RU")}`}
                   </span>
                 </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  asChild
+                >
+                  <a href={url} download={attachment.fileName} target="_blank" rel="noopener noreferrer">
+                    <Download className="h-4 w-4" />
+                  </a>
+                </Button>
                 {!readOnly && (
                   <Button
                     type="button"
