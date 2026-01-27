@@ -28,26 +28,16 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
           <table className="w-full text-sm">
             <tbody>
               <tr>
-                <td className="py-1 text-gray-600 w-1/3">Наименование:</td>
-                <td className="py-1 font-medium">{estimate.name}</td>
-              </tr>
-              {estimate.requestName && (
-                <tr>
-                  <td className="py-1 text-gray-600">Заявка:</td>
-                  <td className="py-1 font-medium">{estimate.requestName}</td>
-                </tr>
-              )}
-              <tr>
-                <td className="py-1 text-gray-600">Тип расчёта:</td>
-                <td className="py-1 font-medium">{estimate.type}</td>
+                <td className="py-1 text-gray-600 w-1/3">Заказчик:</td>
+                <td className="py-1 font-medium">{estimate.requestName?.split(' - ')[1] || "—"}</td>
               </tr>
               <tr>
-                <td className="py-1 text-gray-600">Статус:</td>
-                <td className="py-1 font-medium">{estimate.status}</td>
+                <td className="py-1 text-gray-600">Объект:</td>
+                <td className="py-1 font-medium">{estimate.requestName?.split(' - ')[2] || estimate.name}</td>
               </tr>
               <tr>
-                <td className="py-1 text-gray-600">Расчёт составил:</td>
-                <td className="py-1 font-medium">{estimate.createdByName}</td>
+                <td className="py-1 text-gray-600">Исполнитель:</td>
+                <td className="py-1 font-medium">ООО «Климатис»</td>
               </tr>
             </tbody>
           </table>
