@@ -18,7 +18,6 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
       <div ref={ref} className="bg-white text-black" style={{ 
         fontFamily: 'Arial, sans-serif',
         width: '210mm',
-        minHeight: '297mm',
         padding: '15mm 20mm',
         fontSize: '10pt',
         lineHeight: '1.3',
