@@ -21,6 +21,20 @@ export function MaterialListEditor({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Initialize search values from materials prop when component mounts or materials change
+  useEffect(() => {
+    const newSearchValues: Record<string, string> = {};
+    materials.forEach((material) => {
+      // Only set if not already in searchValues to preserve user edits
+      if (material.materialName && searchValues[material.id] === undefined) {
+        newSearchValues[material.id] = material.materialName;
+      }
+    });
+    if (Object.keys(newSearchValues).length > 0) {
+      setSearchValues((prev) => ({ ...newSearchValues, ...prev }));
+    }
+  }, [materials]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (activeDropdown) {
