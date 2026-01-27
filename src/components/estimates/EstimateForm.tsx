@@ -293,8 +293,6 @@ export function EstimateForm({
         <div class="container">
           <h1>РАСЧЁТ  СТОИМОСТИ</h1>
           <div class="header-info">
-            <div class="header-row"><span class="header-label">Расчёт:</span><span class="header-value">${estimateName || "—"} № ${estimateNumber || "—"}</span></div>
-            <div class="header-row"><span class="header-label">Дата:</span><span class="header-value">${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}</span></div>
             <div class="header-row"><span class="header-label">Заказчик:</span><span class="header-value">${selectedRequest?.clientName || "—"}</span></div>
             <div class="header-row"><span class="header-label">Объект:</span><span class="header-value">${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span></div>
             <div class="header-row"><span class="header-label">Исполнитель:</span><span class="header-value">ООО «Климатис»</span></div>
@@ -825,14 +823,6 @@ export function EstimateForm({
         </h1>
         
         <div style={{ marginBottom: "24px", fontSize: "12pt" }}>
-          <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Расчёт:</span>
-            <span>{watch("name") || "—"} № {watch("estimateNumber") || "—"}</span>
-          </div>
-          <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Дата:</span>
-            <span>{watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : "—"}</span>
-          </div>
           <div style={{ display: "flex", marginBottom: "4px" }}>
             <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Заказчик:</span>
             <span>{selectedRequest?.clientName || "—"}</span>
