@@ -51,6 +51,9 @@ export interface Estimate {
   name: string;
   requestId?: string;
   requestName?: string;
+  clientName?: string;
+  objectName?: string;
+  objectAddress?: string;
   estimateNumber: string;
   estimateDate: string;
   status: "черновик" | "готов" | "согласован";

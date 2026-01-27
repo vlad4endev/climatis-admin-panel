@@ -37,11 +37,14 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
             <tbody>
               <tr>
                 <td style={{ padding: '2px 0', color: '#666', width: '80px' }}>Заказчик:</td>
-                <td style={{ padding: '2px 0', fontWeight: 500 }}>{estimate.requestName?.split(' - ')[1] || "—"}</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>{estimate.clientName || "—"}</td>
               </tr>
               <tr>
                 <td style={{ padding: '2px 0', color: '#666' }}>Объект:</td>
-                <td style={{ padding: '2px 0', fontWeight: 500 }}>{estimate.requestName?.split(' - ')[2] || estimate.name}</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>
+                  {estimate.objectName || estimate.name}
+                  {estimate.objectAddress && `, ${estimate.objectAddress}`}
+                </td>
               </tr>
               <tr>
                 <td style={{ padding: '2px 0', color: '#666' }}>Исполнитель:</td>

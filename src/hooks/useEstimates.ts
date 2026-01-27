@@ -12,7 +12,12 @@ export function useEstimates() {
         .from("estimates")
         .select(`
           *,
-          request:requests(id, request_number),
+          request:requests(
+            id, 
+            request_number,
+            client:clients(id, company_name),
+            object:service_objects(id, object_name, address)
+          ),
           creator:employees(id, full_name),
           materials:estimate_materials(
             id,
@@ -39,6 +44,9 @@ export function useEstimates() {
         name: row.name,
         requestId: row.request_id || undefined,
         requestName: row.request?.request_number || undefined,
+        clientName: row.request?.client?.company_name || undefined,
+        objectName: row.request?.object?.object_name || undefined,
+        objectAddress: row.request?.object?.address || undefined,
         estimateNumber: row.estimate_number,
         estimateDate: row.estimate_date,
         status: row.status,
