@@ -15,69 +15,77 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
     const grandTotal = worksTotal + materialsTotal;
 
     return (
-      <div ref={ref} className="p-8 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold mb-2">РАСЧЁТ (СМЕТА)</h1>
-          <p className="text-lg">№ {estimate.estimateNumber}</p>
-          <p className="text-sm text-gray-600">
+      <div ref={ref} className="bg-white text-black" style={{ 
+        fontFamily: 'Arial, sans-serif',
+        width: '210mm',
+        minHeight: '297mm',
+        padding: '15mm 20mm',
+        fontSize: '10pt',
+        lineHeight: '1.3',
+        boxSizing: 'border-box'
+      }}>
+        <div className="text-center" style={{ marginBottom: '12px' }}>
+          <h1 style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '4px' }}>РАСЧЁТ (СМЕТА)</h1>
+          <p style={{ fontSize: '11pt' }}>№ {estimate.estimateNumber}</p>
+          <p style={{ fontSize: '9pt', color: '#666' }}>
             от {new Date(estimate.estimateDate).toLocaleDateString('ru-RU')}
           </p>
         </div>
 
-        <div className="mb-6 border-b pb-4">
-          <table className="w-full text-sm">
+        <div style={{ marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+          <table style={{ width: '100%', fontSize: '9pt' }}>
             <tbody>
               <tr>
-                <td className="py-1 text-gray-600 w-1/3">Заказчик:</td>
-                <td className="py-1 font-medium">{estimate.requestName?.split(' - ')[1] || "—"}</td>
+                <td style={{ padding: '2px 0', color: '#666', width: '80px' }}>Заказчик:</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>{estimate.requestName?.split(' - ')[1] || "—"}</td>
               </tr>
               <tr>
-                <td className="py-1 text-gray-600">Объект:</td>
-                <td className="py-1 font-medium">{estimate.requestName?.split(' - ')[2] || estimate.name}</td>
+                <td style={{ padding: '2px 0', color: '#666' }}>Объект:</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>{estimate.requestName?.split(' - ')[2] || estimate.name}</td>
               </tr>
               <tr>
-                <td className="py-1 text-gray-600">Исполнитель:</td>
-                <td className="py-1 font-medium">ООО «Климатис»</td>
+                <td style={{ padding: '2px 0', color: '#666' }}>Исполнитель:</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>ООО «Климатис»</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         {estimate.workBlocks && estimate.workBlocks.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 border-b pb-1">Перечень работ</h2>
+          <div style={{ marginBottom: '12px' }}>
+            <h2 style={{ fontSize: '11pt', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #ddd', paddingBottom: '2px' }}>Перечень работ</h2>
             {estimate.workBlocks.map((block, blockIndex) => (
-              <div key={block.id} className="mb-4">
-                <h3 className="font-medium mb-2">
+              <div key={block.id} style={{ marginBottom: '8px' }}>
+                <h3 style={{ fontWeight: 500, marginBottom: '4px', fontSize: '9pt' }}>
                   {blockIndex + 1}. {block.description || "Без описания"}
                 </h3>
-                <table className="w-full text-sm border-collapse mb-2">
+                <table style={{ width: '100%', fontSize: '8pt', borderCollapse: 'collapse', marginBottom: '4px' }}>
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left">Категория</th>
-                      <th className="border p-2 text-right">План. часы</th>
-                      <th className="border p-2 text-right">Кол-во</th>
-                      <th className="border p-2 text-right">Ставка</th>
-                      <th className="border p-2 text-right">Итого</th>
+                    <tr style={{ backgroundColor: '#f3f4f6' }}>
+                      <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'left' }}>Категория</th>
+                      <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '60px' }}>Часы</th>
+                      <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '50px' }}>Кол-во</th>
+                      <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '60px' }}>Ставка</th>
+                      <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '70px' }}>Итого</th>
                     </tr>
                   </thead>
                   <tbody>
                     {block.rows.filter(row => row.planHours > 0 || row.quantity > 0).map((row, rowIndex) => (
                       <tr key={rowIndex}>
-                        <td className="border p-2">{row.category}</td>
-                        <td className="border p-2 text-right">{row.planHours}</td>
-                        <td className="border p-2 text-right">{row.quantity}</td>
-                        <td className="border p-2 text-right">{row.rate.toLocaleString('ru-RU')}</td>
-                        <td className="border p-2 text-right">
+                        <td style={{ border: '1px solid #ddd', padding: '2px 4px' }}>{row.category}</td>
+                        <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{row.planHours}</td>
+                        <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{row.quantity}</td>
+                        <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{row.rate.toLocaleString('ru-RU')}</td>
+                        <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>
                           {Math.round(row.planHours * row.quantity * row.rate).toLocaleString('ru-RU')}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-gray-50 font-medium">
-                      <td colSpan={4} className="border p-2 text-right">Итого по блоку:</td>
-                      <td className="border p-2 text-right">
+                    <tr style={{ backgroundColor: '#f9fafb', fontWeight: 500 }}>
+                      <td colSpan={4} style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>Итого по блоку:</td>
+                      <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>
                         {Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')} ₽
                       </td>
                     </tr>
@@ -85,42 +93,42 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
                 </table>
               </div>
             ))}
-            <div className="font-bold bg-gray-100 p-2 text-right">
+            <div style={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', padding: '4px 8px', textAlign: 'right', fontSize: '9pt' }}>
               Итого по работам: {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
             </div>
           </div>
         )}
 
         {estimate.materials && estimate.materials.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 border-b pb-1">Материалы</h2>
-            <table className="w-full text-sm border-collapse">
+          <div style={{ marginBottom: '12px' }}>
+            <h2 style={{ fontSize: '11pt', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #ddd', paddingBottom: '2px' }}>Материалы</h2>
+            <table style={{ width: '100%', fontSize: '8pt', borderCollapse: 'collapse' }}>
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2 text-left">№</th>
-                  <th className="border p-2 text-left">Наименование</th>
-                  <th className="border p-2 text-right">Кол-во</th>
-                  <th className="border p-2 text-right">Цена</th>
-                  <th className="border p-2 text-right">Сумма</th>
+                <tr style={{ backgroundColor: '#f3f4f6' }}>
+                  <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'left', width: '30px' }}>№</th>
+                  <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'left' }}>Наименование</th>
+                  <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '50px' }}>Кол-во</th>
+                  <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '60px' }}>Цена</th>
+                  <th style={{ border: '1px solid #ddd', padding: '3px 4px', textAlign: 'right', width: '70px' }}>Сумма</th>
                 </tr>
               </thead>
               <tbody>
                 {estimate.materials.map((material, index) => (
                   <tr key={material.id || index}>
-                    <td className="border p-2">{index + 1}</td>
-                    <td className="border p-2">{material.materialName}</td>
-                    <td className="border p-2 text-right">{material.quantity}</td>
-                    <td className="border p-2 text-right">{material.pricePerUnit.toLocaleString('ru-RU')}</td>
-                    <td className="border p-2 text-right">
+                    <td style={{ border: '1px solid #ddd', padding: '2px 4px' }}>{index + 1}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '2px 4px' }}>{material.materialName}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{material.quantity}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{material.pricePerUnit.toLocaleString('ru-RU')}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>
                       {Math.round(material.quantity * material.pricePerUnit).toLocaleString('ru-RU')}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50 font-medium">
-                  <td colSpan={4} className="border p-2 text-right">Итого по материалам:</td>
-                  <td className="border p-2 text-right">
+                <tr style={{ backgroundColor: '#f9fafb', fontWeight: 500 }}>
+                  <td colSpan={4} style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>Итого по материалам:</td>
+                  <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>
                     {Math.round(materialsTotal).toLocaleString('ru-RU')} ₽
                   </td>
                 </tr>
@@ -129,38 +137,32 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
           </div>
         )}
 
-        <div className="mb-6 p-3 bg-gray-100 rounded">
-          <div className="grid grid-cols-3 gap-4 text-sm mb-2">
-            <div className="flex justify-between">
-              <span>Работы:</span>
-              <span className="font-medium">{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Материалы:</span>
-              <span className="font-medium">{Math.round(materialsTotal).toLocaleString('ru-RU')} ₽</span>
-            </div>
+        <div style={{ marginBottom: '12px', padding: '8px', backgroundColor: '#f3f4f6', borderRadius: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9pt', marginBottom: '4px' }}>
+            <span>Работы: <strong>{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</strong></span>
+            <span>Материалы: <strong>{Math.round(materialsTotal).toLocaleString('ru-RU')} ₽</strong></span>
           </div>
-          <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11pt', fontWeight: 'bold', borderTop: '1px solid #ddd', paddingTop: '4px' }}>
             <span>ОБЩАЯ СУММА:</span>
             <span>{Math.round(grandTotal).toLocaleString('ru-RU')} ₽</span>
           </div>
         </div>
 
         {estimate.engineerComment && (
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-2 border-b pb-1">Комментарий инженера</h2>
-            <p className="text-sm whitespace-pre-wrap">{estimate.engineerComment}</p>
+          <div style={{ marginBottom: '12px' }}>
+            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', marginBottom: '4px', borderBottom: '1px solid #ddd', paddingBottom: '2px' }}>Комментарий инженера</h2>
+            <p style={{ fontSize: '9pt', whiteSpace: 'pre-wrap' }}>{estimate.engineerComment}</p>
           </div>
         )}
 
-        <div className="mt-8 pt-4 border-t">
-          <div className="grid grid-cols-2 gap-8 text-sm">
+        <div style={{ marginTop: '20px', paddingTop: '10px', borderTop: '1px solid #ddd' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9pt' }}>
             <div>
-              <p className="mb-8">Расчёт составил: _____________________</p>
+              <p style={{ marginBottom: '20px' }}>Расчёт составил: _____________________</p>
               <p>Дата: _____________________</p>
             </div>
             <div>
-              <p className="mb-8">Согласовал: _____________________</p>
+              <p style={{ marginBottom: '20px' }}>Согласовал: _____________________</p>
               <p>Дата: _____________________</p>
             </div>
           </div>
