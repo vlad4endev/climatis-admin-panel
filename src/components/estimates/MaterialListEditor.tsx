@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
@@ -6,7 +6,7 @@ import { Material } from "@/types/estimate";
 
 interface MaterialListEditorProps {
   materials: Material[];
-  onChange: (materials: Material[]) => void;
+  onChange: (value: SetStateAction<Material[]>) => void;
   availableMaterials: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
 }
@@ -22,8 +22,6 @@ export function MaterialListEditor({
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const createLocalId = () => {
-    // IMPORTANT: Date.now() can collide when adding multiple rows quickly.
-    // Use random UUID when available.
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
       return crypto.randomUUID();
     }
@@ -31,17 +29,14 @@ export function MaterialListEditor({
   };
 
   // Sync local input values with persisted material names.
-  // This fixes the issue where switching tabs remounts the editor and clears local state.
   useEffect(() => {
     setSearchValues((prev) => {
       const next: Record<string, string> = { ...prev };
 
-      // Ensure every material row has an entry so Inputs don't go blank after remount.
       for (const m of materials) {
         if (next[m.id] === undefined) next[m.id] = m.materialName || "";
       }
 
-      // Remove entries for deleted rows.
       for (const key of Object.keys(next)) {
         if (!materials.some((m) => m.id === key)) delete next[key];
       }
@@ -65,21 +60,24 @@ export function MaterialListEditor({
   }, [activeDropdown]);
 
   const addMaterial = () => {
+    const newId = createLocalId();
     const newMaterial: Material = {
-      id: createLocalId(),
+      id: newId,
       materialName: "",
       quantity: 0,
       pricePerUnit: 0,
     };
-    onChange([...materials, newMaterial]);
-    setSearchValues({ ...searchValues, [newMaterial.id]: "" });
+    onChange((prev) => [...prev, newMaterial]);
+    setSearchValues((prev) => ({ ...prev, [newId]: "" }));
   };
 
   const removeMaterial = (id: string) => {
-    onChange(materials.filter((material) => material.id !== id));
-    const newSearchValues = { ...searchValues };
-    delete newSearchValues[id];
-    setSearchValues(newSearchValues);
+    onChange((prev) => prev.filter((material) => material.id !== id));
+    setSearchValues((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const updateMaterial = (
@@ -87,8 +85,8 @@ export function MaterialListEditor({
     field: keyof Material,
     value: string | number | undefined
   ) => {
-    onChange(
-      materials.map((material) =>
+    onChange((prev) =>
+      prev.map((material) =>
         material.id === id ? { ...material, [field]: value } : material
       )
     );
@@ -98,19 +96,36 @@ export function MaterialListEditor({
     materialId: string,
     selectedMaterial: { id: string; name: string; price?: number }
   ) => {
-    updateMaterial(materialId, "materialId", selectedMaterial.id);
-    updateMaterial(materialId, "materialName", selectedMaterial.name);
-    if (selectedMaterial.price) {
-      updateMaterial(materialId, "pricePerUnit", selectedMaterial.price);
-    }
-    setSearchValues({ ...searchValues, [materialId]: selectedMaterial.name });
+    // Atomic update: set all fields in one call to avoid stale state issues
+    onChange((prev) =>
+      prev.map((material) =>
+        material.id === materialId
+          ? {
+              ...material,
+              materialId: selectedMaterial.id,
+              materialName: selectedMaterial.name,
+              pricePerUnit:
+                selectedMaterial.price != null
+                  ? selectedMaterial.price
+                  : material.pricePerUnit,
+            }
+          : material
+      )
+    );
+    setSearchValues((prev) => ({ ...prev, [materialId]: selectedMaterial.name }));
     setActiveDropdown(null);
   };
 
   const handleSearchChange = (materialId: string, value: string) => {
-    setSearchValues({ ...searchValues, [materialId]: value });
-    updateMaterial(materialId, "materialName", value);
-    updateMaterial(materialId, "materialId", undefined);
+    setSearchValues((prev) => ({ ...prev, [materialId]: value }));
+    // Atomic update: set materialName and clear materialId in one call
+    onChange((prev) =>
+      prev.map((material) =>
+        material.id === materialId
+          ? { ...material, materialName: value, materialId: undefined }
+          : material
+      )
+    );
     setActiveDropdown(materialId);
   };
 
@@ -169,7 +184,7 @@ export function MaterialListEditor({
                         onClick={() => selectMaterial(material.id, availMaterial)}
                       >
                         {availMaterial.name}
-                        {availMaterial.price && (
+                        {availMaterial.price != null && (
                           <span className="text-muted-foreground ml-2">
                             ({availMaterial.price} ₽)
                           </span>
