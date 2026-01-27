@@ -77,7 +77,7 @@ export function useCreateEstimate() {
       const { data: estimateData, error: estimateError } = await supabase
         .from("estimates")
         .insert({
-          estimate_number: `Р-${new Date().getFullYear()}-TEMP`,
+          estimate_number: "",
           name: estimate.name || "",
           request_id: estimate.requestId || null,
           estimate_date: estimate.estimateDate || new Date().toISOString().split('T')[0],
@@ -292,7 +292,7 @@ export function useCopyEstimate() {
       const { data: estimateData, error: estimateError } = await supabase
         .from("estimates")
         .insert({
-          estimate_number: `Р-${new Date().getFullYear()}-TEMP`,
+          estimate_number: "",
           name: `Копия: ${estimate.name}`,
           request_id: estimate.requestId || null,
           estimate_date: new Date().toISOString().split('T')[0],

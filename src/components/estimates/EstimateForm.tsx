@@ -96,7 +96,6 @@ export function EstimateForm({
       return new Promise((resolve, reject) => {
         createMutation.mutate({
           name: data.name || "Новый расчёт",
-          estimateNumber: data.estimateNumber || `РС-${Date.now()}`,
           estimateDate: data.estimateDate || new Date().toISOString().split("T")[0],
           status: (data.status as any) || "черновик",
           type: (data.type as any) || "простой ремонт",
@@ -304,15 +303,15 @@ export function EstimateForm({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="estimateNumber">
-                  Номер / обозначение расчёта
+                  Номер расчёта
                 </Label>
                 <Input
                   id="estimateNumber"
                   {...register("estimateNumber")}
-                  placeholder="РС-001"
-                  readOnly={readOnly}
-                  tabIndex={readOnly ? -1 : undefined}
-                  className={readOnly ? "bg-input-readonly" : ""}
+                  placeholder={estimate?.id ? "" : "Присвоится автоматически"}
+                  readOnly
+                  tabIndex={-1}
+                  className="bg-input-readonly"
                 />
               </div>
               <div>
