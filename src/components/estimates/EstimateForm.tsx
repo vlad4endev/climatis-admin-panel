@@ -317,13 +317,22 @@ export function EstimateForm({
     const pdf = new jsPDF("p", "mm", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 10;
 
-    pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    // A4 dimensions: 210mm x 297mm; margins: 12mm on all sides
+    const margin = 12;
+    const contentWidth = pdfWidth - 2 * margin;
+    const contentHeight = pdfHeight - 2 * margin;
+
+    // Calculate image dimensions in mm (canvas pixels / 96 dpi * 25.4 mm/inch)
+    const imgWidthMM = (canvas.width / 2) * 25.4 / 96; // scale=2 in html2canvas
+    const imgHeightMM = (canvas.height / 2) * 25.4 / 96;
+
+    // Scale to fit within content area while preserving aspect ratio
+    const scaleRatio = Math.min(contentWidth / imgWidthMM, contentHeight / imgHeightMM);
+    const renderW = Math.round(imgWidthMM * scaleRatio * 100) / 100;
+    const renderH = Math.round(imgHeightMM * scaleRatio * 100) / 100;
+
+    pdf.addImage(imgData, "PNG", margin, margin, renderW, renderH);
 
     const estimateName = watch("name");
     const estimateNumber = watch("estimateNumber");
@@ -763,8 +772,8 @@ export function EstimateForm({
         className="fixed left-[-9999px] top-0 bg-white text-black"
         style={{ 
           fontFamily: "Arial, sans-serif",
-          width: "595px", // A4 width at 72dpi
-          padding: "40px 50px",
+          width: "740px", // A4 width at 96dpi (210mm * 96dpi / 25.4mm)
+          padding: "48px", // 12mm margins at 96dpi
           boxSizing: "border-box"
         }}
       >
