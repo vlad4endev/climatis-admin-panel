@@ -181,54 +181,126 @@ export function EstimateForm({
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset="utf-8"><title>Расчёт стоимости</title>
-      <style>
-        body { font-family: Arial, sans-serif; font-size: 12pt; }
-        h1 { text-align: center; font-size: 16pt; margin-bottom: 20px; }
-        h2 { font-size: 14pt; border-bottom: 1px solid #000; padding-bottom: 5px; margin-top: 20px; }
-        .info { margin-bottom: 15px; }
-        .info p { margin: 3px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-        td { padding: 5px 0; }
-        .right { text-align: right; }
-        .bold { font-weight: bold; }
-        .border-top { border-top: 1px solid #000; padding-top: 5px; }
-        .total { font-size: 14pt; font-weight: bold; border-top: 2px solid #000; margin-top: 20px; padding-top: 10px; }
-      </style></head><body>
-      <h1>РАСЧЁТ СТОИМОСТИ</h1>
-      <div class="info">
-        <p><strong>Расчёт:</strong> ${estimateName || "—"} № ${estimateNumber || "—"}</p>
-        <p><strong>Дата:</strong> ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}</p>
-        <p><strong>Заказчик:</strong> ${selectedRequest?.clientName || "—"}</p>
-        <p><strong>Объект:</strong> ${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
-        <p><strong>Исполнитель:</strong> ООО «Климатис»</p>
-      </div>
-      <h2>РАБОТЫ</h2>
-      <table>
-        ${workBlocks.map((block, index) => {
-          const blockBase = calculateWorkBlockTotal(block);
-          const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-          return `<tr><td>${index + 1}. ${block.description || "Работа без названия"}</td><td class="right">${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</td></tr>`;
-        }).join("")}
-        <tr class="border-top bold"><td>Итого по работам:</td><td class="right">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
-      </table>
-      <h2>МАТЕРИАЛЫ</h2>
-      <table>
-        ${materials.map((material, index) => 
-          `<tr><td>${index + 1}. ${material.materialName} (${material.quantity} шт.)</td><td class="right">${Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</td></tr>`
-        ).join("")}
-        <tr><td>Базовая стоимость материалов:</td><td class="right">${Math.round(materialsTotal).toLocaleString("ru-RU")} р.</td></tr>
-        <tr><td>+ Транспортные расходы (${customerCalc.transportPercent}%):</td><td class="right">${Math.round(materialsTransport).toLocaleString("ru-RU")} р.</td></tr>
-        <tr><td>+ Заготовительно-складские (${customerCalc.warehousePercent}%):</td><td class="right">${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</td></tr>
-        <tr class="border-top bold"><td>Итого по материалам:</td><td class="right">${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
-      </table>
-      ${customerCalc.otherPercent && customerCalc.otherPercent > 0 ? `
-        <table><tr><td>+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%):</td><td class="right">${Math.round(otherAmount).toLocaleString("ru-RU")} р.</td></tr></table>
-      ` : ""}
-      <div class="total">
-        <table><tr><td>ИТОГО:</td><td class="right">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr></table>
-      </div>
-      </body></html>
+      <head>
+        <meta charset="utf-8">
+        <title>Расчёт стоимости</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
+        <style>
+          @page {
+            size: A4;
+            margin: 2cm 2.5cm 2cm 2.5cm;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100%;
+          }
+          h1 {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 0 0 20px 0;
+            padding: 0;
+          }
+          h2 {
+            font-size: 12pt;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+            margin: 20px 0 10px 0;
+          }
+          .info {
+            margin-bottom: 15px;
+          }
+          .info p {
+            margin: 2px 0;
+            font-size: 10pt;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            table-layout: fixed;
+          }
+          td {
+            padding: 3px 0;
+            vertical-align: top;
+            word-wrap: break-word;
+          }
+          td.desc {
+            width: 75%;
+          }
+          td.price {
+            width: 25%;
+            text-align: right;
+            white-space: nowrap;
+          }
+          .bold {
+            font-weight: bold;
+          }
+          .border-top td {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+          }
+          .total-section {
+            margin-top: 20px;
+            border-top: 2px solid #000;
+            padding-top: 10px;
+          }
+          .total-section table td {
+            font-size: 12pt;
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>РАСЧЁТ СТОИМОСТИ</h1>
+        <div class="info">
+          <p><strong>Расчёт:</strong> ${estimateName || "—"} № ${estimateNumber || "—"}</p>
+          <p><strong>Дата:</strong> ${estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU") : "—"}</p>
+          <p><strong>Заказчик:</strong> ${selectedRequest?.clientName || "—"}</p>
+          <p><strong>Объект:</strong> ${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
+          <p><strong>Исполнитель:</strong> ООО «Климатис»</p>
+        </div>
+        <h2>РАБОТЫ</h2>
+        <table>
+          ${workBlocks.map((block, index) => {
+            const blockBase = calculateWorkBlockTotal(block);
+            const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+            return `<tr><td class="desc">${index + 1}. ${block.description || "Работа без названия"}</td><td class="price">${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</td></tr>`;
+          }).join("")}
+          <tr class="border-top bold"><td class="desc">Итого по работам:</td><td class="price">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+        </table>
+        <h2>МАТЕРИАЛЫ</h2>
+        <table>
+          ${materials.map((material, index) => 
+            `<tr><td class="desc">${index + 1}. ${material.materialName} (${material.quantity} шт.)</td><td class="price">${Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</td></tr>`
+          ).join("")}
+          <tr><td class="desc">Базовая стоимость материалов:</td><td class="price">${Math.round(materialsTotal).toLocaleString("ru-RU")} р.</td></tr>
+          <tr><td class="desc">+ Транспортные расходы (${customerCalc.transportPercent}%):</td><td class="price">${Math.round(materialsTransport).toLocaleString("ru-RU")} р.</td></tr>
+          <tr><td class="desc">+ Заготовительно-складские (${customerCalc.warehousePercent}%):</td><td class="price">${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</td></tr>
+          <tr class="border-top bold"><td class="desc">Итого по материалам:</td><td class="price">${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+        </table>
+        ${customerCalc.otherPercent && customerCalc.otherPercent > 0 ? `
+          <table><tr><td class="desc">+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%):</td><td class="price">${Math.round(otherAmount).toLocaleString("ru-RU")} р.</td></tr></table>
+        ` : ""}
+        <div class="total-section">
+          <table><tr><td class="desc">ИТОГО:</td><td class="price">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr></table>
+        </div>
+      </body>
+      </html>
     `;
   };
 
@@ -685,69 +757,125 @@ export function EstimateForm({
         </div>
       )}
 
-      {/* Hidden PDF Content */}
+      {/* Hidden PDF Content - A4 proportions with proper margins */}
       <div 
         ref={pdfContentRef} 
-        className="fixed left-[-9999px] top-0 w-[800px] bg-white text-black p-8"
-        style={{ fontFamily: "Arial, sans-serif" }}
+        className="fixed left-[-9999px] top-0 bg-white text-black"
+        style={{ 
+          fontFamily: "Arial, sans-serif",
+          width: "595px", // A4 width at 72dpi
+          padding: "40px 50px",
+          boxSizing: "border-box"
+        }}
       >
-        <h1 className="text-2xl font-bold text-center mb-6">РАСЧЁТ СТОИМОСТИ</h1>
+        <h1 style={{ fontSize: "16px", fontWeight: "bold", textAlign: "center", marginBottom: "20px" }}>
+          РАСЧЁТ СТОИМОСТИ
+        </h1>
         
-        <div className="mb-4 text-sm">
-          <p><strong>Расчёт:</strong> {watch("name") || "—"} № {watch("estimateNumber") || "—"}</p>
-          <p><strong>Дата:</strong> {watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : "—"}</p>
-          <p><strong>Заказчик:</strong> {selectedRequest?.clientName || "—"}</p>
-          <p><strong>Объект:</strong> {selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
-          <p><strong>Исполнитель:</strong> ООО «Климатис»</p>
+        <div style={{ marginBottom: "16px", fontSize: "11px", lineHeight: "1.5" }}>
+          <p style={{ margin: "2px 0" }}><strong>Расчёт:</strong> {watch("name") || "—"} № {watch("estimateNumber") || "—"}</p>
+          <p style={{ margin: "2px 0" }}><strong>Дата:</strong> {watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : "—"}</p>
+          <p style={{ margin: "2px 0" }}><strong>Заказчик:</strong> {selectedRequest?.clientName || "—"}</p>
+          <p style={{ margin: "2px 0" }}><strong>Объект:</strong> {selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</p>
+          <p style={{ margin: "2px 0" }}><strong>Исполнитель:</strong> ООО «Климатис»</p>
         </div>
 
-        <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">РАБОТЫ</h2>
-        <div className="text-sm space-y-1 mb-4">
-          {workBlocks.map((block, index) => {
-            const blockBase = calculateWorkBlockTotal(block);
-            const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-            return (
-              <div key={block.id} className="flex justify-between">
-                <span>{index + 1}. {block.description || "Работа без названия"}</span>
-                <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</span>
-              </div>
-            );
-          })}
-        </div>
-        <div className="text-sm border-t pt-2">
-          <div className="flex justify-between font-bold"><span>Итого по работам:</span><span>{Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
-        </div>
+        <h2 style={{ fontSize: "13px", fontWeight: "bold", borderBottom: "1px solid #000", paddingBottom: "4px", marginTop: "20px", marginBottom: "10px" }}>
+          РАБОТЫ
+        </h2>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", tableLayout: "fixed" }}>
+          <tbody>
+            {workBlocks.map((block, index) => {
+              const blockBase = calculateWorkBlockTotal(block);
+              const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+              return (
+                <tr key={block.id}>
+                  <td style={{ padding: "3px 0", width: "75%", wordWrap: "break-word" }}>
+                    {index + 1}. {block.description || "Работа без названия"}
+                  </td>
+                  <td style={{ padding: "3px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap" }}>
+                    {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.
+                  </td>
+                </tr>
+              );
+            })}
+            <tr style={{ borderTop: "1px solid #000" }}>
+              <td style={{ padding: "5px 0 3px 0", fontWeight: "bold" }}>Итого по работам:</td>
+              <td style={{ padding: "5px 0 3px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap" }}>
+                {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-        <h2 className="text-lg font-bold mt-6 mb-3 border-b pb-1">МАТЕРИАЛЫ</h2>
-        <div className="text-sm space-y-1 mb-4">
-          {materials.map((material, index) => (
-            <div key={material.id} className="flex justify-between">
-              <span>{index + 1}. {material.materialName} ({material.quantity} шт.)</span>
-              <span>{Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</span>
-            </div>
-          ))}
-        </div>
-        <div className="text-sm border-t pt-2 space-y-1">
-          <div className="flex justify-between"><span>Базовая стоимость материалов:</span><span>{Math.round(materialsTotal).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between text-gray-600"><span>+ Транспортные расходы ({customerCalc.transportPercent}%):</span><span>{Math.round(materialsTransport).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between text-gray-600"><span>+ Заготовительно-складские ({customerCalc.warehousePercent}%):</span><span>{Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</span></div>
-          <div className="flex justify-between font-bold border-t pt-1"><span>Итого по материалам:</span><span>{Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</span></div>
-        </div>
+        <h2 style={{ fontSize: "13px", fontWeight: "bold", borderBottom: "1px solid #000", paddingBottom: "4px", marginTop: "20px", marginBottom: "10px" }}>
+          МАТЕРИАЛЫ
+        </h2>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", tableLayout: "fixed" }}>
+          <tbody>
+            {materials.map((material, index) => (
+              <tr key={material.id}>
+                <td style={{ padding: "3px 0", width: "75%", wordWrap: "break-word" }}>
+                  {index + 1}. {material.materialName} ({material.quantity} шт.)
+                </td>
+                <td style={{ padding: "3px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap" }}>
+                  {Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.
+                </td>
+              </tr>
+            ))}
+            <tr style={{ borderTop: "1px solid #ccc" }}>
+              <td style={{ padding: "5px 0 3px 0" }}>Базовая стоимость материалов:</td>
+              <td style={{ padding: "5px 0 3px 0", textAlign: "right", whiteSpace: "nowrap" }}>
+                {Math.round(materialsTotal).toLocaleString("ru-RU")} р.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "2px 0", color: "#666" }}>+ Транспортные расходы ({customerCalc.transportPercent}%):</td>
+              <td style={{ padding: "2px 0", textAlign: "right", color: "#666", whiteSpace: "nowrap" }}>
+                {Math.round(materialsTransport).toLocaleString("ru-RU")} р.
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "2px 0", color: "#666" }}>+ Заготовительно-складские ({customerCalc.warehousePercent}%):</td>
+              <td style={{ padding: "2px 0", textAlign: "right", color: "#666", whiteSpace: "nowrap" }}>
+                {Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.
+              </td>
+            </tr>
+            <tr style={{ borderTop: "1px solid #000" }}>
+              <td style={{ padding: "5px 0 3px 0", fontWeight: "bold" }}>Итого по материалам:</td>
+              <td style={{ padding: "5px 0 3px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap" }}>
+                {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         {customerCalc.otherPercent && customerCalc.otherPercent > 0 && (
-          <div className="text-sm mt-4">
-            <div className="flex justify-between text-gray-600">
-              <span>+ {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>
-              <span>{Math.round(otherAmount).toLocaleString("ru-RU")} р.</span>
-            </div>
-          </div>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", marginTop: "8px", tableLayout: "fixed" }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: "2px 0", color: "#666", width: "75%" }}>
+                  + {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):
+                </td>
+                <td style={{ padding: "2px 0", textAlign: "right", color: "#666", width: "25%", whiteSpace: "nowrap" }}>
+                  {Math.round(otherAmount).toLocaleString("ru-RU")} р.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         )}
 
-        <div className="mt-6 pt-4 border-t-2 border-black">
-          <div className="flex justify-between text-xl font-bold">
-            <span>ИТОГО:</span>
-            <span>{Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</span>
-          </div>
+        <div style={{ marginTop: "20px", paddingTop: "10px", borderTop: "2px solid #000" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+            <tbody>
+              <tr>
+                <td style={{ fontSize: "14px", fontWeight: "bold", width: "75%" }}>ИТОГО:</td>
+                <td style={{ fontSize: "14px", fontWeight: "bold", textAlign: "right", width: "25%", whiteSpace: "nowrap" }}>
+                  {Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </form>
