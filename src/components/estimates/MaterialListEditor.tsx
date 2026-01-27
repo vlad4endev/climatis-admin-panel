@@ -21,18 +21,33 @@ export function MaterialListEditor({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Initialize search values from materials prop when component mounts or materials change
-  useEffect(() => {
-    const newSearchValues: Record<string, string> = {};
-    materials.forEach((material) => {
-      // Only set if not already in searchValues to preserve user edits
-      if (material.materialName && searchValues[material.id] === undefined) {
-        newSearchValues[material.id] = material.materialName;
-      }
-    });
-    if (Object.keys(newSearchValues).length > 0) {
-      setSearchValues((prev) => ({ ...newSearchValues, ...prev }));
+  const createLocalId = () => {
+    // IMPORTANT: Date.now() can collide when adding multiple rows quickly.
+    // Use random UUID when available.
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
     }
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  };
+
+  // Sync local input values with persisted material names.
+  // This fixes the issue where switching tabs remounts the editor and clears local state.
+  useEffect(() => {
+    setSearchValues((prev) => {
+      const next: Record<string, string> = { ...prev };
+
+      // Ensure every material row has an entry so Inputs don't go blank after remount.
+      for (const m of materials) {
+        if (next[m.id] === undefined) next[m.id] = m.materialName || "";
+      }
+
+      // Remove entries for deleted rows.
+      for (const key of Object.keys(next)) {
+        if (!materials.some((m) => m.id === key)) delete next[key];
+      }
+
+      return next;
+    });
   }, [materials]);
 
   useEffect(() => {
@@ -51,7 +66,7 @@ export function MaterialListEditor({
 
   const addMaterial = () => {
     const newMaterial: Material = {
-      id: Date.now().toString(),
+      id: createLocalId(),
       materialName: "",
       quantity: 0,
       pricePerUnit: 0,
@@ -70,7 +85,7 @@ export function MaterialListEditor({
   const updateMaterial = (
     id: string,
     field: keyof Material,
-    value: string | number
+    value: string | number | undefined
   ) => {
     onChange(
       materials.map((material) =>
