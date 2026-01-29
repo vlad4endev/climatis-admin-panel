@@ -174,6 +174,12 @@ export function EstimateForm({
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+  };
+
   const getDocumentContent = () => {
     const estimateName = watch("name");
     const estimateNumber = watch("estimateNumber");
@@ -287,11 +293,18 @@ export function EstimateForm({
             font-size: 12pt;
             font-weight: bold;
           }
+          .doc-number {
+            text-align: right;
+            font-size: 11pt;
+            color: #333;
+            margin-bottom: 16px;
+          }
         </style>
       </head>
       <body>
         <div class="container">
           <h1>РАСЧЁТ  СТОИМОСТИ</h1>
+          <div class="doc-number">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</div>
           <div class="header-info">
             <div class="header-row"><span class="header-label">Заказчик:</span><span class="header-value">${selectedRequest?.clientName || "—"}</span></div>
             <div class="header-row"><span class="header-label">Объект:</span><span class="header-value">${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span></div>
@@ -816,11 +829,20 @@ export function EstimateForm({
           fontSize: "16pt", 
           fontWeight: "bold", 
           textAlign: "center", 
-          marginBottom: "24px",
+          marginBottom: "8px",
           letterSpacing: "1px"
         }}>
           РАСЧЁТ  СТОИМОСТИ
         </h1>
+        
+        <div style={{ 
+          textAlign: "right", 
+          fontSize: "11pt", 
+          color: "#333", 
+          marginBottom: "16px" 
+        }}>
+          № {watch("estimateNumber") || "б/н"} от {formatDate(watch("estimateDate"))}
+        </div>
         
         <div style={{ marginBottom: "24px", fontSize: "12pt" }}>
           <div style={{ display: "flex", marginBottom: "4px" }}>
