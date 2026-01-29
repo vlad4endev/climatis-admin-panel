@@ -176,6 +176,12 @@ export function EstimateForm({
   const engineerEmployee = employees.find((e) => 
     e.position?.toLowerCase().includes("инженер")
   );
+  
+  // Extract surname (first word of full name)
+  const getEngineerSurname = () => {
+    if (!engineerEmployee?.fullName) return "____________________";
+    return engineerEmployee.fullName.split(" ")[0];
+  };
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
@@ -359,7 +365,7 @@ export function EstimateForm({
                 &nbsp;
               </div>
               <div style="display: table-cell; width: 40%; text-align: right; vertical-align: bottom;">
-                <span style="font-size: 11pt;">${engineerEmployee?.fullName || "____________________"}</span>
+                <span style="font-size: 11pt;">${getEngineerSurname()}</span>
               </div>
             </div>
             <div style="display: table-row;">
@@ -1001,7 +1007,7 @@ export function EstimateForm({
             &nbsp;
           </div>
           <div style={{ fontSize: "11pt", width: "35%", textAlign: "right" }}>
-            {engineerEmployee?.fullName || "____________________"}
+            {getEngineerSurname()}
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "2px" }}>
