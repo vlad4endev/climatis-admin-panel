@@ -43,7 +43,7 @@ interface EstimateFormProps {
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
-  employees: Array<{ id: string; fullName: string }>;
+  employees: Array<{ id: string; fullName: string; position?: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
 }
@@ -171,6 +171,11 @@ export function EstimateForm({
 
   const selectedRequest = requests.find((r) => r.id === requestId);
   const selectedEmployee = employees.find((e) => e.id === createdById);
+  
+  // Find first engineer for document signature
+  const engineerEmployee = employees.find((e) => 
+    e.position?.toLowerCase().includes("инженер")
+  );
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
@@ -345,6 +350,24 @@ export function EstimateForm({
               <tr><td class="col-desc">ИТОГО:</td><td class="col-price">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr>
             </tbody>
           </table>
+          <div style="margin-top: 48px; display: table; width: 100%;">
+            <div style="display: table-row;">
+              <div style="display: table-cell; width: 30%; vertical-align: bottom;">
+                <span style="font-size: 11pt;">${engineerEmployee?.position || "Инженер"}</span>
+              </div>
+              <div style="display: table-cell; width: 30%; text-align: center; vertical-align: bottom; border-bottom: 1px solid #000; padding-bottom: 2px;">
+                &nbsp;
+              </div>
+              <div style="display: table-cell; width: 40%; text-align: right; vertical-align: bottom;">
+                <span style="font-size: 11pt;">${engineerEmployee?.fullName || "____________________"}</span>
+              </div>
+            </div>
+            <div style="display: table-row;">
+              <div style="display: table-cell;"></div>
+              <div style="display: table-cell; text-align: center; font-size: 9pt; color: #666; padding-top: 2px;">(подпись)</div>
+              <div style="display: table-cell; text-align: right; font-size: 9pt; color: #666; padding-top: 2px;">(ФИО)</div>
+            </div>
+          </div>
         </div>
       </body>
       </html>
@@ -968,6 +991,24 @@ export function EstimateForm({
             </tr>
           </tbody>
         </table>
+
+        {/* Signature block */}
+        <div style={{ marginTop: "48px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+          <div style={{ fontSize: "11pt", width: "30%" }}>
+            {engineerEmployee?.position || "Инженер"}
+          </div>
+          <div style={{ width: "25%", borderBottom: "1px solid #000", textAlign: "center", paddingBottom: "2px" }}>
+            &nbsp;
+          </div>
+          <div style={{ fontSize: "11pt", width: "35%", textAlign: "right" }}>
+            {engineerEmployee?.fullName || "____________________"}
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "2px" }}>
+          <div style={{ width: "30%" }}></div>
+          <div style={{ width: "25%", textAlign: "center", fontSize: "9pt", color: "#666" }}>(подпись)</div>
+          <div style={{ width: "35%", textAlign: "right", fontSize: "9pt", color: "#666" }}>(ФИО)</div>
+        </div>
       </div>
     </form>
   );
