@@ -20,6 +20,7 @@ import { useEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate, 
 import { useRequests } from "@/hooks/useRequests";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useSpareParts } from "@/hooks/useSpareParts";
+import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +32,7 @@ export default function Estimates() {
   const { data: requestsData = [] } = useRequests();
   const { data: employeesData = [] } = useEmployees();
   const { data: sparePartsData = [] } = useSpareParts();
+  const { data: serviceObjectsData = [] } = useServiceObjects();
   
   const createMutation = useCreateEstimate();
   const updateMutation = useUpdateEstimate();
@@ -43,14 +45,18 @@ export default function Estimates() {
   const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
   const printRef = useRef<HTMLDivElement>(null);
 
-  const requests = requestsData.map(r => ({
-    id: r.id,
-    name: r.requestNumber,
-    createdAt: r.createdAt.toString(),
-    clientName: r.clientName || "",
-    serviceObjectName: r.objectName || "",
-    serviceObjectAddress: "",
-  }));
+  const requests = requestsData.map(r => {
+    // Find the service object to get the address
+    const serviceObject = serviceObjectsData.find(obj => obj.id === r.objectId);
+    return {
+      id: r.id,
+      name: r.requestNumber,
+      createdAt: r.createdAt.toString(),
+      clientName: r.clientName || "",
+      serviceObjectName: serviceObject?.objectName || r.objectName || "",
+      serviceObjectAddress: serviceObject?.address || "",
+    };
+  });
 
   const employees = employeesData.map(e => ({
     id: e.id,
