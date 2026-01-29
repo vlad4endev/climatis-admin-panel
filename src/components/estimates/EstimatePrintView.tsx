@@ -179,40 +179,20 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
 
         {/* Подписи */}
         <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '2px solid #000' }}>
-          <div style={{ marginBottom: '20px' }}>
-            <p style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '10pt' }}>Расчёт составил:</p>
-            <table style={{ width: '100%', fontSize: '10pt' }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: '80px', verticalAlign: 'bottom', paddingBottom: '4px' }}>Инженер</td>
-                  <td style={{ width: '120px', borderBottom: '1px solid #000', verticalAlign: 'bottom', textAlign: 'center' }}></td>
-                  <td style={{ verticalAlign: 'bottom', paddingLeft: '16px', paddingBottom: '4px' }}>{engineerName || estimate.createdByName || "______________________"}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontSize: '8pt', color: '#666' }}>(должность)</td>
-                  <td style={{ fontSize: '8pt', color: '#666', textAlign: 'center' }}>(подпись)</td>
-                  <td style={{ fontSize: '8pt', color: '#666', paddingLeft: '16px' }}>(ФИО)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <p style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '10pt' }}>Согласовано:</p>
-            <table style={{ width: '100%', fontSize: '10pt' }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: '80px', borderBottom: '1px solid #000', verticalAlign: 'bottom' }}></td>
-                  <td style={{ width: '120px', borderBottom: '1px solid #000', verticalAlign: 'bottom', textAlign: 'center' }}></td>
-                  <td style={{ borderBottom: '1px solid #000', verticalAlign: 'bottom', paddingLeft: '16px' }}></td>
-                </tr>
-                <tr>
-                  <td style={{ fontSize: '8pt', color: '#666' }}>(должность)</td>
-                  <td style={{ fontSize: '8pt', color: '#666', textAlign: 'center' }}>(подпись)</td>
-                  <td style={{ fontSize: '8pt', color: '#666', paddingLeft: '16px' }}>(ФИО)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table style={{ width: '100%', fontSize: '10pt' }}>
+            <tbody>
+              <tr>
+                <td style={{ width: '80px', verticalAlign: 'bottom', paddingBottom: '4px' }}>Инженер</td>
+                <td style={{ width: '120px', borderBottom: '1px solid #000', verticalAlign: 'bottom', textAlign: 'center' }}></td>
+                <td style={{ verticalAlign: 'bottom', paddingLeft: '16px', paddingBottom: '4px' }}>{engineerName || estimate.createdByName || "______________________"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: '8pt', color: '#666' }}>(должность)</td>
+                <td style={{ fontSize: '8pt', color: '#666', textAlign: 'center' }}>(подпись)</td>
+                <td style={{ fontSize: '8pt', color: '#666', paddingLeft: '16px' }}>(ФИО)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     );
