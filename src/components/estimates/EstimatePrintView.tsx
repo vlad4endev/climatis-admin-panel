@@ -3,10 +3,11 @@ import { Estimate, calculateWorkBlockTotal, calculateAllBlocksTotal } from "@/ty
 
 interface EstimatePrintViewProps {
   estimate: Estimate;
+  engineerName?: string;
 }
 
 export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewProps>(
-  ({ estimate }, ref) => {
+  ({ estimate, engineerName }, ref) => {
     const worksTotal = estimate.workBlocks ? calculateAllBlocksTotal(estimate.workBlocks) : 0;
     const materialsTotal = estimate.materials?.reduce(
       (sum, m) => sum + m.quantity * m.pricePerUnit, 
@@ -178,58 +179,40 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
 
         {/* Подписи */}
         <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '2px solid #000' }}>
-          <table style={{ width: '100%', fontSize: '9pt' }}>
-            <tbody>
-              <tr>
-                <td style={{ width: '50%', verticalAlign: 'top', paddingRight: '20px' }}>
-                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Расчёт составил:</p>
-                  <table style={{ width: '100%' }}>
-                    <tbody>
-                      <tr>
-                        <td style={{ width: '80px' }}>Должность:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingBottom: '2px' }}>Инженер</td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>ФИО:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', paddingBottom: '2px' }}>{estimate.createdByName || "______________________"}</td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>Подпись:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', height: '20px' }}></td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>Дата:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', paddingBottom: '2px' }}>{new Date(estimate.estimateDate).toLocaleDateString('ru-RU')}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-                <td style={{ width: '50%', verticalAlign: 'top', paddingLeft: '20px' }}>
-                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Согласовано:</p>
-                  <table style={{ width: '100%' }}>
-                    <tbody>
-                      <tr>
-                        <td style={{ width: '80px' }}>Должность:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingBottom: '2px' }}>______________________</td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>ФИО:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', paddingBottom: '2px' }}>______________________</td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>Подпись:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', height: '20px' }}></td>
-                      </tr>
-                      <tr>
-                        <td style={{ paddingTop: '8px' }}>Дата:</td>
-                        <td style={{ borderBottom: '1px solid #000', paddingTop: '8px', paddingBottom: '2px' }}>______________________</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div style={{ marginBottom: '20px' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '10pt' }}>Расчёт составил:</p>
+            <table style={{ width: '100%', fontSize: '10pt' }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: '80px', verticalAlign: 'bottom', paddingBottom: '4px' }}>Инженер</td>
+                  <td style={{ width: '120px', borderBottom: '1px solid #000', verticalAlign: 'bottom', textAlign: 'center' }}></td>
+                  <td style={{ verticalAlign: 'bottom', paddingLeft: '16px', paddingBottom: '4px' }}>{engineerName || estimate.createdByName || "______________________"}</td>
+                </tr>
+                <tr>
+                  <td style={{ fontSize: '8pt', color: '#666' }}>(должность)</td>
+                  <td style={{ fontSize: '8pt', color: '#666', textAlign: 'center' }}>(подпись)</td>
+                  <td style={{ fontSize: '8pt', color: '#666', paddingLeft: '16px' }}>(ФИО)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '10pt' }}>Согласовано:</p>
+            <table style={{ width: '100%', fontSize: '10pt' }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: '80px', borderBottom: '1px solid #000', verticalAlign: 'bottom' }}></td>
+                  <td style={{ width: '120px', borderBottom: '1px solid #000', verticalAlign: 'bottom', textAlign: 'center' }}></td>
+                  <td style={{ borderBottom: '1px solid #000', verticalAlign: 'bottom', paddingLeft: '16px' }}></td>
+                </tr>
+                <tr>
+                  <td style={{ fontSize: '8pt', color: '#666' }}>(должность)</td>
+                  <td style={{ fontSize: '8pt', color: '#666', textAlign: 'center' }}>(подпись)</td>
+                  <td style={{ fontSize: '8pt', color: '#666', paddingLeft: '16px' }}>(ФИО)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );

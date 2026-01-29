@@ -43,7 +43,7 @@ interface EstimateFormProps {
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
-  employees: Array<{ id: string; fullName: string }>;
+  employees: Array<{ id: string; fullName: string; position?: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
 }
@@ -171,6 +171,8 @@ export function EstimateForm({
 
   const selectedRequest = requests.find((r) => r.id === requestId);
   const selectedEmployee = employees.find((e) => e.id === createdById);
+  // Найти инженера из списка сотрудников для подписи в документе
+  const engineerForSignature = employees.find((e) => e.position?.toLowerCase() === "инженер");
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
@@ -420,24 +422,36 @@ export function EstimateForm({
           </table>
           
           <div class="signatures">
-            <table class="signature-table">
-              <tr>
-                <td class="signature-cell">
-                  <div class="signature-title">Расчёт составил:</div>
-                  <div class="signature-row"><span class="signature-label">Должность:</span> <span class="signature-value">Инженер</span></div>
-                  <div class="signature-row"><span class="signature-label">ФИО:</span> <span class="signature-value">${selectedEmployee?.fullName || "______________________"}</span></div>
-                  <div class="signature-row"><span class="signature-label">Подпись:</span> <span class="signature-line"></span></div>
-                  <div class="signature-row"><span class="signature-label">Дата:</span> <span class="signature-value">${formattedDate}</span></div>
-                </td>
-                <td class="signature-cell">
-                  <div class="signature-title">Согласовано:</div>
-                  <div class="signature-row"><span class="signature-label">Должность:</span> <span class="signature-value">______________________</span></div>
-                  <div class="signature-row"><span class="signature-label">ФИО:</span> <span class="signature-value">______________________</span></div>
-                  <div class="signature-row"><span class="signature-label">Подпись:</span> <span class="signature-line"></span></div>
-                  <div class="signature-row"><span class="signature-label">Дата:</span> <span class="signature-value">______________________</span></div>
-                </td>
-              </tr>
-            </table>
+            <div style="margin-bottom: 24px;">
+              <div style="font-weight: bold; margin-bottom: 12px;">Расчёт составил:</div>
+              <table style="width: 100%;">
+                <tr>
+                  <td style="width: 80px; vertical-align: bottom;">Инженер</td>
+                  <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
+                  <td style="vertical-align: bottom; padding-left: 20px;">${engineerForSignature?.fullName || "______________________"}</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 9pt; color: #666;">(должность)</td>
+                  <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
+                  <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
+                </tr>
+              </table>
+            </div>
+            <div>
+              <div style="font-weight: bold; margin-bottom: 12px;">Согласовано:</div>
+              <table style="width: 100%;">
+                <tr>
+                  <td style="width: 80px; border-bottom: 1px solid #000; vertical-align: bottom;"></td>
+                  <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
+                  <td style="border-bottom: 1px solid #000; vertical-align: bottom; padding-left: 20px;"></td>
+                </tr>
+                <tr>
+                  <td style="font-size: 9pt; color: #666;">(должность)</td>
+                  <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
+                  <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
+                </tr>
+              </table>
+            </div>
           </div>
         </div>
       </body>
@@ -1065,58 +1079,40 @@ export function EstimateForm({
 
         {/* Блок подписей */}
         <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "2px solid #000" }}>
-          <table style={{ width: "100%", fontSize: "9pt" }}>
-            <tbody>
-              <tr>
-                <td style={{ width: "50%", verticalAlign: "top", paddingRight: "16px" }}>
-                  <div style={{ fontWeight: "bold", marginBottom: "8px" }}>Расчёт составил:</div>
-                  <table style={{ width: "100%" }}>
-                    <tbody>
-                      <tr>
-                        <td style={{ width: "70px", padding: "4px 0" }}>Должность:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>Инженер</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>ФИО:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>{selectedEmployee?.fullName || "______________________"}</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>Подпись:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0", height: "20px" }}></td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>Дата:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>{watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU") : ""}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-                <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "16px" }}>
-                  <div style={{ fontWeight: "bold", marginBottom: "8px" }}>Согласовано:</div>
-                  <table style={{ width: "100%" }}>
-                    <tbody>
-                      <tr>
-                        <td style={{ width: "70px", padding: "4px 0" }}>Должность:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>______________________</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>ФИО:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>______________________</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>Подпись:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0", height: "20px" }}></td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "4px 0" }}>Дата:</td>
-                        <td style={{ borderBottom: "1px solid #000", padding: "4px 0" }}>______________________</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "10px", fontSize: "10pt" }}>Расчёт составил:</div>
+            <table style={{ width: "100%", fontSize: "10pt" }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: "80px", verticalAlign: "bottom", paddingBottom: "4px" }}>Инженер</td>
+                  <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
+                  <td style={{ verticalAlign: "bottom", paddingLeft: "16px", paddingBottom: "4px" }}>{engineerForSignature?.fullName || "______________________"}</td>
+                </tr>
+                <tr>
+                  <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
+                  <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
+                  <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div style={{ fontWeight: "bold", marginBottom: "10px", fontSize: "10pt" }}>Согласовано:</div>
+            <table style={{ width: "100%", fontSize: "10pt" }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: "80px", borderBottom: "1px solid #000", verticalAlign: "bottom" }}></td>
+                  <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
+                  <td style={{ borderBottom: "1px solid #000", verticalAlign: "bottom", paddingLeft: "16px" }}></td>
+                </tr>
+                <tr>
+                  <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
+                  <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
+                  <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </form>

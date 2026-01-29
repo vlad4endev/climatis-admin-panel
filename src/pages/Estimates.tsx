@@ -55,6 +55,7 @@ export default function Estimates() {
   const employees = employeesData.map(e => ({
     id: e.id,
     fullName: e.fullName,
+    position: e.position,
   }));
 
   const availableMaterials = sparePartsData.map(p => ({
@@ -275,7 +276,11 @@ export default function Estimates() {
 
       <div style={{ display: 'none' }}>
         {printingEstimate && (
-          <EstimatePrintView ref={printRef} estimate={printingEstimate} />
+          <EstimatePrintView 
+            ref={printRef} 
+            estimate={printingEstimate} 
+            engineerName={employees.find(e => e.position?.toLowerCase() === "инженер")?.fullName}
+          />
         )}
       </div>
     </div>
