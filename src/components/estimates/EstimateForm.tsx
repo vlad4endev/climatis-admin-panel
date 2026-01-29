@@ -192,7 +192,6 @@ export function EstimateForm({
   };
 
   const getDocumentContent = () => {
-    const estimateName = watch("name");
     const estimateNumber = watch("estimateNumber");
     const estimateDate = watch("estimateDate");
 
@@ -212,166 +211,184 @@ export function EstimateForm({
         <![endif]-->
         <style>
           @page {
-            size: A4;
-            margin: 20mm 25mm 20mm 25mm;
+            size: A4 portrait;
+            margin: 15mm 20mm 15mm 25mm;
           }
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
-            font-family: Arial, sans-serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.4;
             color: #000;
           }
-          .container {
-            width: 100%;
-            max-width: 160mm;
-          }
-          h1 {
+          .container { width: 100%; }
+          .doc-header {
             text-align: center;
-            font-size: 16pt;
-            font-weight: bold;
-            margin-bottom: 24px;
-            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
           }
-          .header-info {
-            margin-bottom: 24px;
-          }
-          .header-row {
-            display: table;
-            width: 100%;
-            margin-bottom: 4px;
-          }
-          .header-label {
-            display: table-cell;
-            width: 120px;
-            font-weight: bold;
-            vertical-align: top;
-          }
-          .header-value {
-            display: table-cell;
-            vertical-align: top;
-          }
-          h2 {
+          .doc-title {
             font-size: 14pt;
             font-weight: bold;
-            border-bottom: 1px solid #000;
-            padding-bottom: 6px;
-            margin: 24px 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+          }
+          .doc-number {
+            font-size: 11pt;
+          }
+          .parties-section {
+            margin-bottom: 16px;
+          }
+          .party-row {
+            margin-bottom: 6px;
+            line-height: 1.3;
+          }
+          .party-label {
+            font-weight: bold;
+            display: inline;
+          }
+          .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #f0f0f0;
+            padding: 6px 8px;
+            margin: 16px 0 8px 0;
+            border-left: 3px solid #000;
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed;
           }
-          td {
-            padding: 4px 0;
+          .items-table td {
+            padding: 4px 8px;
             vertical-align: top;
+            border-bottom: 1px dotted #ccc;
           }
-          .col-desc {
-            width: 75%;
-            padding-right: 12px;
-            word-wrap: break-word;
-          }
-          .col-price {
-            width: 25%;
-            text-align: right;
-            white-space: nowrap;
-            font-variant-numeric: tabular-nums;
-          }
-          .row-total td {
-            border-top: 1px solid #000;
-            padding-top: 8px;
+          .items-table td:first-child { width: 6%; text-align: center; }
+          .items-table td:nth-child(2) { width: 70%; }
+          .items-table td:last-child { width: 24%; text-align: right; font-variant-numeric: tabular-nums; }
+          .subtotal-row td {
+            padding: 8px;
             font-weight: bold;
+            border-top: 1px solid #000;
+            border-bottom: none;
           }
-          .row-subtotal td {
-            border-top: 1px solid #ccc;
-            padding-top: 6px;
-          }
-          .row-addon td {
-            color: #555;
+          .addon-row td {
+            padding: 3px 8px;
+            color: #444;
             font-size: 10pt;
+            border-bottom: none;
           }
-          .grand-total {
-            margin-top: 24px;
-            border-top: 2px solid #000;
-            padding-top: 12px;
+          .grand-total-section {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f5f5f5;
+            border: 2px solid #000;
           }
-          .grand-total td {
+          .grand-total-row {
+            display: table;
+            width: 100%;
+          }
+          .grand-total-label {
+            display: table-cell;
             font-size: 12pt;
             font-weight: bold;
+            text-transform: uppercase;
           }
-          .doc-number {
+          .grand-total-value {
+            display: table-cell;
             text-align: right;
-            font-size: 11pt;
-            color: #333;
-            margin-bottom: 16px;
+            font-size: 14pt;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
           }
+          .signature-section {
+            margin-top: 30px;
+            padding-top: 20px;
+          }
+          .signature-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+          }
+          .signature-position { display: table-cell; width: 35%; vertical-align: bottom; }
+          .signature-line { display: table-cell; width: 30%; text-align: center; vertical-align: bottom; border-bottom: 1px solid #000; }
+          .signature-name { display: table-cell; width: 35%; text-align: right; vertical-align: bottom; }
+          .signature-hint {
+            display: table;
+            width: 100%;
+            font-size: 8pt;
+            color: #666;
+          }
+          .signature-hint span { display: table-cell; }
+          .signature-hint span:nth-child(2) { width: 30%; text-align: center; }
+          .signature-hint span:last-child { width: 35%; text-align: right; }
         </style>
       </head>
       <body>
         <div class="container">
-          <h1>РАСЧЁТ  СТОИМОСТИ</h1>
-          <div class="doc-number">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</div>
-          <div class="header-info">
-            <div class="header-row"><span class="header-label">Заказчик:</span><span class="header-value">${selectedRequest?.clientName || "—"}</span></div>
-            <div class="header-row"><span class="header-label">Объект:</span><span class="header-value">${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span></div>
-            <div class="header-row"><span class="header-label">Исполнитель:</span><span class="header-value">ООО «Климатис»</span></div>
+          <div class="doc-header">
+            <div class="doc-title">Расчёт стоимости работ и материалов</div>
+            <div class="doc-number">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)} г.</div>
           </div>
-          <h2>РАБОТЫ</h2>
-          <table>
+          
+          <div class="parties-section">
+            <div class="party-row"><span class="party-label">Заказчик:</span> ${selectedRequest?.clientName || "—"}</div>
+            <div class="party-row"><span class="party-label">Объект:</span> ${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</div>
+            <div class="party-row"><span class="party-label">Исполнитель:</span> ООО «Климатис»</div>
+          </div>
+          
+          <div class="section-title">1. Работы</div>
+          <table class="items-table">
             <tbody>
               ${workBlocks.map((block, index) => {
                 const blockBase = calculateWorkBlockTotal(block);
                 const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-                return `<tr><td class="col-desc">${index + 1}. ${block.description || "Работа без названия"}</td><td class="col-price">${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.</td></tr>`;
+                return `<tr><td>${index + 1}.</td><td>${block.description || "Работа без названия"}</td><td>${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} руб.</td></tr>`;
               }).join("")}
-              <tr class="row-total"><td class="col-desc">Итого по работам:</td><td class="col-price">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+              <tr class="subtotal-row"><td></td><td>Итого по работам:</td><td>${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} руб.</td></tr>
             </tbody>
           </table>
-          <h2>МАТЕРИАЛЫ</h2>
-          <table>
+          
+          <div class="section-title">2. Материалы</div>
+          <table class="items-table">
             <tbody>
-              ${materials.map((material, index) => 
-                `<tr><td class="col-desc">${index + 1}. ${material.materialName} (${material.quantity} шт.)</td><td class="col-price">${Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.</td></tr>`
-              ).join("")}
-              <tr class="row-subtotal"><td class="col-desc">Базовая стоимость материалов:</td><td class="col-price">${Math.round(materialsTotal).toLocaleString("ru-RU")} р.</td></tr>
-              <tr class="row-addon"><td class="col-desc">+ Транспортные расходы (${customerCalc.transportPercent}%)</td><td class="col-price">${Math.round(materialsTransport).toLocaleString("ru-RU")} р.</td></tr>
-              <tr class="row-addon"><td class="col-desc">+ Заготовительно-складские (${customerCalc.warehousePercent}%)</td><td class="col-price">${Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.</td></tr>
-              <tr class="row-total"><td class="col-desc">Итого по материалам:</td><td class="col-price">${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
+              ${materials.map((material, index) => {
+                const materialPrice = Math.round(material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100));
+                return `<tr><td>${index + 1}.</td><td>${material.materialName} — ${material.quantity} шт.</td><td>${materialPrice.toLocaleString("ru-RU")} руб.</td></tr>`;
+              }).join("")}
+              <tr class="subtotal-row"><td></td><td>Итого по материалам:</td><td>${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} руб.</td></tr>
             </tbody>
           </table>
+          
           ${customerCalc.otherPercent && customerCalc.otherPercent > 0 ? `
-            <table style="margin-top: 12px;">
-              <tbody>
-                <tr class="row-addon"><td class="col-desc">+ ${customerCalc.otherName || "Другое"} (${customerCalc.otherPercent}%)</td><td class="col-price">${Math.round(otherAmount).toLocaleString("ru-RU")} р.</td></tr>
-              </tbody>
-            </table>
-          ` : ""}
-          <table class="grand-total">
+          <table class="items-table" style="margin-top: 8px;">
             <tbody>
-              <tr><td class="col-desc">ИТОГО:</td><td class="col-price">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr>
+              <tr class="addon-row"><td></td><td>${customerCalc.otherName || "Прочие расходы"} (${customerCalc.otherPercent}%)</td><td>${Math.round(otherAmount).toLocaleString("ru-RU")} руб.</td></tr>
             </tbody>
           </table>
-          <div style="margin-top: 48px; display: table; width: 100%;">
-            <div style="display: table-row;">
-              <div style="display: table-cell; width: 30%; vertical-align: bottom;">
-                <span style="font-size: 11pt;">${engineerEmployee?.position || "Инженер"}</span>
-              </div>
-              <div style="display: table-cell; width: 30%; text-align: center; vertical-align: bottom; border-bottom: 1px solid #000; padding-bottom: 2px;">
-                &nbsp;
-              </div>
-              <div style="display: table-cell; width: 40%; text-align: right; vertical-align: bottom;">
-                <span style="font-size: 11pt;">${getEngineerSurname()}</span>
-              </div>
+          ` : ""}
+          
+          <div class="grand-total-section">
+            <div class="grand-total-row">
+              <span class="grand-total-label">Итого к оплате:</span>
+              <span class="grand-total-value">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} руб.</span>
             </div>
-            <div style="display: table-row;">
-              <div style="display: table-cell;"></div>
-              <div style="display: table-cell; text-align: center; font-size: 9pt; color: #666; padding-top: 2px;">(подпись)</div>
-              <div style="display: table-cell; text-align: right; font-size: 9pt; color: #666; padding-top: 2px;">(ФИО)</div>
+          </div>
+          
+          <div class="signature-section">
+            <div class="signature-row">
+              <span class="signature-position">${engineerEmployee?.position || "Инженер"}</span>
+              <span class="signature-line">&nbsp;</span>
+              <span class="signature-name">${getEngineerSurname()}</span>
+            </div>
+            <div class="signature-hint">
+              <span></span>
+              <span>(подпись)</span>
+              <span>(расшифровка)</span>
             </div>
           </div>
         </div>
@@ -842,178 +859,187 @@ export function EstimateForm({
         </div>
       )}
 
-      {/* Hidden PDF Content - A4 proportions with proper margins */}
+      {/* Hidden PDF Content - A4 portrait format with professional layout */}
       <div 
         ref={pdfContentRef} 
         className="fixed left-[-9999px] top-0 bg-white text-black"
         style={{ 
-          fontFamily: "Arial, sans-serif",
+          fontFamily: "'Times New Roman', Times, serif",
           width: "210mm",
-          padding: "20mm 25mm",
+          padding: "15mm 20mm 15mm 25mm",
           boxSizing: "border-box",
-          lineHeight: "1.5"
+          lineHeight: "1.4",
+          fontSize: "11pt"
         }}
       >
-        <h1 style={{ 
-          fontSize: "16pt", 
-          fontWeight: "bold", 
-          textAlign: "center", 
-          marginBottom: "8px",
-          letterSpacing: "1px"
-        }}>
-          РАСЧЁТ  СТОИМОСТИ
-        </h1>
-        
+        {/* Document Header */}
         <div style={{ 
-          textAlign: "right", 
-          fontSize: "11pt", 
-          color: "#333", 
-          marginBottom: "16px" 
+          textAlign: "center", 
+          marginBottom: "20px",
+          paddingBottom: "10px",
+          borderBottom: "2px solid #000"
         }}>
-          № {watch("estimateNumber") || "б/н"} от {formatDate(watch("estimateDate"))}
+          <div style={{ 
+            fontSize: "14pt", 
+            fontWeight: "bold", 
+            textTransform: "uppercase",
+            letterSpacing: "2px",
+            marginBottom: "8px"
+          }}>
+            Расчёт стоимости работ и материалов
+          </div>
+          <div style={{ fontSize: "11pt" }}>
+            № {watch("estimateNumber") || "б/н"} от {formatDate(watch("estimateDate"))} г.
+          </div>
         </div>
         
-        <div style={{ marginBottom: "24px", fontSize: "12pt" }}>
-          <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Заказчик:</span>
-            <span>{selectedRequest?.clientName || "—"}</span>
+        {/* Parties Section */}
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ marginBottom: "6px", lineHeight: "1.3" }}>
+            <span style={{ fontWeight: "bold" }}>Заказчик:</span> {selectedRequest?.clientName || "—"}
           </div>
-          <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Объект:</span>
-            <span>{selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span>
+          <div style={{ marginBottom: "6px", lineHeight: "1.3" }}>
+            <span style={{ fontWeight: "bold" }}>Объект:</span> {selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}
           </div>
-          <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Исполнитель:</span>
-            <span>ООО «Климатис»</span>
+          <div style={{ marginBottom: "6px", lineHeight: "1.3" }}>
+            <span style={{ fontWeight: "bold" }}>Исполнитель:</span> ООО «Климатис»
           </div>
         </div>
 
-        <h2 style={{ 
-          fontSize: "14pt", 
+        {/* Section 1: Works */}
+        <div style={{ 
+          fontSize: "11pt", 
           fontWeight: "bold", 
-          borderBottom: "1px solid #000", 
-          paddingBottom: "6px", 
-          marginTop: "24px", 
-          marginBottom: "12px"
+          textTransform: "uppercase",
+          background: "#f0f0f0",
+          padding: "6px 8px",
+          margin: "16px 0 8px 0",
+          borderLeft: "3px solid #000"
         }}>
-          РАБОТЫ
-        </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12pt", tableLayout: "fixed" }}>
+          1. Работы
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11pt" }}>
           <tbody>
             {workBlocks.map((block, index) => {
               const blockBase = calculateWorkBlockTotal(block);
               const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
               return (
-                <tr key={block.id}>
-                  <td style={{ padding: "4px 12px 4px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
-                    {index + 1}. {block.description || "Работа без названия"}
+                <tr key={block.id} style={{ borderBottom: "1px dotted #ccc" }}>
+                  <td style={{ padding: "4px 8px", width: "6%", textAlign: "center", verticalAlign: "top" }}>
+                    {index + 1}.
                   </td>
-                  <td style={{ padding: "4px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                    {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.
+                  <td style={{ padding: "4px 8px", width: "70%", verticalAlign: "top" }}>
+                    {block.description || "Работа без названия"}
+                  </td>
+                  <td style={{ padding: "4px 8px", width: "24%", textAlign: "right", fontVariantNumeric: "tabular-nums", verticalAlign: "top" }}>
+                    {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} руб.
                   </td>
                 </tr>
               );
             })}
             <tr style={{ borderTop: "1px solid #000" }}>
-              <td style={{ padding: "8px 12px 4px 0", fontWeight: "bold" }}>Итого по работам:</td>
-              <td style={{ padding: "8px 0 4px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.
+              <td style={{ padding: "8px" }}></td>
+              <td style={{ padding: "8px", fontWeight: "bold" }}>Итого по работам:</td>
+              <td style={{ padding: "8px", textAlign: "right", fontWeight: "bold", fontVariantNumeric: "tabular-nums" }}>
+                {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} руб.
               </td>
             </tr>
           </tbody>
         </table>
 
-        <h2 style={{ 
-          fontSize: "14pt", 
+        {/* Section 2: Materials */}
+        <div style={{ 
+          fontSize: "11pt", 
           fontWeight: "bold", 
-          borderBottom: "1px solid #000", 
-          paddingBottom: "6px", 
-          marginTop: "24px", 
-          marginBottom: "12px"
+          textTransform: "uppercase",
+          background: "#f0f0f0",
+          padding: "6px 8px",
+          margin: "16px 0 8px 0",
+          borderLeft: "3px solid #000"
         }}>
-          МАТЕРИАЛЫ
-        </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12pt", tableLayout: "fixed" }}>
+          2. Материалы
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11pt" }}>
           <tbody>
-            {materials.map((material, index) => (
-              <tr key={material.id}>
-                <td style={{ padding: "4px 12px 4px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
-                  {index + 1}. {material.materialName} ({material.quantity} шт.)
-                </td>
-                <td style={{ padding: "4px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  {Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.
-                </td>
-              </tr>
-            ))}
-            <tr style={{ borderTop: "1px solid #ccc" }}>
-              <td style={{ padding: "6px 12px 4px 0" }}>Базовая стоимость материалов:</td>
-              <td style={{ padding: "6px 0 4px 0", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(materialsTotal).toLocaleString("ru-RU")} р.
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: "2px 12px 2px 0", color: "#555", fontSize: "11pt" }}>+ Транспортные расходы ({customerCalc.transportPercent}%)</td>
-              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "11pt", fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(materialsTransport).toLocaleString("ru-RU")} р.
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: "2px 12px 2px 0", color: "#555", fontSize: "11pt" }}>+ Заготовительно-складские ({customerCalc.warehousePercent}%)</td>
-              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "11pt", fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.
-              </td>
-            </tr>
+            {materials.map((material, index) => {
+              const materialPrice = Math.round(material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100));
+              return (
+                <tr key={material.id} style={{ borderBottom: "1px dotted #ccc" }}>
+                  <td style={{ padding: "4px 8px", width: "6%", textAlign: "center", verticalAlign: "top" }}>
+                    {index + 1}.
+                  </td>
+                  <td style={{ padding: "4px 8px", width: "70%", verticalAlign: "top" }}>
+                    {material.materialName} — {material.quantity} шт.
+                  </td>
+                  <td style={{ padding: "4px 8px", width: "24%", textAlign: "right", fontVariantNumeric: "tabular-nums", verticalAlign: "top" }}>
+                    {materialPrice.toLocaleString("ru-RU")} руб.
+                  </td>
+                </tr>
+              );
+            })}
             <tr style={{ borderTop: "1px solid #000" }}>
-              <td style={{ padding: "8px 12px 4px 0", fontWeight: "bold" }}>Итого по материалам:</td>
-              <td style={{ padding: "8px 0 4px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.
+              <td style={{ padding: "8px" }}></td>
+              <td style={{ padding: "8px", fontWeight: "bold" }}>Итого по материалам:</td>
+              <td style={{ padding: "8px", textAlign: "right", fontWeight: "bold", fontVariantNumeric: "tabular-nums" }}>
+                {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} руб.
               </td>
             </tr>
           </tbody>
         </table>
 
+        {/* Other expenses if any */}
         {customerCalc.otherPercent && customerCalc.otherPercent > 0 && (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11pt", marginTop: "12px", tableLayout: "fixed" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10pt", marginTop: "8px" }}>
             <tbody>
               <tr>
-                <td style={{ padding: "2px 12px 2px 0", color: "#555", width: "75%" }}>
-                  + {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%)
+                <td style={{ padding: "3px 8px", width: "6%" }}></td>
+                <td style={{ padding: "3px 8px", width: "70%", color: "#444" }}>
+                  {customerCalc.otherName || "Прочие расходы"} ({customerCalc.otherPercent}%)
                 </td>
-                <td style={{ padding: "2px 0", textAlign: "right", color: "#555", width: "25%", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  {Math.round(otherAmount).toLocaleString("ru-RU")} р.
+                <td style={{ padding: "3px 8px", width: "24%", textAlign: "right", color: "#444", fontVariantNumeric: "tabular-nums" }}>
+                  {Math.round(otherAmount).toLocaleString("ru-RU")} руб.
                 </td>
               </tr>
             </tbody>
           </table>
         )}
 
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "24px", borderTop: "2px solid #000", tableLayout: "fixed" }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: "12px 12px 0 0", fontSize: "14pt", fontWeight: "bold", width: "75%" }}>ИТОГО:</td>
-              <td style={{ padding: "12px 0 0 0", fontSize: "14pt", fontWeight: "bold", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums", width: "25%" }}>
-                {Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Signature block */}
-        <div style={{ marginTop: "48px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-          <div style={{ fontSize: "11pt", width: "30%" }}>
-            {engineerEmployee?.position || "Инженер"}
-          </div>
-          <div style={{ width: "25%", borderBottom: "1px solid #000", textAlign: "center", paddingBottom: "2px" }}>
-            &nbsp;
-          </div>
-          <div style={{ fontSize: "11pt", width: "35%", textAlign: "right" }}>
-            {getEngineerSurname()}
-          </div>
+        {/* Grand Total */}
+        <div style={{ 
+          marginTop: "20px", 
+          padding: "12px",
+          background: "#f5f5f5",
+          border: "2px solid #000",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <span style={{ fontSize: "12pt", fontWeight: "bold", textTransform: "uppercase" }}>
+            Итого к оплате:
+          </span>
+          <span style={{ fontSize: "14pt", fontWeight: "bold", fontVariantNumeric: "tabular-nums" }}>
+            {Math.round(customerGrandTotal).toLocaleString("ru-RU")} руб.
+          </span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "2px" }}>
-          <div style={{ width: "30%" }}></div>
-          <div style={{ width: "25%", textAlign: "center", fontSize: "9pt", color: "#666" }}>(подпись)</div>
-          <div style={{ width: "35%", textAlign: "right", fontSize: "9pt", color: "#666" }}>(ФИО)</div>
+
+        {/* Signature Section */}
+        <div style={{ marginTop: "30px", paddingTop: "20px" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", marginBottom: "4px" }}>
+            <div style={{ width: "35%" }}>
+              {engineerEmployee?.position || "Инженер"}
+            </div>
+            <div style={{ width: "30%", borderBottom: "1px solid #000", textAlign: "center", paddingBottom: "2px" }}>
+              &nbsp;
+            </div>
+            <div style={{ width: "35%", textAlign: "right" }}>
+              {getEngineerSurname()}
+            </div>
+          </div>
+          <div style={{ display: "flex", fontSize: "8pt", color: "#666" }}>
+            <div style={{ width: "35%" }}></div>
+            <div style={{ width: "30%", textAlign: "center" }}>(подпись)</div>
+            <div style={{ width: "35%", textAlign: "right" }}>(расшифровка)</div>
+          </div>
         </div>
       </div>
     </form>
