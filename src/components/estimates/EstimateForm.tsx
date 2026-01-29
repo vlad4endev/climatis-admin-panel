@@ -422,36 +422,18 @@ export function EstimateForm({
           </table>
           
           <div class="signatures">
-            <div style="margin-bottom: 24px;">
-              <div style="font-weight: bold; margin-bottom: 12px;">Расчёт составил:</div>
-              <table style="width: 100%;">
-                <tr>
-                  <td style="width: 80px; vertical-align: bottom;">Инженер</td>
-                  <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
-                  <td style="vertical-align: bottom; padding-left: 20px;">${engineerForSignature?.fullName || "______________________"}</td>
-                </tr>
-                <tr>
-                  <td style="font-size: 9pt; color: #666;">(должность)</td>
-                  <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
-                  <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
-                </tr>
-              </table>
-            </div>
-            <div>
-              <div style="font-weight: bold; margin-bottom: 12px;">Согласовано:</div>
-              <table style="width: 100%;">
-                <tr>
-                  <td style="width: 80px; border-bottom: 1px solid #000; vertical-align: bottom;"></td>
-                  <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
-                  <td style="border-bottom: 1px solid #000; vertical-align: bottom; padding-left: 20px;"></td>
-                </tr>
-                <tr>
-                  <td style="font-size: 9pt; color: #666;">(должность)</td>
-                  <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
-                  <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
-                </tr>
-              </table>
-            </div>
+            <table style="width: 100%;">
+              <tr>
+                <td style="width: 80px; vertical-align: bottom;">Инженер</td>
+                <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
+                <td style="vertical-align: bottom; padding-left: 20px;">${engineerForSignature?.fullName || "______________________"}</td>
+              </tr>
+              <tr>
+                <td style="font-size: 9pt; color: #666;">(должность)</td>
+                <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
+                <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
+              </tr>
+            </table>
           </div>
         </div>
       </body>
@@ -1079,40 +1061,20 @@ export function EstimateForm({
 
         {/* Блок подписей */}
         <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "2px solid #000" }}>
-          <div style={{ marginBottom: "20px" }}>
-            <div style={{ fontWeight: "bold", marginBottom: "10px", fontSize: "10pt" }}>Расчёт составил:</div>
-            <table style={{ width: "100%", fontSize: "10pt" }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: "80px", verticalAlign: "bottom", paddingBottom: "4px" }}>Инженер</td>
-                  <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
-                  <td style={{ verticalAlign: "bottom", paddingLeft: "16px", paddingBottom: "4px" }}>{engineerForSignature?.fullName || "______________________"}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
-                  <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
-                  <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <div style={{ fontWeight: "bold", marginBottom: "10px", fontSize: "10pt" }}>Согласовано:</div>
-            <table style={{ width: "100%", fontSize: "10pt" }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: "80px", borderBottom: "1px solid #000", verticalAlign: "bottom" }}></td>
-                  <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
-                  <td style={{ borderBottom: "1px solid #000", verticalAlign: "bottom", paddingLeft: "16px" }}></td>
-                </tr>
-                <tr>
-                  <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
-                  <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
-                  <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table style={{ width: "100%", fontSize: "10pt" }}>
+            <tbody>
+              <tr>
+                <td style={{ width: "80px", verticalAlign: "bottom", paddingBottom: "4px" }}>Инженер</td>
+                <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
+                <td style={{ verticalAlign: "bottom", paddingLeft: "16px", paddingBottom: "4px" }}>{engineerForSignature?.fullName || "______________________"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
+                <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
+                <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </form>
