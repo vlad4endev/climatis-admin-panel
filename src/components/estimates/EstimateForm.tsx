@@ -325,6 +325,7 @@ export function EstimateForm({
         <div class="container">
           <div class="doc-header">
             <div class="doc-title">РАСЧЕТ СТОИМОСТИ</div>
+            <div style="font-size: 11pt; margin-top: 8px;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)} г.</div>
           </div>
           
           <table class="parties-table">
@@ -892,6 +893,9 @@ export function EstimateForm({
             letterSpacing: "1px"
           }}>
             РАСЧЕТ СТОИМОСТИ
+          </div>
+          <div style={{ fontSize: "11pt", marginTop: "8px" }}>
+            № {watch("estimateNumber") || "б/н"} от {formatDate(watch("estimateDate"))} г.
           </div>
         </div>
         
