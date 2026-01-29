@@ -55,6 +55,7 @@ export default function Estimates() {
   const employees = employeesData.map(e => ({
     id: e.id,
     fullName: e.fullName,
+    position: e.position || "",
   }));
 
   const availableMaterials = sparePartsData.map(p => ({
