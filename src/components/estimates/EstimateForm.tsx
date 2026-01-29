@@ -219,11 +219,14 @@ export function EstimateForm({
             margin: 15mm 20mm 15mm 25mm;
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { width: 100%; }
           body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 11pt;
             line-height: 1.4;
             color: #000;
+            -webkit-font-smoothing: antialiased;
+            font-variant-numeric: tabular-nums;
           }
           .container { width: 100%; }
           .doc-header {
@@ -236,6 +239,12 @@ export function EstimateForm({
             text-transform: uppercase;
             letter-spacing: 1px;
           }
+
+          /* Common vertical rhythm */
+          .mt-20 { margin-top: 20px; }
+          .mb-10 { margin-bottom: 10px; }
+          .mb-20 { margin-bottom: 20px; }
+
           .parties-table {
             width: 100%;
             border-collapse: collapse;
@@ -254,17 +263,8 @@ export function EstimateForm({
           .parties-table .value-cell {
             padding-left: 8px;
           }
+
           .section-header {
-            margin-bottom: 16px;
-          }
-          .party-row {
-            margin-bottom: 6px;
-            line-height: 1.3;
-          }
-          .party-label {
-            font-weight: bold;
-            display: inline;
-          }
             font-size: 11pt;
             font-weight: bold;
             text-transform: uppercase;
@@ -272,6 +272,7 @@ export function EstimateForm({
             padding: 6px 0;
             border-bottom: 1px solid #000;
           }
+
           .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -282,7 +283,7 @@ export function EstimateForm({
             padding: 6px 4px;
             vertical-align: top;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #999;
           }
           .data-table .col-num { width: 30px; text-align: center; }
           .data-table .col-name { }
@@ -874,11 +875,13 @@ export function EstimateForm({
         className="fixed left-[-9999px] top-0 bg-white text-black"
         style={{ 
           fontFamily: "'Times New Roman', Times, serif",
-          width: "210mm",
-          padding: "15mm 20mm 15mm 25mm",
+          // Fixed pixel canvas to avoid rounding drift when rendering to PDF
+          width: "794px",
+          padding: "57px 76px 57px 95px",
           boxSizing: "border-box",
           lineHeight: "1.4",
-          fontSize: "11pt"
+          fontSize: "11pt",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {/* Document Header */}
@@ -931,9 +934,9 @@ export function EstimateForm({
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: "11pt" }}>
           <thead>
             <tr>
-              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #ddd" }}>№</th>
-              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Наименование</th>
-              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #ddd" }}>Сумма</th>
+              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>№</th>
+              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #000" }}>Наименование</th>
+              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #000" }}>Сумма</th>
             </tr>
           </thead>
           <tbody>
@@ -942,22 +945,22 @@ export function EstimateForm({
               const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
               return (
                 <tr key={block.id}>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {index + 1}
                   </td>
-                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {block.description || "Работа без названия"}
                   </td>
-                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} руб.
                   </td>
                 </tr>
               );
             })}
             <tr>
-              <td style={{ paddingTop: "10px" }}></td>
-              <td style={{ paddingTop: "10px", fontWeight: "bold" }}>Итого по работам:</td>
-              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold" }}>
+              <td style={{ paddingTop: "10px", borderTop: "1px solid #000" }}></td>
+              <td style={{ paddingTop: "10px", fontWeight: "bold", borderTop: "1px solid #000" }}>Итого по работам:</td>
+              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold", borderTop: "1px solid #000" }}>
                 {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} руб.
               </td>
             </tr>
@@ -978,10 +981,10 @@ export function EstimateForm({
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: "11pt" }}>
           <thead>
             <tr>
-              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #ddd" }}>№</th>
-              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Наименование</th>
-              <th style={{ width: "60px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #ddd" }}>Кол-во</th>
-              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #ddd" }}>Сумма</th>
+              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>№</th>
+              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #000" }}>Наименование</th>
+              <th style={{ width: "60px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>Кол-во</th>
+              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #000" }}>Сумма</th>
             </tr>
           </thead>
           <tbody>
@@ -989,25 +992,25 @@ export function EstimateForm({
               const materialPrice = Math.round(material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100));
               return (
                 <tr key={material.id}>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {index + 1}
                   </td>
-                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {material.materialName}
                   </td>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {material.quantity}
                   </td>
-                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #999" }}>
                     {materialPrice.toLocaleString("ru-RU")} руб.
                   </td>
                 </tr>
               );
             })}
             <tr>
-              <td style={{ paddingTop: "10px" }}></td>
-              <td colSpan={2} style={{ paddingTop: "10px", fontWeight: "bold" }}>Итого по материалам:</td>
-              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold" }}>
+              <td style={{ paddingTop: "10px", borderTop: "1px solid #000" }}></td>
+              <td colSpan={2} style={{ paddingTop: "10px", fontWeight: "bold", borderTop: "1px solid #000" }}>Итого по материалам:</td>
+              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold", borderTop: "1px solid #000" }}>
                 {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} руб.
               </td>
             </tr>
