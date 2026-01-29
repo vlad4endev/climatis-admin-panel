@@ -43,7 +43,7 @@ interface EstimateFormProps {
   onSubmit: (data: Partial<Estimate>) => void;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
-  employees: Array<{ id: string; fullName: string; position?: string }>;
+  employees: Array<{ id: string; fullName: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
   readOnly?: boolean;
 }
@@ -171,8 +171,6 @@ export function EstimateForm({
 
   const selectedRequest = requests.find((r) => r.id === requestId);
   const selectedEmployee = employees.find((e) => e.id === createdById);
-  // Найти инженера из списка сотрудников для подписи в документе
-  const engineerForSignature = employees.find((e) => e.position?.toLowerCase() === "инженер");
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
@@ -180,7 +178,6 @@ export function EstimateForm({
     const estimateName = watch("name");
     const estimateNumber = watch("estimateNumber");
     const estimateDate = watch("estimateDate");
-    const formattedDate = estimateDate ? new Date(estimateDate).toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" }) + " г." : "";
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -216,46 +213,12 @@ export function EstimateForm({
             width: 100%;
             max-width: 160mm;
           }
-          .doc-header {
-            display: table;
-            width: 100%;
-            margin-bottom: 16px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 12px;
-          }
-          .doc-header-left {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-          }
-          .doc-header-right {
-            display: table-cell;
-            width: 50%;
-            text-align: right;
-            vertical-align: top;
-          }
-          .company-name {
-            font-weight: bold;
-            font-size: 11pt;
-          }
-          .company-role {
-            color: #555;
-            font-size: 10pt;
-          }
-          .doc-number {
-            font-weight: bold;
-            font-size: 11pt;
-          }
-          .doc-date {
-            font-size: 10pt;
-          }
           h1 {
             text-align: center;
             font-size: 16pt;
             font-weight: bold;
-            margin: 16px 0;
+            margin-bottom: 24px;
             letter-spacing: 1px;
-            text-transform: uppercase;
           }
           .header-info {
             margin-bottom: 24px;
@@ -274,7 +237,6 @@ export function EstimateForm({
           .header-value {
             display: table-cell;
             vertical-align: top;
-            border-bottom: 1px solid #ccc;
           }
           h2 {
             font-size: 14pt;
@@ -325,65 +287,17 @@ export function EstimateForm({
             font-size: 12pt;
             font-weight: bold;
           }
-          .signatures {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #000;
-          }
-          .signature-table {
-            width: 100%;
-          }
-          .signature-cell {
-            width: 50%;
-            vertical-align: top;
-            padding: 0 10px;
-          }
-          .signature-title {
-            font-weight: bold;
-            margin-bottom: 12px;
-          }
-          .signature-row {
-            margin-bottom: 8px;
-          }
-          .signature-label {
-            display: inline-block;
-            width: 70px;
-          }
-          .signature-value {
-            display: inline-block;
-            border-bottom: 1px solid #000;
-            min-width: 150px;
-            padding-bottom: 2px;
-          }
-          .signature-line {
-            border-bottom: 1px solid #000;
-            height: 25px;
-            min-width: 150px;
-            display: inline-block;
-          }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="doc-header">
-            <div class="doc-header-left">
-              <div class="company-name">ООО «Климатис»</div>
-              <div class="company-role">Исполнитель</div>
-            </div>
-            <div class="doc-header-right">
-              <div class="doc-number">Расчёт № ${estimateNumber || "—"}</div>
-              <div class="doc-date">от ${formattedDate}</div>
-            </div>
-          </div>
-          
-          <h1>РАСЧЁТ СТОИМОСТИ РАБОТ</h1>
-          
+          <h1>РАСЧЁТ  СТОИМОСТИ</h1>
           <div class="header-info">
             <div class="header-row"><span class="header-label">Заказчик:</span><span class="header-value">${selectedRequest?.clientName || "—"}</span></div>
             <div class="header-row"><span class="header-label">Объект:</span><span class="header-value">${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span></div>
+            <div class="header-row"><span class="header-label">Исполнитель:</span><span class="header-value">ООО «Климатис»</span></div>
           </div>
-          
-          <h2>1. РАБОТЫ</h2>
+          <h2>РАБОТЫ</h2>
           <table>
             <tbody>
               ${workBlocks.map((block, index) => {
@@ -394,8 +308,7 @@ export function EstimateForm({
               <tr class="row-total"><td class="col-desc">Итого по работам:</td><td class="col-price">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.</td></tr>
             </tbody>
           </table>
-          
-          <h2>2. МАТЕРИАЛЫ</h2>
+          <h2>МАТЕРИАЛЫ</h2>
           <table>
             <tbody>
               ${materials.map((material, index) => 
@@ -414,27 +327,11 @@ export function EstimateForm({
               </tbody>
             </table>
           ` : ""}
-          
           <table class="grand-total">
             <tbody>
               <tr><td class="col-desc">ИТОГО:</td><td class="col-price">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.</td></tr>
             </tbody>
           </table>
-          
-          <div class="signatures">
-            <table style="width: 100%;">
-              <tr>
-                <td style="width: 80px; vertical-align: bottom;">Инженер</td>
-                <td style="width: 150px; border-bottom: 1px solid #000; vertical-align: bottom; text-align: center;"></td>
-                <td style="vertical-align: bottom; padding-left: 20px;">${engineerForSignature?.fullName || "______________________"}</td>
-              </tr>
-              <tr>
-                <td style="font-size: 9pt; color: #666;">(должность)</td>
-                <td style="font-size: 9pt; color: #666; text-align: center;">(подпись)</td>
-                <td style="font-size: 9pt; color: #666; padding-left: 20px;">(ФИО)</td>
-              </tr>
-            </table>
-          </div>
         </div>
       </body>
       </html>
@@ -910,74 +807,65 @@ export function EstimateForm({
         style={{ 
           fontFamily: "Arial, sans-serif",
           width: "210mm",
-          padding: "15mm 20mm",
+          padding: "20mm 25mm",
           boxSizing: "border-box",
-          lineHeight: "1.4"
+          lineHeight: "1.5"
         }}
       >
-        {/* Шапка документа */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", borderBottom: "2px solid #000", paddingBottom: "10px" }}>
-          <div style={{ fontSize: "10pt" }}>
-            <div style={{ fontWeight: "bold" }}>ООО «Климатис»</div>
-            <div style={{ color: "#555" }}>Исполнитель</div>
-          </div>
-          <div style={{ textAlign: "right", fontSize: "10pt" }}>
-            <div style={{ fontWeight: "bold" }}>Расчёт № {watch("estimateNumber") || "—"}</div>
-            <div>от {watch("estimateDate") ? new Date(watch("estimateDate")).toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" }) + " г." : ""}</div>
-          </div>
-        </div>
-
         <h1 style={{ 
-          fontSize: "14pt", 
+          fontSize: "16pt", 
           fontWeight: "bold", 
           textAlign: "center", 
-          margin: "12px 0",
-          letterSpacing: "1px",
-          textTransform: "uppercase"
+          marginBottom: "24px",
+          letterSpacing: "1px"
         }}>
-          РАСЧЁТ СТОИМОСТИ РАБОТ
+          РАСЧЁТ  СТОИМОСТИ
         </h1>
         
-        <div style={{ marginBottom: "16px", fontSize: "11pt" }}>
+        <div style={{ marginBottom: "24px", fontSize: "12pt" }}>
           <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "100px", fontWeight: "bold", flexShrink: 0 }}>Заказчик:</span>
-            <span style={{ borderBottom: "1px solid #ccc", flex: 1, paddingBottom: "2px" }}>{selectedRequest?.clientName || "—"}</span>
+            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Заказчик:</span>
+            <span>{selectedRequest?.clientName || "—"}</span>
           </div>
           <div style={{ display: "flex", marginBottom: "4px" }}>
-            <span style={{ width: "100px", fontWeight: "bold", flexShrink: 0 }}>Объект:</span>
-            <span style={{ borderBottom: "1px solid #ccc", flex: 1, paddingBottom: "2px" }}>{selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span>
+            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Объект:</span>
+            <span>{selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</span>
+          </div>
+          <div style={{ display: "flex", marginBottom: "4px" }}>
+            <span style={{ width: "120px", fontWeight: "bold", flexShrink: 0 }}>Исполнитель:</span>
+            <span>ООО «Климатис»</span>
           </div>
         </div>
 
         <h2 style={{ 
-          fontSize: "12pt", 
+          fontSize: "14pt", 
           fontWeight: "bold", 
           borderBottom: "1px solid #000", 
-          paddingBottom: "4px", 
-          marginTop: "16px", 
-          marginBottom: "8px"
+          paddingBottom: "6px", 
+          marginTop: "24px", 
+          marginBottom: "12px"
         }}>
-          1. РАБОТЫ
+          РАБОТЫ
         </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10pt", tableLayout: "fixed" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12pt", tableLayout: "fixed" }}>
           <tbody>
             {workBlocks.map((block, index) => {
               const blockBase = calculateWorkBlockTotal(block);
               const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
               return (
                 <tr key={block.id}>
-                  <td style={{ padding: "3px 8px 3px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
+                  <td style={{ padding: "4px 12px 4px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
                     {index + 1}. {block.description || "Работа без названия"}
                   </td>
-                  <td style={{ padding: "3px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                  <td style={{ padding: "4px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                     {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} р.
                   </td>
                 </tr>
               );
             })}
             <tr style={{ borderTop: "1px solid #000" }}>
-              <td style={{ padding: "6px 8px 3px 0", fontWeight: "bold" }}>Итого по работам:</td>
-              <td style={{ padding: "6px 0 3px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+              <td style={{ padding: "8px 12px 4px 0", fontWeight: "bold" }}>Итого по работам:</td>
+              <td style={{ padding: "8px 0 4px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                 {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} р.
               </td>
             </tr>
@@ -985,48 +873,48 @@ export function EstimateForm({
         </table>
 
         <h2 style={{ 
-          fontSize: "12pt", 
+          fontSize: "14pt", 
           fontWeight: "bold", 
           borderBottom: "1px solid #000", 
-          paddingBottom: "4px", 
-          marginTop: "16px", 
-          marginBottom: "8px"
+          paddingBottom: "6px", 
+          marginTop: "24px", 
+          marginBottom: "12px"
         }}>
-          2. МАТЕРИАЛЫ
+          МАТЕРИАЛЫ
         </h2>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10pt", tableLayout: "fixed" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12pt", tableLayout: "fixed" }}>
           <tbody>
             {materials.map((material, index) => (
               <tr key={material.id}>
-                <td style={{ padding: "3px 8px 3px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
+                <td style={{ padding: "4px 12px 4px 0", width: "75%", wordWrap: "break-word", verticalAlign: "top" }}>
                   {index + 1}. {material.materialName} ({material.quantity} шт.)
                 </td>
-                <td style={{ padding: "3px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                <td style={{ padding: "4px 0", width: "25%", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                   {Math.round(material.quantity * material.pricePerUnit).toLocaleString("ru-RU")} р.
                 </td>
               </tr>
             ))}
             <tr style={{ borderTop: "1px solid #ccc" }}>
-              <td style={{ padding: "4px 8px 3px 0", fontSize: "9pt" }}>Базовая стоимость материалов:</td>
-              <td style={{ padding: "4px 0 3px 0", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums", fontSize: "9pt" }}>
+              <td style={{ padding: "6px 12px 4px 0" }}>Базовая стоимость материалов:</td>
+              <td style={{ padding: "6px 0 4px 0", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                 {Math.round(materialsTotal).toLocaleString("ru-RU")} р.
               </td>
             </tr>
             <tr>
-              <td style={{ padding: "2px 8px 2px 0", color: "#555", fontSize: "9pt" }}>+ Транспортные расходы ({customerCalc.transportPercent}%)</td>
-              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "9pt", fontVariantNumeric: "tabular-nums" }}>
+              <td style={{ padding: "2px 12px 2px 0", color: "#555", fontSize: "11pt" }}>+ Транспортные расходы ({customerCalc.transportPercent}%)</td>
+              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "11pt", fontVariantNumeric: "tabular-nums" }}>
                 {Math.round(materialsTransport).toLocaleString("ru-RU")} р.
               </td>
             </tr>
             <tr>
-              <td style={{ padding: "2px 8px 2px 0", color: "#555", fontSize: "9pt" }}>+ Заготовительно-складские ({customerCalc.warehousePercent}%)</td>
-              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "9pt", fontVariantNumeric: "tabular-nums" }}>
+              <td style={{ padding: "2px 12px 2px 0", color: "#555", fontSize: "11pt" }}>+ Заготовительно-складские ({customerCalc.warehousePercent}%)</td>
+              <td style={{ padding: "2px 0", textAlign: "right", color: "#555", whiteSpace: "nowrap", fontSize: "11pt", fontVariantNumeric: "tabular-nums" }}>
                 {Math.round(materialsWarehouse).toLocaleString("ru-RU")} р.
               </td>
             </tr>
             <tr style={{ borderTop: "1px solid #000" }}>
-              <td style={{ padding: "6px 8px 3px 0", fontWeight: "bold" }}>Итого по материалам:</td>
-              <td style={{ padding: "6px 0 3px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+              <td style={{ padding: "8px 12px 4px 0", fontWeight: "bold" }}>Итого по материалам:</td>
+              <td style={{ padding: "8px 0 4px 0", textAlign: "right", fontWeight: "bold", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                 {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} р.
               </td>
             </tr>
@@ -1034,10 +922,10 @@ export function EstimateForm({
         </table>
 
         {customerCalc.otherPercent && customerCalc.otherPercent > 0 && (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9pt", marginTop: "8px", tableLayout: "fixed" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11pt", marginTop: "12px", tableLayout: "fixed" }}>
             <tbody>
               <tr>
-                <td style={{ padding: "2px 8px 2px 0", color: "#555", width: "75%" }}>
+                <td style={{ padding: "2px 12px 2px 0", color: "#555", width: "75%" }}>
                   + {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%)
                 </td>
                 <td style={{ padding: "2px 0", textAlign: "right", color: "#555", width: "25%", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
@@ -1048,34 +936,16 @@ export function EstimateForm({
           </table>
         )}
 
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "16px", borderTop: "2px solid #000", tableLayout: "fixed" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "24px", borderTop: "2px solid #000", tableLayout: "fixed" }}>
           <tbody>
             <tr>
-              <td style={{ padding: "10px 8px 0 0", fontSize: "12pt", fontWeight: "bold", width: "75%" }}>ИТОГО:</td>
-              <td style={{ padding: "10px 0 0 0", fontSize: "12pt", fontWeight: "bold", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums", width: "25%" }}>
+              <td style={{ padding: "12px 12px 0 0", fontSize: "14pt", fontWeight: "bold", width: "75%" }}>ИТОГО:</td>
+              <td style={{ padding: "12px 0 0 0", fontSize: "14pt", fontWeight: "bold", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums", width: "25%" }}>
                 {Math.round(customerGrandTotal).toLocaleString("ru-RU")} р.
               </td>
             </tr>
           </tbody>
         </table>
-
-        {/* Блок подписей */}
-        <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "2px solid #000" }}>
-          <table style={{ width: "100%", fontSize: "10pt" }}>
-            <tbody>
-              <tr>
-                <td style={{ width: "80px", verticalAlign: "bottom", paddingBottom: "4px" }}>Инженер</td>
-                <td style={{ width: "120px", borderBottom: "1px solid #000", verticalAlign: "bottom", textAlign: "center" }}></td>
-                <td style={{ verticalAlign: "bottom", paddingLeft: "16px", paddingBottom: "4px" }}>{engineerForSignature?.fullName || "______________________"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontSize: "8pt", color: "#666" }}>(должность)</td>
-                <td style={{ fontSize: "8pt", color: "#666", textAlign: "center" }}>(подпись)</td>
-                <td style={{ fontSize: "8pt", color: "#666", paddingLeft: "16px" }}>(ФИО)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </form>
   );
