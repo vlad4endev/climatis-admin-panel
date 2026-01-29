@@ -23,14 +23,12 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
         lineHeight: '1.3',
         boxSizing: 'border-box'
       }}>
-        <div style={{ marginBottom: '16px' }}>
-          <div className="text-center" style={{ marginBottom: '8px' }}>
-            <h1 style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '0' }}>РАСЧЁТ (СМЕТА)</h1>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10pt', borderBottom: '1px solid #000', paddingBottom: '4px' }}>
-            <span>№ <strong>{estimate.estimateNumber}</strong></span>
-            <span>от «{new Date(estimate.estimateDate).toLocaleDateString('ru-RU', { day: '2-digit' })}» {new Date(estimate.estimateDate).toLocaleDateString('ru-RU', { month: 'long' })} {new Date(estimate.estimateDate).getFullYear()} г.</span>
-          </div>
+        <div className="text-center" style={{ marginBottom: '12px' }}>
+          <h1 style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '4px' }}>РАСЧЁТ (СМЕТА)</h1>
+          <p style={{ fontSize: '11pt' }}>№ {estimate.estimateNumber}</p>
+          <p style={{ fontSize: '9pt', color: '#666' }}>
+            от {new Date(estimate.estimateDate).toLocaleDateString('ru-RU')}
+          </p>
         </div>
 
         <div style={{ marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
