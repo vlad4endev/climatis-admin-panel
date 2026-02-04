@@ -26,14 +26,14 @@ const formatCurrency = (value: number): string => {
   return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ").replace(".", ",");
 };
 
-// Format date as DD.MM.YYYY
+// Format date as DD.MM.YYYYг.
 const formatDate = (dateStr: string): string => {
   if (!dateStr) return "__.__.____";
   const d = new Date(dateStr);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
-  return `${day}.${month}.${year}`;
+  return `${day}.${month}.${year}г.`;
 };
 
 export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePDFProps>(
@@ -48,7 +48,6 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
       materials,
       customerCalc,
       engineerName,
-      engineerPosition,
     },
     ref
   ) => {
@@ -66,22 +65,26 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
     // Grand totals
     const worksWithVat = worksCustomerTotal + worksVat;
     const grandTotalWithoutVat = worksCustomerTotal + materialsCustomerTotal;
+    const grandTotalVat = worksVat + materialsVat;
     const grandTotalWithVat = grandTotalWithoutVat + worksVat;
 
-    const vatPercent = customerCalc.vatRate === 22 ? "22" : "0";
+    const vatNote = customerCalc.vatRate === 22 
+      ? "(0 либо 22%, как указано в расчете)" 
+      : "(0 либо 22%, как указано в расчете)";
     const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;
 
     const cellStyle: React.CSSProperties = {
       border: "1px solid #000",
-      padding: "6px 8px",
-      verticalAlign: "middle",
+      padding: "4px 6px",
+      verticalAlign: "top",
+      fontSize: "9pt",
     };
 
     const headerCellStyle: React.CSSProperties = {
       ...cellStyle,
-      fontWeight: "bold",
+      fontWeight: "normal",
       textAlign: "center",
-      backgroundColor: "#f5f5f5",
+      backgroundColor: "#fff",
     };
 
     return (
@@ -89,65 +92,65 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         ref={ref}
         style={{
           width: "794px",
-          padding: "40px 50px",
+          padding: "30px 50px",
           fontFamily: "'Times New Roman', Times, serif",
-          fontSize: "11pt",
-          lineHeight: "1.5",
+          fontSize: "10pt",
+          lineHeight: "1.4",
           color: "#000",
           backgroundColor: "#fff",
         }}
       >
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-          <div>
-            <div style={{ fontWeight: "bold" }}>СОГЛАСОВАНО:</div>
-            <div style={{ borderBottom: "1px solid #000", width: "180px", marginTop: "30px", marginBottom: "5px" }}></div>
-            <div>"___" _____________ 2026 г.</div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            к Договору № _______ от __________
-          </div>
-        </div>
+        <table style={{ width: "100%", marginBottom: "10px", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td style={{ width: "50%", verticalAlign: "top" }}>
+                <div style={{ fontWeight: "bold" }}>СОГЛАСОВАНО:</div>
+                <div style={{ marginTop: "20px" }}>"____"______________2026 г.</div>
+                <div style={{ borderBottom: "1px solid #000", width: "150px", marginTop: "5px" }}></div>
+                <div style={{ borderBottom: "1px solid #000", width: "100px", marginTop: "5px" }}></div>
+              </td>
+              <td style={{ width: "50%", textAlign: "right", verticalAlign: "top" }}>
+                к Договору № ___ от ________
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         {/* Title */}
-        <div style={{ textAlign: "center", margin: "30px 0" }}>
-          <div style={{ fontSize: "16pt", fontWeight: "bold" }}>РАСЧЕТ СТОИМОСТИ</div>
-          <div style={{ marginTop: "8px" }}>№ {estimateNumber || "б/н"} от {formatDate(estimateDate)} г.</div>
+        <div style={{ textAlign: "center", margin: "25px 0 15px" }}>
+          <div style={{ fontSize: "14pt", fontWeight: "bold" }}>РАСЧЕТ СТОИМОСТИ</div>
+          <div style={{ marginTop: "5px", fontSize: "10pt" }}>№ {estimateNumber || "б/н"} от {formatDate(estimateDate)}</div>
         </div>
 
         {/* Requisites */}
-        <table style={{ width: "100%", marginBottom: "25px", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", marginBottom: "20px", borderCollapse: "collapse" }}>
           <tbody>
             <tr>
-              <td style={{ width: "100px", fontWeight: "bold", padding: "3px 0" }}>Заказчик:</td>
-              <td style={{ padding: "3px 0 3px 15px" }}>{clientName || "—"}</td>
+              <td style={{ width: "100px", fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Заказчик:</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{clientName || "—"}</td>
             </tr>
             <tr>
-              <td style={{ fontWeight: "bold", padding: "3px 0" }}>Объект:</td>
-              <td style={{ padding: "3px 0 3px 15px" }}>{objectFull || "—"}</td>
+              <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Объект:</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{objectFull || "—"}</td>
             </tr>
             <tr>
-              <td style={{ fontWeight: "bold", padding: "3px 0" }}>Исполнитель:</td>
-              <td style={{ padding: "3px 0 3px 15px" }}>ООО «Климатис»</td>
+              <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Исполнитель:</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>ООО «Климатис» (ИП Щеткин А.Г.)</td>
             </tr>
           </tbody>
         </table>
 
         {/* Section 1: РАБОТЫ */}
-        <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
-          1. РАБОТЫ
+        <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "10pt" }}>
+          <span style={{ borderBottom: "1px solid #000", paddingBottom: "1px" }}>1. РАБОТЫ</span>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", tableLayout: "fixed" }}>
-          <colgroup>
-            <col style={{ width: "35px" }} />
-            <col style={{ width: "auto" }} />
-            <col style={{ width: "120px" }} />
-          </colgroup>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "15px" }}>
           <thead>
             <tr>
-              <th style={headerCellStyle}>№</th>
-              <th style={{ ...headerCellStyle, textAlign: "left" }}>Перечень выполняемых работ</th>
-              <th style={headerCellStyle}>Стоимость, руб.</th>
+              <th style={{ ...headerCellStyle, width: "25px" }}>№</th>
+              <th style={{ ...headerCellStyle, textAlign: "center" }}>Перечень выполняемых работ</th>
+              <th style={{ ...headerCellStyle, width: "90px" }}>Стоимость, руб</th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +161,9 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                 return (
                   <tr key={block.id}>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
-                    <td style={{ ...cellStyle, textAlign: "left" }}>{block.description || "Работа"}</td>
+                    <td style={{ ...cellStyle, textAlign: "left" }}>
+                      {block.description || "Работа"} <span style={{ fontStyle: "italic", color: "#666", fontSize: "8pt" }}>(с учетом накладных, сметной прибыли)</span>
+                    </td>
                     <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(blockCustomerPrice)}</td>
                   </tr>
                 );
@@ -170,43 +175,41 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                 </td>
               </tr>
             )}
+            {/* ИТОГО row */}
             <tr>
-              <td style={cellStyle}>&nbsp;</td>
+              <td style={cellStyle}></td>
               <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold" }}>ИТОГО:</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksCustomerTotal)}</td>
             </tr>
+            {/* НДС row */}
             <tr>
-              <td style={cellStyle}>&nbsp;</td>
-              <td style={{ ...cellStyle, textAlign: "right" }}>НДС ({vatPercent}%):</td>
+              <td style={cellStyle}></td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>
+                НДС <span style={{ fontStyle: "italic", fontSize: "8pt" }}>{vatNote}</span>:
+              </td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat)}</td>
             </tr>
+            {/* ВСЕГО row - yellow */}
             <tr>
-              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}>&nbsp;</td>
-              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО, по статье РАБОТЫ:</td>
-              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(worksWithVat)}</td>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF00" }}></td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF00" }}>ВСЕГО, по статье РАБОТЫ:</td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF00" }}>{formatCurrency(worksWithVat)}</td>
             </tr>
           </tbody>
         </table>
 
-        {/* Section 2: МАТЕРИАЛЫ */}
-        <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
-          2. МАТЕРИАЛЫ
+        {/* Section 2: Материалы */}
+        <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "10pt" }}>
+          <span style={{ borderBottom: "1px solid #000", paddingBottom: "1px" }}>2. Материалы</span>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", tableLayout: "fixed" }}>
-          <colgroup>
-            <col style={{ width: "35px" }} />
-            <col style={{ width: "auto" }} />
-            <col style={{ width: "55px" }} />
-            <col style={{ width: "55px" }} />
-            <col style={{ width: "100px" }} />
-          </colgroup>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "15px" }}>
           <thead>
             <tr>
-              <th style={headerCellStyle}>№</th>
-              <th style={{ ...headerCellStyle, textAlign: "left" }}>Спецификация используемых материалов</th>
-              <th style={headerCellStyle}>Ед.<br/>изм.</th>
-              <th style={headerCellStyle}>Кол-во</th>
-              <th style={headerCellStyle}>Стоимость,<br/>руб.</th>
+              <th style={{ ...headerCellStyle, width: "25px" }}>№</th>
+              <th style={{ ...headerCellStyle, textAlign: "center" }}>Спецификация используемых материалов</th>
+              <th style={{ ...headerCellStyle, width: "50px" }}>Ед. изм.</th>
+              <th style={{ ...headerCellStyle, width: "45px" }}>Кол-во</th>
+              <th style={{ ...headerCellStyle, width: "90px" }}>Стоимость, руб</th>
             </tr>
           </thead>
           <tbody>
@@ -216,7 +219,9 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                 return (
                   <tr key={material.id}>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
-                    <td style={{ ...cellStyle, textAlign: "left" }}>{material.materialName}</td>
+                    <td style={{ ...cellStyle, textAlign: "left" }}>
+                      {material.materialName} <span style={{ fontStyle: "italic", color: "#666", fontSize: "8pt" }}>(с учетом транспортных и заготовительно складских расходов)</span>
+                    </td>
                     <td style={{ ...cellStyle, textAlign: "center" }}>шт</td>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{material.quantity}</td>
                     <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(materialPrice)}</td>
@@ -230,54 +235,59 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                 </td>
               </tr>
             )}
+            {/* ВСЕГО row - yellow */}
             <tr>
-              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}>&nbsp;</td>
-              <td colSpan={3} style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО по статье МАТЕРИАЛЫ:</td>
-              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(materialsCustomerTotal)}</td>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF00" }}></td>
+              <td colSpan={3} style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF00" }}>ВСЕГО по статье МАТЕРИАЛЫ:</td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF00" }}>{formatCurrency(materialsCustomerTotal)}</td>
             </tr>
+            {/* НДС row */}
             <tr>
-              <td style={cellStyle}>&nbsp;</td>
-              <td colSpan={3} style={{ ...cellStyle, textAlign: "right" }}>в т.ч. НДС ({vatPercent}%):</td>
+              <td style={cellStyle}></td>
+              <td colSpan={3} style={{ ...cellStyle, textAlign: "right" }}>
+                в т.ч. НДС <span style={{ fontStyle: "italic", fontSize: "8pt" }}>{vatNote}</span>:
+              </td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(materialsVat)}</td>
             </tr>
           </tbody>
         </table>
 
-        {/* Final Totals */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
+        {/* Final Totals - NO BORDERS */}
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "30px" }}>
           <tbody>
             <tr>
-              <td style={{ ...cellStyle, fontWeight: "bold", width: "80%" }}>ИТОГО, по расчету без НДС:</td>
-              <td style={{ ...cellStyle, textAlign: "right", width: "20%" }}>{formatCurrency(grandTotalWithoutVat)}</td>
+              <td style={{ padding: "3px 0", borderTop: "1px solid #000" }}>
+                <strong>ИТОГО, по расчету без НДС</strong> <span style={{ fontStyle: "italic", fontSize: "8pt" }}>(здесь суммы по формуле, без НДС)</span>:
+              </td>
+              <td style={{ padding: "3px 0", textAlign: "right", width: "100px", borderTop: "1px solid #000" }}>{formatCurrency(grandTotalWithoutVat)}</td>
             </tr>
             <tr>
-              <td style={{ ...cellStyle }}>НДС ({vatPercent}%):</td>
-              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat + materialsVat)}</td>
+              <td style={{ padding: "3px 0" }}>
+                <strong>НДС</strong> <span style={{ fontStyle: "italic", fontSize: "8pt" }}>{vatNote}</span>:
+              </td>
+              <td style={{ padding: "3px 0", textAlign: "right" }}>{formatCurrency(grandTotalVat)}</td>
             </tr>
             <tr>
-              <td style={{ ...cellStyle, fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО ПО РАСЧЕТУ:</td>
-              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", fontSize: "13pt", backgroundColor: "#FFFF99" }}>{formatCurrency(grandTotalWithVat)} руб.</td>
+              <td style={{ padding: "5px 8px", backgroundColor: "#FFFF00", fontWeight: "bold", fontSize: "11pt" }}>
+                ВСЕГО по расчету:
+              </td>
+              <td style={{ padding: "5px 8px", textAlign: "right", backgroundColor: "#FFFF00", fontWeight: "bold", fontSize: "11pt" }}>
+                {formatCurrency(grandTotalWithVat)}
+              </td>
             </tr>
           </tbody>
         </table>
 
-        {/* Signature */}
-        <div style={{ marginTop: "40px" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              <tr>
-                <td style={{ width: "150px", verticalAlign: "bottom", paddingBottom: "5px" }}>Расчет составил:</td>
-                <td style={{ width: "200px", textAlign: "center", verticalAlign: "bottom", borderBottom: "1px solid #000", paddingBottom: "5px" }}></td>
-                <td style={{ verticalAlign: "bottom", textAlign: "right", paddingBottom: "5px", paddingLeft: "20px" }}>{engineerName || "________________"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontSize: "9pt", color: "#666", paddingTop: "3px" }}>{engineerPosition || "Инженер"}</td>
-                <td style={{ fontSize: "9pt", color: "#666", textAlign: "center", paddingTop: "3px" }}>(подпись)</td>
-                <td style={{ fontSize: "9pt", color: "#666", textAlign: "right", paddingTop: "3px" }}>(ФИО)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        {/* Signature - minimal */}
+        <table style={{ width: "100%", marginTop: "40px" }}>
+          <tbody>
+            <tr>
+              <td style={{ width: "40%", textAlign: "center", paddingTop: "20px" }}>Расчет составил</td>
+              <td style={{ width: "20%" }}></td>
+              <td style={{ width: "40%", textAlign: "center", paddingTop: "20px" }}>{engineerName || "________________"}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
