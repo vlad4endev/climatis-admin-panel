@@ -135,12 +135,15 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   yPos += 8;
   addText('"____"______________2026 г.', marginLeft, yPos, { fontSize: 10 });
   
-  yPos += 4;
+  yPos += 8;
   doc.setLineWidth(0.3);
-  doc.line(marginLeft, yPos, marginLeft + 40, yPos);
-  
-  yPos += 3;
-  doc.line(marginLeft, yPos, marginLeft + 28, yPos);
+  // Two signature lines on the same row: longer (signature) + shorter (initials)
+  const signLineStart = marginLeft;
+  const signLineLength = 35;
+  const initialsLineLength = 25;
+  const gapBetweenLines = 5;
+  doc.line(signLineStart, yPos, signLineStart + signLineLength, yPos);
+  doc.line(signLineStart + signLineLength + gapBetweenLines, yPos, signLineStart + signLineLength + gapBetweenLines + initialsLineLength, yPos);
 
   // === TITLE ===
   yPos += 12;
