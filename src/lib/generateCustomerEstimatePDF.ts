@@ -320,31 +320,39 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   yPos += 5;
   const totalsValueX = pageWidth - marginRight;
   
-  // First line: ИТОГО - description left, value right-aligned flush
+  // First line: ИТОГО - description left, value right-aligned
   const itogo1 = "ИТОГО, по расчету без НДС ";
   const itogo2 = "(здесь суммы по формуле, без НДС):";
-  addText(itogo1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  addText(itogo2, marginLeft + doc.getTextWidth(itogo1), yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 9 });
+  doc.text(itogo1, marginLeft, yPos);
+  const itogo1Width = doc.getTextWidth(itogo1);
+  doc.setFont("NotoSerif", "italic");
+  doc.text(itogo2, marginLeft + itogo1Width, yPos);
+  doc.setFont("NotoSerif", "bold");
+  doc.text(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 5;
-  // Second line: НДС - description left, value right-aligned flush
+  // Second line: НДС - description left, value right-aligned
   const nds1 = "НДС ";
   const nds2 = "(0 либо 22%, как указано в расчете):";
-  addText(nds1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  addText(nds2, marginLeft + doc.getTextWidth(nds1), yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 9 });
+  doc.text(nds1, marginLeft, yPos);
+  const nds1Width = doc.getTextWidth(nds1);
+  doc.setFont("NotoSerif", "italic");
+  doc.text(nds2, marginLeft + nds1Width, yPos);
+  doc.setFont("NotoSerif", "bold");
+  doc.text(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 6;
   // Final total line with underline
   doc.setLineWidth(0.3);
   doc.line(marginLeft, yPos + 1, totalsValueX, yPos + 1);
-  addText("ВСЕГО по расчету:", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
-  addText(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
+  doc.setFont("NotoSerif", "bold");
+  doc.setFontSize(10);
+  doc.text("ВСЕГО по расчету:", marginLeft, yPos);
+  doc.text(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right" });
 
   // === SIGNATURE ===
   yPos += 25;
