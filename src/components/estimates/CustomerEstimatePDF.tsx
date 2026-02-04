@@ -171,17 +171,17 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
               </tr>
             )}
             <tr>
-              <td style={cellStyle}></td>
+              <td style={cellStyle}>&nbsp;</td>
               <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold" }}>ИТОГО:</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksCustomerTotal)}</td>
             </tr>
             <tr>
-              <td style={cellStyle}></td>
+              <td style={cellStyle}>&nbsp;</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>НДС ({vatPercent}%):</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat)}</td>
             </tr>
             <tr>
-              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}></td>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}>&nbsp;</td>
               <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО, по статье РАБОТЫ:</td>
               <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(worksWithVat)}</td>
             </tr>
@@ -231,12 +231,12 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
               </tr>
             )}
             <tr>
-              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}></td>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}>&nbsp;</td>
               <td colSpan={3} style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО по статье МАТЕРИАЛЫ:</td>
               <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(materialsCustomerTotal)}</td>
             </tr>
             <tr>
-              <td style={cellStyle}></td>
+              <td style={cellStyle}>&nbsp;</td>
               <td colSpan={3} style={{ ...cellStyle, textAlign: "right" }}>в т.ч. НДС ({vatPercent}%):</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(materialsVat)}</td>
             </tr>
@@ -244,18 +244,14 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         </table>
 
         {/* Final Totals */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px", tableLayout: "fixed" }}>
-          <colgroup>
-            <col style={{ width: "auto" }} />
-            <col style={{ width: "150px" }} />
-          </colgroup>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
           <tbody>
             <tr>
-              <td style={{ ...cellStyle, fontWeight: "bold" }}>ИТОГО, по расчету без НДС:</td>
-              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(grandTotalWithoutVat)}</td>
+              <td style={{ ...cellStyle, fontWeight: "bold", width: "80%" }}>ИТОГО, по расчету без НДС:</td>
+              <td style={{ ...cellStyle, textAlign: "right", width: "20%" }}>{formatCurrency(grandTotalWithoutVat)}</td>
             </tr>
             <tr>
-              <td style={cellStyle}>НДС ({vatPercent}%):</td>
+              <td style={{ ...cellStyle }}>НДС ({vatPercent}%):</td>
               <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat + materialsVat)}</td>
             </tr>
             <tr>
@@ -266,20 +262,22 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         </table>
 
         {/* Signature */}
-        <table style={{ width: "100%", marginTop: "30px" }}>
-          <tbody>
-            <tr>
-              <td style={{ width: "30%", verticalAlign: "bottom" }}>Расчет составил:</td>
-              <td style={{ width: "40%", textAlign: "center", verticalAlign: "bottom", borderBottom: "1px solid #000" }}></td>
-              <td style={{ width: "30%", textAlign: "right", verticalAlign: "bottom" }}>{engineerName || "________________"}</td>
-            </tr>
-            <tr>
-              <td style={{ fontSize: "9pt", color: "#666" }}>{engineerPosition || "Инженер"}</td>
-              <td style={{ fontSize: "9pt", color: "#666", textAlign: "center" }}>(подпись)</td>
-              <td style={{ fontSize: "9pt", color: "#666", textAlign: "right" }}>(ФИО)</td>
-            </tr>
-          </tbody>
-        </table>
+        <div style={{ marginTop: "40px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              <tr>
+                <td style={{ width: "150px", verticalAlign: "bottom", paddingBottom: "5px" }}>Расчет составил:</td>
+                <td style={{ width: "200px", textAlign: "center", verticalAlign: "bottom", borderBottom: "1px solid #000", paddingBottom: "5px" }}></td>
+                <td style={{ verticalAlign: "bottom", textAlign: "right", paddingBottom: "5px", paddingLeft: "20px" }}>{engineerName || "________________"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "9pt", color: "#666", paddingTop: "3px" }}>{engineerPosition || "Инженер"}</td>
+                <td style={{ fontSize: "9pt", color: "#666", textAlign: "center", paddingTop: "3px" }}>(подпись)</td>
+                <td style={{ fontSize: "9pt", color: "#666", textAlign: "right", paddingTop: "3px" }}>(ФИО)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
