@@ -318,9 +318,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.line(marginLeft, yPos, pageWidth - marginRight, yPos);
   
   yPos += 5;
-  const totalsValueX = pageWidth - marginRight;
+  // Align values with table's last column (accounting for cell padding)
+  const totalsValueX = pageWidth - marginRight - 1.5;
   
-  // First line: ИТОГО - description left, value right-aligned
+  // First line: ИТОГО - description left, value right-aligned with table
   const itogo1 = "ИТОГО, по расчету без НДС ";
   const itogo2 = "(здесь суммы по формуле, без НДС):";
   doc.setFont("NotoSerif", "bold");
@@ -333,7 +334,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.text(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 5;
-  // Second line: НДС - description left, value right-aligned
+  // Second line: НДС - description left, value right-aligned with table
   const nds1 = "НДС ";
   const nds2 = "(0 либо 22%, как указано в расчете):";
   doc.setFont("NotoSerif", "bold");
@@ -348,7 +349,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   yPos += 6;
   // Final total line with underline
   doc.setLineWidth(0.3);
-  doc.line(marginLeft, yPos + 1, totalsValueX, yPos + 1);
+  doc.line(marginLeft, yPos + 1, pageWidth - marginRight, yPos + 1);
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(10);
   doc.text("ВСЕГО по расчету:", marginLeft, yPos);
