@@ -12,6 +12,7 @@ import {
 // Import fonts
 import RobotoRegular from "@/assets/fonts/Roboto-Regular.ttf";
 import RobotoBold from "@/assets/fonts/Roboto-Bold.ttf";
+import RobotoItalic from "@/assets/fonts/Roboto-Italic.ttf";
 
 interface GeneratePDFParams {
   estimateNumber: string;
@@ -71,9 +72,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   } = params;
 
   // Load fonts
-  const [robotoRegularBase64, robotoBoldBase64] = await Promise.all([
+  const [robotoRegularBase64, robotoBoldBase64, robotoItalicBase64] = await Promise.all([
     loadFontAsBase64(RobotoRegular),
     loadFontAsBase64(RobotoBold),
+    loadFontAsBase64(RobotoItalic),
   ]);
 
   // Calculate totals
@@ -109,6 +111,9 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   
   doc.addFileToVFS("Roboto-Bold.ttf", robotoBoldBase64);
   doc.addFont("Roboto-Bold.ttf", "Roboto", "bold");
+  
+  doc.addFileToVFS("Roboto-Italic.ttf", robotoItalicBase64);
+  doc.addFont("Roboto-Italic.ttf", "Roboto", "italic");
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const marginLeft = 20;
@@ -117,7 +122,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   let yPos = 18;
 
   // Helper function to add text
-  const addText = (text: string, x: number, y: number, options: { fontStyle?: "normal" | "bold"; fontSize?: number; align?: "left" | "center" | "right" } = {}) => {
+  const addText = (text: string, x: number, y: number, options: { fontStyle?: "normal" | "bold" | "italic"; fontSize?: number; align?: "left" | "center" | "right" } = {}) => {
     doc.setFont("Roboto", options.fontStyle || "normal");
     doc.setFontSize(options.fontSize || 10);
     doc.text(text, x, y, { align: options.align || "left" });
@@ -314,11 +319,39 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const valueWidth = 30; // Width reserved for value
   const labelEndX = totalsValueX - valueWidth;
   
-  addText(`ИТОГО, по расчету без НДС (здесь суммы по форму|ле, без НДС):`, labelEndX, yPos, { fontStyle: "bold", fontSize: 9, align: "right" });
+  // First line: ИТОГО with italic note
+  doc.setFont("Roboto", "bold");
+  doc.setFontSize(9);
+  const itogoLabel = "ИТОГО, по расчету без НДС ";
+  const itogoNote = "(здесь суммы по формуле, без НДС):";
+  const itogoNoteWidth = doc.getTextWidth(itogoNote);
+  doc.setFont("Roboto", "italic");
+  const itogoLabelWidth = doc.getTextWidth(itogoLabel);
+  doc.setFont("Roboto", "bold");
+  
+  // Calculate positions for right alignment
+  const itogoTotalWidth = doc.getTextWidth(itogoLabel) + itogoNoteWidth;
+  const itogoStartX = labelEndX - itogoTotalWidth;
+  
+  addText(itogoLabel, itogoStartX, yPos, { fontStyle: "bold", fontSize: 9 });
+  addText(itogoNote, itogoStartX + doc.getTextWidth(itogoLabel), yPos, { fontStyle: "italic", fontSize: 9 });
   addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 4;
-  addText(`НДС ${vatNote}:`, labelEndX, yPos, { fontSize: 9, align: "right" });
+  // Second line: НДС with italic note
+  const ndsLabel = "НДС ";
+  const ndsNote = "(0 либо 22%, как указано в расчете):";
+  doc.setFont("Roboto", "normal");
+  doc.setFontSize(9);
+  const ndsLabelWidth = doc.getTextWidth(ndsLabel);
+  doc.setFont("Roboto", "italic");
+  const ndsNoteWidth = doc.getTextWidth(ndsNote);
+  
+  const ndsTotalWidth = ndsLabelWidth + ndsNoteWidth;
+  const ndsStartX = labelEndX - ndsTotalWidth;
+  
+  addText(ndsLabel, ndsStartX, yPos, { fontSize: 9 });
+  addText(ndsNote, ndsStartX + ndsLabelWidth, yPos, { fontStyle: "italic", fontSize: 9 });
   addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 5;
