@@ -31,9 +31,14 @@ import {
   Material,
   CustomerCalculation,
   DEFAULT_CUSTOMER_CALCULATION,
+  VatRate,
   calculateAllBlocksTotal,
   calculateWorkBlockTotal,
+  calculateWorksVat,
+  calculateMaterialsVat,
+  calculateGrandTotalWithVat,
 } from "@/types/estimate";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
@@ -157,6 +162,12 @@ export function EstimateForm({
   const customerSubtotal = worksCustomerTotal + materialsCustomerTotal;
   const otherAmount = customerCalc.otherPercent ? customerSubtotal * (customerCalc.otherPercent / 100) : 0;
   const customerGrandTotal = customerSubtotal + otherAmount;
+
+  // VAT calculations (дополнительный слой, не меняющий базовые расчёты)
+  const worksVat = calculateWorksVat(worksCustomerTotal, customerCalc.vatRate);
+  const materialsVat = calculateMaterialsVat(materialsCustomerTotal, customerCalc.vatRate);
+  const totalVat = worksVat + materialsVat;
+  const customerGrandTotalWithVat = calculateGrandTotalWithVat(customerGrandTotal, worksVat, customerCalc.vatRate);
 
   const handleFormSubmit = (data: any) => {
     const employee = employees.find((e) => e.id === data.createdById);
@@ -385,8 +396,12 @@ export function EstimateForm({
           <table class="grand-total-table">
             <tr>
               <td class="label">Итого к оплате:</td>
-              <td class="value">${Math.round(customerGrandTotal).toLocaleString("ru-RU")} руб.</td>
+              <td class="value">${Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} руб.</td>
             </tr>
+            ${customerCalc.vatRate === 22 ? `<tr>
+              <td style="font-size: 10pt; font-weight: normal; padding: 6px 10px;">В том числе НДС:</td>
+              <td style="font-size: 10pt; text-align: right; font-weight: normal; padding: 6px 10px;">${Math.round(totalVat).toLocaleString("ru-RU")} руб.</td>
+            </tr>` : ""}
           </table>
           
           <table class="signature-table">
@@ -641,9 +656,15 @@ export function EstimateForm({
               </div>
 
               <div className="flex justify-between items-center py-1 px-3 text-xs text-muted-foreground">
-                <span>Стоимость для заказчика:</span>
-                <span>{Math.round(customerGrandTotal).toLocaleString("ru-RU")} ₽</span>
+                <span>Стоимость для заказчика{customerCalc.vatRate === 22 ? " (с НДС)" : ""}:</span>
+                <span>{Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} ₽</span>
               </div>
+              {customerCalc.vatRate === 22 && (
+                <div className="flex justify-between items-center py-1 px-3 text-xs text-muted-foreground">
+                  <span>В том числе НДС:</span>
+                  <span>{Math.round(totalVat).toLocaleString("ru-RU")} ₽</span>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -801,11 +822,50 @@ export function EstimateForm({
                 />
               </div>
             </div>
-            {customerCalc.otherPercent !== undefined && customerCalc.otherPercent > 0 && (
-              <div className="bg-background/50 p-3 rounded text-sm">
+          </div>
+
+          <div className="bg-form-section p-4 rounded-lg space-y-4">
+            <h3 className="font-semibold text-form-label">НДС</h3>
+            <div>
+              <Label>Ставка НДС</Label>
+              <ToggleGroup 
+                type="single" 
+                value={String(customerCalc.vatRate)}
+                onValueChange={(value) => {
+                  if (value === "0" || value === "22") {
+                    setCustomerCalc(prev => ({
+                      ...prev,
+                      vatRate: Number(value) as VatRate
+                    }));
+                  }
+                }}
+                disabled={readOnly}
+                className="justify-start mt-2"
+              >
+                <ToggleGroupItem value="0" aria-label="Без НДС" className="px-4">
+                  0% (без НДС)
+                </ToggleGroupItem>
+                <ToggleGroupItem value="22" aria-label="НДС 22%" className="px-4">
+                  22%
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <p className="text-xs text-muted-foreground mt-2">
+                НДС по работам начисляется сверху. НДС по материалам уже включён в цену.
+              </p>
+            </div>
+            {customerCalc.vatRate === 22 && (
+              <div className="bg-background/50 p-3 rounded space-y-1 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>+ {customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>
-                  <span>{Math.round(otherAmount).toLocaleString("ru-RU")} ₽</span>
+                  <span>НДС по работам (22% сверху):</span>
+                  <span>{Math.round(worksVat).toLocaleString("ru-RU")} ₽</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>НДС по материалам (в т.ч. 22/122):</span>
+                  <span>{Math.round(materialsVat).toLocaleString("ru-RU")} ₽</span>
+                </div>
+                <div className="flex justify-between font-medium border-t pt-1">
+                  <span>Итого НДС:</span>
+                  <span>{Math.round(totalVat).toLocaleString("ru-RU")} ₽</span>
                 </div>
               </div>
             )}
@@ -828,12 +888,24 @@ export function EstimateForm({
                   <span className="font-medium">{Math.round(otherAmount).toLocaleString("ru-RU")} ₽</span>
                 </div>
               )}
+              {customerCalc.vatRate === 22 && (
+                <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
+                  <span className="text-muted-foreground">НДС по работам (22%):</span>
+                  <span className="font-medium">{Math.round(worksVat).toLocaleString("ru-RU")} ₽</span>
+                </div>
+              )}
               <div className="flex justify-between items-center py-3 px-3 border-t-2 border-primary/30 mt-2">
-                <span className="text-lg font-semibold">ИТОГО для заказчика:</span>
+                <span className="text-lg font-semibold">ИТОГО к оплате:</span>
                 <span className="text-xl font-bold text-primary">
-                  {Math.round(customerGrandTotal).toLocaleString("ru-RU")} ₽
+                  {Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} ₽
                 </span>
               </div>
+              {customerCalc.vatRate === 22 && (
+                <div className="flex justify-between items-center py-1 px-3 text-sm text-muted-foreground">
+                  <span>В том числе НДС:</span>
+                  <span>{Math.round(totalVat).toLocaleString("ru-RU")} ₽</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1030,9 +1102,19 @@ export function EstimateForm({
                 Итого к оплате:
               </td>
               <td style={{ padding: "10px", textAlign: "right", fontWeight: "bold", fontSize: "14pt" }}>
-                {Math.round(customerGrandTotal).toLocaleString("ru-RU")} руб.
+                {Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} руб.
               </td>
             </tr>
+            {customerCalc.vatRate === 22 && (
+              <tr>
+                <td style={{ padding: "6px 10px", fontSize: "10pt" }}>
+                  В том числе НДС:
+                </td>
+                <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "10pt" }}>
+                  {Math.round(totalVat).toLocaleString("ru-RU")} руб.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
