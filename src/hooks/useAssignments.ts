@@ -22,6 +22,7 @@ export function useAssignments() {
           estimate:estimates(
             id,
             name,
+            engineer_comment,
             work_blocks(
               id,
               description,
@@ -66,6 +67,7 @@ export function useAssignments() {
           pricePerUnit: Number(m.price_per_unit) || 0,
         })) || [],
         comments: row.comments || "",
+        engineerComment: row.estimate?.engineer_comment || "",
       }));
     },
   });

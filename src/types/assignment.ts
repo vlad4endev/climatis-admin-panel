@@ -33,4 +33,5 @@ export interface Assignment {
   comments: string;
   clientName?: string;
   objectName?: string;
+  engineerComment?: string;
 }
