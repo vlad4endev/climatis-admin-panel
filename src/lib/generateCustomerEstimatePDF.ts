@@ -318,9 +318,9 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.line(marginLeft, yPos, pageWidth - marginRight, yPos);
   
   yPos += 5;
-  const totalsValueX = pageWidth - marginRight - 2; // Visual right padding
+  const totalsValueX = pageWidth - marginRight;
   
-  // First line: ИТОГО - label left, value right with spacing
+  // First line: ИТОГО - description left, value right-aligned flush
   const itogo1 = "ИТОГО, по расчету без НДС ";
   const itogo2 = "(здесь суммы по формуле, без НДС):";
   addText(itogo1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
@@ -330,7 +330,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 9 });
   
   yPos += 5;
-  // Second line: НДС - label left, value right with spacing
+  // Second line: НДС - description left, value right-aligned flush
   const nds1 = "НДС ";
   const nds2 = "(0 либо 22%, как указано в расчете):";
   addText(nds1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
@@ -342,7 +342,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   yPos += 6;
   // Final total line with underline
   doc.setLineWidth(0.3);
-  doc.line(marginLeft, yPos + 1, pageWidth - marginRight, yPos + 1);
+  doc.line(marginLeft, yPos + 1, totalsValueX, yPos + 1);
   addText("ВСЕГО по расчету:", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
   addText(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
 
