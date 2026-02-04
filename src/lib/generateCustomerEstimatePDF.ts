@@ -204,8 +204,8 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   ]);
   worksBodyData.push([
     "",
-    { content: "ВСЕГО, по статье РАБОТЫ:", styles: { halign: "right", fontStyle: "bold", fillColor: [255, 255, 0] } },
-    { content: formatCurrency(worksWithVat), styles: { fillColor: [255, 255, 0], fontStyle: "bold" } },
+    { content: "ВСЕГО, по статье РАБОТЫ:", styles: { halign: "right", fontStyle: "bold" } },
+    { content: formatCurrency(worksWithVat), styles: { fontStyle: "bold" } },
   ]);
 
   const worksTableOptions: UserOptions = {
@@ -266,10 +266,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Summary rows for materials
   materialsBodyData.push([
     "",
-    { content: "ВСЕГО по статье МАТЕРИАЛЫ:", styles: { halign: "right", fontStyle: "bold", fillColor: [255, 255, 0] } },
-    { content: "", styles: { fillColor: [255, 255, 0] } },
-    { content: "", styles: { fillColor: [255, 255, 0] } },
-    { content: formatCurrency(materialsCustomerTotal), styles: { fillColor: [255, 255, 0], fontStyle: "bold" } },
+    { content: "ВСЕГО по статье МАТЕРИАЛЫ:", styles: { halign: "right", fontStyle: "bold" } },
+    "",
+    "",
+    { content: formatCurrency(materialsCustomerTotal), styles: { fontStyle: "bold" } },
   ]);
   materialsBodyData.push([
     "",
@@ -358,10 +358,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 5;
-  // Yellow background for final total
-  const contentWidth = pageWidth - marginLeft - marginRight;
-  doc.setFillColor(255, 255, 0);
-  doc.rect(marginLeft, yPos - 3.5, contentWidth, 6, "F");
+  // Final total line (no background)
   addText("ВСЕГО по расчету:", marginLeft + 1, yPos, { fontStyle: "bold", fontSize: 10 });
   addText(formatCurrency(grandTotalWithVat), totalsValueX - 1, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
 
