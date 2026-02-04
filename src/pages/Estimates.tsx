@@ -131,7 +131,6 @@ export default function Estimates() {
     fields: [
       { key: "clientName", label: "Контрагент", type: "text", searchable: true },
       { key: "objectName", label: "Объект", type: "text", searchable: true },
-      { key: "objectAddress", label: "Адрес объекта", type: "text", searchable: true },
       {
         key: "name",
         label: "Расчёт (смета)",
