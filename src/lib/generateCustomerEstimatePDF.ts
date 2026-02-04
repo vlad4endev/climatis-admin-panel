@@ -318,27 +318,31 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.line(marginLeft, yPos, pageWidth - marginRight, yPos);
   
   yPos += 5;
-  const totalsValueX = pageWidth - marginRight;
+  const totalsValueX = pageWidth - marginRight - 2; // Visual right padding
   
-  // First line: ИТОГО - label left, value right
-  addText("ИТОГО, по расчету без НДС ", marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
+  // First line: ИТОГО - label left, value right with spacing
+  const itogo1 = "ИТОГО, по расчету без НДС ";
+  const itogo2 = "(здесь суммы по формуле, без НДС):";
+  addText(itogo1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  const itogoLabelWidth = doc.getTextWidth("ИТОГО, по расчету без НДС ");
-  addText("(здесь суммы по формуле, без НДС):", marginLeft + itogoLabelWidth, yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
-  
-  yPos += 4;
-  // Second line: НДС - label left, value right
-  addText("НДС ", marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
-  doc.setFont("NotoSerif", "bold");
-  doc.setFontSize(9);
-  const ndsLabelWidth = doc.getTextWidth("НДС ");
-  addText("(0 либо 22%, как указано в расчете):", marginLeft + ndsLabelWidth, yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
+  addText(itogo2, marginLeft + doc.getTextWidth(itogo1), yPos, { fontStyle: "italic", fontSize: 9 });
+  addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 9 });
   
   yPos += 5;
-  // Final total line
+  // Second line: НДС - label left, value right with spacing
+  const nds1 = "НДС ";
+  const nds2 = "(0 либо 22%, как указано в расчете):";
+  addText(nds1, marginLeft, yPos, { fontStyle: "bold", fontSize: 9 });
+  doc.setFont("NotoSerif", "bold");
+  doc.setFontSize(9);
+  addText(nds2, marginLeft + doc.getTextWidth(nds1), yPos, { fontStyle: "italic", fontSize: 9 });
+  addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 9 });
+  
+  yPos += 6;
+  // Final total line with underline
+  doc.setLineWidth(0.3);
+  doc.line(marginLeft, yPos + 1, pageWidth - marginRight, yPos + 1);
   addText("ВСЕГО по расчету:", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
   addText(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
 
