@@ -9,10 +9,10 @@ import {
   calculateMaterialsVat,
 } from "@/types/estimate";
 
-// Import fonts
-import RobotoRegular from "@/assets/fonts/Roboto-Regular.ttf";
-import RobotoBold from "@/assets/fonts/Roboto-Bold.ttf";
-import RobotoItalic from "@/assets/fonts/Roboto-Italic.ttf";
+// Import fonts (Noto Serif - similar to Times New Roman with Cyrillic support)
+import NotoSerifRegular from "@/assets/fonts/NotoSerif-Regular.ttf";
+import NotoSerifBold from "@/assets/fonts/NotoSerif-Bold.ttf";
+import NotoSerifItalic from "@/assets/fonts/NotoSerif-Italic.ttf";
 
 interface GeneratePDFParams {
   estimateNumber: string;
@@ -72,10 +72,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   } = params;
 
   // Load fonts
-  const [robotoRegularBase64, robotoBoldBase64, robotoItalicBase64] = await Promise.all([
-    loadFontAsBase64(RobotoRegular),
-    loadFontAsBase64(RobotoBold),
-    loadFontAsBase64(RobotoItalic),
+  const [serifRegularBase64, serifBoldBase64, serifItalicBase64] = await Promise.all([
+    loadFontAsBase64(NotoSerifRegular),
+    loadFontAsBase64(NotoSerifBold),
+    loadFontAsBase64(NotoSerifItalic),
   ]);
 
   // Calculate totals
@@ -105,15 +105,15 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     format: "a4",
   });
 
-  // Add Roboto fonts with Cyrillic support
-  doc.addFileToVFS("Roboto-Regular.ttf", robotoRegularBase64);
-  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  // Add Noto Serif fonts with Cyrillic support (Times New Roman alternative)
+  doc.addFileToVFS("NotoSerif-Regular.ttf", serifRegularBase64);
+  doc.addFont("NotoSerif-Regular.ttf", "NotoSerif", "normal");
   
-  doc.addFileToVFS("Roboto-Bold.ttf", robotoBoldBase64);
-  doc.addFont("Roboto-Bold.ttf", "Roboto", "bold");
+  doc.addFileToVFS("NotoSerif-Bold.ttf", serifBoldBase64);
+  doc.addFont("NotoSerif-Bold.ttf", "NotoSerif", "bold");
   
-  doc.addFileToVFS("Roboto-Italic.ttf", robotoItalicBase64);
-  doc.addFont("Roboto-Italic.ttf", "Roboto", "italic");
+  doc.addFileToVFS("NotoSerif-Italic.ttf", serifItalicBase64);
+  doc.addFont("NotoSerif-Italic.ttf", "NotoSerif", "italic");
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const marginLeft = 20;
@@ -123,7 +123,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // Helper function to add text
   const addText = (text: string, x: number, y: number, options: { fontStyle?: "normal" | "bold" | "italic"; fontSize?: number; align?: "left" | "center" | "right" } = {}) => {
-    doc.setFont("Roboto", options.fontStyle || "normal");
+    doc.setFont("NotoSerif", options.fontStyle || "normal");
     doc.setFontSize(options.fontSize || 10);
     doc.text(text, x, y, { align: options.align || "left" });
   };
@@ -212,7 +212,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     margin: { left: marginLeft, right: marginRight },
     tableWidth: "auto",
     styles: {
-      font: "Roboto",
+      font: "NotoSerif",
       fontSize: 9,
       cellPadding: 1.5,
       lineColor: [0, 0, 0],
@@ -283,7 +283,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     margin: { left: marginLeft, right: marginRight },
     tableWidth: "auto",
     styles: {
-      font: "Roboto",
+      font: "NotoSerif",
       fontSize: 9,
       cellPadding: 1.5,
       lineColor: [0, 0, 0],
@@ -320,14 +320,14 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const labelEndX = totalsValueX - valueWidth;
   
   // First line: ИТОГО with italic note
-  doc.setFont("Roboto", "bold");
+  doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
   const itogoLabel = "ИТОГО, по расчету без НДС ";
   const itogoNote = "(здесь суммы по формуле, без НДС):";
   const itogoNoteWidth = doc.getTextWidth(itogoNote);
-  doc.setFont("Roboto", "italic");
+  doc.setFont("NotoSerif", "italic");
   const itogoLabelWidth = doc.getTextWidth(itogoLabel);
-  doc.setFont("Roboto", "bold");
+  doc.setFont("NotoSerif", "bold");
   
   // Calculate positions for right alignment
   const itogoTotalWidth = doc.getTextWidth(itogoLabel) + itogoNoteWidth;
@@ -341,10 +341,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Second line: НДС with italic note
   const ndsLabel = "НДС ";
   const ndsNote = "(0 либо 22%, как указано в расчете):";
-  doc.setFont("Roboto", "normal");
+  doc.setFont("NotoSerif", "normal");
   doc.setFontSize(9);
   const ndsLabelWidth = doc.getTextWidth(ndsLabel);
-  doc.setFont("Roboto", "italic");
+  doc.setFont("NotoSerif", "italic");
   const ndsNoteWidth = doc.getTextWidth(ndsNote);
   
   const ndsTotalWidth = ndsLabelWidth + ndsNoteWidth;
