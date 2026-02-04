@@ -42,6 +42,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
+import { CustomerEstimatePDF } from "./CustomerEstimatePDF";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -206,9 +207,18 @@ export function EstimateForm({
     return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
+  // Format number with 2 decimal places
+  const formatCurrency = (value: number): string => {
+    return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ").replace(".", ",");
+  };
+
   const getDocumentContent = () => {
     const estimateNumber = watch("estimateNumber");
     const estimateDate = watch("estimateDate");
+    
+    const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "0%";
+    const worksWithVat = worksCustomerTotal + worksVat;
+    const grandTotalWithoutVat = worksCustomerTotal + materialsCustomerTotal;
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -236,184 +246,155 @@ export function EstimateForm({
             font-size: 11pt;
             line-height: 1.4;
             color: #000;
-            -webkit-font-smoothing: antialiased;
-            font-variant-numeric: tabular-nums;
           }
           .container { width: 100%; }
-          .doc-header {
-            text-align: center;
-            margin-bottom: 24px;
-          }
-          .doc-title {
-            font-size: 14pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          }
-
-          /* Common vertical rhythm */
-          .mt-20 { margin-top: 20px; }
-          .mb-10 { margin-bottom: 10px; }
-          .mb-20 { margin-bottom: 20px; }
-
-          .parties-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-          }
-          .parties-table td {
-            padding: 4px 0;
-            vertical-align: top;
-            line-height: 1.4;
-          }
-          .parties-table .label-cell {
-            width: 100px;
-            font-weight: bold;
-            white-space: nowrap;
-          }
-          .parties-table .value-cell {
-            padding-left: 8px;
-          }
-
-          .section-header {
-            font-size: 11pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin: 20px 0 10px 0;
-            padding: 6px 0;
-            border-bottom: 1px solid #000;
-          }
-
-          .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-          }
-          .data-table th,
-          .data-table td {
-            padding: 6px 4px;
-            vertical-align: top;
-            text-align: left;
-            border-bottom: 1px solid #999;
-          }
-          .data-table .col-num { width: 30px; text-align: center; }
-          .data-table .col-name { }
-          .data-table .col-qty { width: 60px; text-align: center; }
-          .data-table .col-price { width: 100px; text-align: right; }
-          .data-table .subtotal-row td {
-            padding-top: 10px;
-            font-weight: bold;
-            border-bottom: none;
-            border-top: 1px solid #000;
-          }
-          .grand-total-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            border: 2px solid #000;
-          }
-          .grand-total-table td {
-            padding: 10px;
-            font-weight: bold;
-          }
-          .grand-total-table .label { font-size: 12pt; text-transform: uppercase; }
-          .grand-total-table .value { text-align: right; font-size: 14pt; }
-          .signature-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 40px;
-          }
-          .signature-table td {
-            padding: 4px 0;
-            vertical-align: bottom;
-          }
-          .signature-table .pos-cell { width: 35%; }
-          .signature-table .sign-cell { width: 30%; text-align: center; border-bottom: 1px solid #000; }
-          .signature-table .name-cell { width: 35%; text-align: right; }
-          .hint-row td { font-size: 8pt; color: #666; padding-top: 2px; border: none; }
+          table { border-collapse: collapse; }
+          .header-table td { padding: 4px 0; vertical-align: top; }
+          .title { text-align: center; margin: 20px 0; }
+          .title h1 { font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
+          .title .doc-num { font-size: 12pt; margin-top: 8px; }
+          .requisites td { padding: 4px 0; vertical-align: top; }
+          .requisites .label { width: 100px; font-weight: bold; }
+          .section-title { font-size: 12pt; font-weight: bold; margin: 20px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #000; }
+          .data-table { width: 100%; border: 1px solid #000; }
+          .data-table th, .data-table td { padding: 8px 4px; border: 1px solid #000; vertical-align: top; }
+          .data-table th { background-color: #f5f5f5; font-weight: bold; }
+          .data-table .num { width: 40px; text-align: center; }
+          .data-table .price { text-align: right; }
+          .data-table .qty { text-align: center; width: 60px; }
+          .data-table .unit { text-align: center; width: 60px; }
+          .highlight { background-color: #FFFF99; }
+          .totals-table { width: 100%; border: 2px solid #000; margin-top: 24px; }
+          .totals-table td { padding: 10px; border: 1px solid #000; }
+          .signature-table { margin-top: 50px; }
+          .signature-table td { padding: 4px 0; vertical-align: bottom; }
+          .hint { font-size: 8pt; color: #666; }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="doc-header">
-            <div class="doc-title">РАСЧЕТ СТОИМОСТИ</div>
-            <div style="font-size: 11pt; margin-top: 8px;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)} г.</div>
+          <!-- Header -->
+          <table class="header-table" style="width: 100%;">
+            <tr>
+              <td style="width: 40%;">
+                <div style="font-weight: bold; margin-bottom: 8px;">СОГЛАСОВАНО:</div>
+                <div style="border-bottom: 1px solid #000; width: 180px; height: 30px;"></div>
+                <div style="font-size: 10pt; margin-top: 4px;">"___" _____________ 2026 г.</div>
+              </td>
+              <td style="width: 60%; text-align: right;">
+                <div style="font-size: 10pt;">к Договору № _______ от __________</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Title -->
+          <div class="title">
+            <h1>РАСЧЕТ СТОИМОСТИ</h1>
+            <div class="doc-num">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)} г.</div>
           </div>
           
-          <table class="parties-table">
+          <!-- Requisites -->
+          <table class="requisites" style="width: 100%; margin-bottom: 24px;">
             <tr>
-              <td class="label-cell">Заказчик:</td>
-              <td class="value-cell">${selectedRequest?.clientName || "—"}</td>
+              <td class="label">Заказчик:</td>
+              <td>${selectedRequest?.clientName || "—"}</td>
             </tr>
             <tr>
-              <td class="label-cell">Объект:</td>
-              <td class="value-cell">${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</td>
+              <td class="label">Объект:</td>
+              <td>${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</td>
             </tr>
             <tr>
-              <td class="label-cell">Исполнитель:</td>
-              <td class="value-cell">ООО «Климатис»</td>
+              <td class="label">Исполнитель:</td>
+              <td>ООО «Климатис»</td>
             </tr>
           </table>
           
-          <div class="section-header">1. Работы</div>
+          <!-- Section 1: РАБОТЫ -->
+          <div class="section-title">1. РАБОТЫ</div>
           <table class="data-table">
             <thead>
               <tr>
-                <th class="col-num">№</th>
-                <th class="col-name">Наименование</th>
-                <th class="col-price">Сумма</th>
+                <th class="num">№</th>
+                <th>Перечень выполняемых работ</th>
+                <th class="price" style="width: 130px;">Стоимость, руб.</th>
               </tr>
             </thead>
             <tbody>
               ${workBlocks.map((block, index) => {
                 const blockBase = calculateWorkBlockTotal(block);
                 const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-                return `<tr><td class="col-num">${index + 1}</td><td class="col-name">${block.description || "Работа без названия"}</td><td class="col-price">${Math.round(blockCustomerPrice).toLocaleString("ru-RU")} руб.</td></tr>`;
-              }).join("")}
-              <tr class="subtotal-row"><td></td><td>Итого по работам:</td><td class="col-price">${Math.round(worksCustomerTotal).toLocaleString("ru-RU")} руб.</td></tr>
+                return `<tr><td class="num">${index + 1}</td><td>${block.description || "Работа без названия"}</td><td class="price">${formatCurrency(blockCustomerPrice)}</td></tr>`;
+              }).join("") || '<tr><td colspan="3" style="text-align: center; font-style: italic; color: #666;">Работы не указаны</td></tr>'}
+              <tr>
+                <td colspan="2" style="text-align: right; font-weight: bold;">ИТОГО:</td>
+                <td class="price" style="font-weight: bold;">${formatCurrency(worksCustomerTotal)}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align: right;">НДС (${vatRateLabel}):</td>
+                <td class="price">${formatCurrency(worksVat)}</td>
+              </tr>
+              <tr class="highlight">
+                <td colspan="2" style="text-align: right; font-weight: bold;">ВСЕГО, по статье РАБОТЫ:</td>
+                <td class="price" style="font-weight: bold;">${formatCurrency(worksWithVat)}</td>
+              </tr>
             </tbody>
           </table>
           
-          <div class="section-header">2. Материалы</div>
+          <!-- Section 2: МАТЕРИАЛЫ -->
+          <div class="section-title">2. МАТЕРИАЛЫ</div>
           <table class="data-table">
             <thead>
               <tr>
-                <th class="col-num">№</th>
-                <th class="col-name">Наименование</th>
-                <th class="col-qty">Кол-во</th>
-                <th class="col-price">Сумма</th>
+                <th class="num">№</th>
+                <th>Спецификация используемых материалов</th>
+                <th class="unit">Ед. изм.</th>
+                <th class="qty">Кол-во</th>
+                <th class="price" style="width: 110px;">Стоимость, руб.</th>
               </tr>
             </thead>
             <tbody>
               ${materials.map((material, index) => {
-                const materialPrice = Math.round(material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100));
-                return `<tr><td class="col-num">${index + 1}</td><td class="col-name">${material.materialName}</td><td class="col-qty">${material.quantity}</td><td class="col-price">${materialPrice.toLocaleString("ru-RU")} руб.</td></tr>`;
-              }).join("")}
-              <tr class="subtotal-row"><td></td><td colspan="2">Итого по материалам:</td><td class="col-price">${Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} руб.</td></tr>
+                const materialPrice = material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+                return `<tr><td class="num">${index + 1}</td><td>${material.materialName}</td><td class="unit">шт.</td><td class="qty">${material.quantity}</td><td class="price">${formatCurrency(materialPrice)}</td></tr>`;
+              }).join("") || '<tr><td colspan="5" style="text-align: center; font-style: italic; color: #666;">Материалы не указаны</td></tr>'}
+              <tr class="highlight">
+                <td colspan="4" style="text-align: right; font-weight: bold;">ВСЕГО по статье МАТЕРИАЛЫ:</td>
+                <td class="price" style="font-weight: bold;">${formatCurrency(materialsCustomerTotal)}</td>
+              </tr>
+              <tr>
+                <td colspan="4" style="text-align: right; font-size: 10pt;">в т.ч. НДС (${vatRateLabel}):</td>
+                <td class="price" style="font-size: 10pt;">${formatCurrency(materialsVat)}</td>
+              </tr>
             </tbody>
           </table>
           
-          <table class="grand-total-table">
+          <!-- Final Totals -->
+          <table class="totals-table">
             <tr>
-              <td class="label">Итого к оплате:</td>
-              <td class="value">${Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} руб.</td>
+              <td style="font-weight: bold;">ИТОГО, по расчету без НДС:</td>
+              <td class="price" style="width: 150px; font-weight: bold;">${formatCurrency(grandTotalWithoutVat)}</td>
             </tr>
-            ${customerCalc.vatRate === 22 ? `<tr>
-              <td style="font-size: 10pt; font-weight: normal; padding: 6px 10px;">В том числе НДС:</td>
-              <td style="font-size: 10pt; text-align: right; font-weight: normal; padding: 6px 10px;">${Math.round(totalVat).toLocaleString("ru-RU")} руб.</td>
-            </tr>` : ""}
+            <tr>
+              <td>НДС (${vatRateLabel}):</td>
+              <td class="price">${formatCurrency(totalVat)}</td>
+            </tr>
+            <tr class="highlight">
+              <td style="font-weight: bold; font-size: 12pt; text-transform: uppercase;">ВСЕГО по расчету:</td>
+              <td class="price" style="font-weight: bold; font-size: 14pt;">${formatCurrency(customerGrandTotalWithVat)} руб.</td>
+            </tr>
           </table>
           
-          <table class="signature-table">
+          <!-- Signature -->
+          <table class="signature-table" style="width: 100%;">
             <tr>
-              <td class="pos-cell">${engineerEmployee?.position || "Инженер"}</td>
-              <td class="sign-cell">&nbsp;</td>
-              <td class="name-cell">${getEngineerNameWithInitials()}</td>
+              <td style="width: 40%;">Расчет составил:</td>
+              <td style="width: 25%; text-align: center; border-bottom: 1px solid #000;">&nbsp;</td>
+              <td style="width: 35%; text-align: right;">${getEngineerNameWithInitials()}</td>
             </tr>
-            <tr class="hint-row">
-              <td></td>
-              <td style="text-align: center;">(подпись)</td>
-              <td style="text-align: right;">(расшифровка)</td>
+            <tr>
+              <td class="hint">${engineerEmployee?.position || ""}</td>
+              <td class="hint" style="text-align: center;">(подпись)</td>
+              <td class="hint" style="text-align: right;">(ФИО)</td>
             </tr>
           </table>
         </div>
@@ -941,204 +922,21 @@ export function EstimateForm({
         </div>
       )}
 
-      {/* Hidden PDF Content - A4 portrait format with professional layout */}
-      <div 
-        ref={pdfContentRef} 
-        className="fixed left-[-9999px] top-0 bg-white text-black"
-        style={{ 
-          fontFamily: "'Times New Roman', Times, serif",
-          // Fixed pixel canvas to avoid rounding drift when rendering to PDF
-          width: "794px",
-          padding: "57px 76px 57px 95px",
-          boxSizing: "border-box",
-          lineHeight: "1.4",
-          fontSize: "11pt",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {/* Document Header */}
-        <div style={{ 
-          textAlign: "center", 
-          marginBottom: "24px"
-        }}>
-          <div style={{ 
-            fontSize: "14pt", 
-            fontWeight: "bold", 
-            textTransform: "uppercase",
-            letterSpacing: "1px"
-          }}>
-            РАСЧЕТ СТОИМОСТИ
-          </div>
-          <div style={{ fontSize: "11pt", marginTop: "8px" }}>
-            № {watch("estimateNumber") || "б/н"} от {formatDate(watch("estimateDate"))} г.
-          </div>
-        </div>
-        
-        {/* Parties Section - Table layout for alignment */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
-          <tbody>
-            <tr>
-              <td style={{ width: "100px", fontWeight: "bold", padding: "4px 0", verticalAlign: "top" }}>Заказчик:</td>
-              <td style={{ padding: "4px 0 4px 8px", verticalAlign: "top" }}>{selectedRequest?.clientName || "—"}</td>
-            </tr>
-            <tr>
-              <td style={{ width: "100px", fontWeight: "bold", padding: "4px 0", verticalAlign: "top" }}>Объект:</td>
-              <td style={{ padding: "4px 0 4px 8px", verticalAlign: "top" }}>{selectedRequest?.serviceObjectName || "—"}{selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</td>
-            </tr>
-            <tr>
-              <td style={{ width: "100px", fontWeight: "bold", padding: "4px 0", verticalAlign: "top" }}>Исполнитель:</td>
-              <td style={{ padding: "4px 0 4px 8px", verticalAlign: "top" }}>ООО «Климатис»</td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Section 1: Works */}
-        <div style={{ 
-          fontSize: "11pt", 
-          fontWeight: "bold", 
-          textTransform: "uppercase",
-          margin: "20px 0 10px 0",
-          padding: "6px 0",
-          borderBottom: "1px solid #000"
-        }}>
-          1. Работы
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: "11pt" }}>
-          <thead>
-            <tr>
-              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>№</th>
-              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #000" }}>Наименование</th>
-              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #000" }}>Сумма</th>
-            </tr>
-          </thead>
-          <tbody>
-            {workBlocks.map((block, index) => {
-              const blockBase = calculateWorkBlockTotal(block);
-              const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-              return (
-                <tr key={block.id}>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {index + 1}
-                  </td>
-                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {block.description || "Работа без названия"}
-                  </td>
-                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {Math.round(blockCustomerPrice).toLocaleString("ru-RU")} руб.
-                  </td>
-                </tr>
-              );
-            })}
-            <tr>
-              <td style={{ paddingTop: "10px", borderTop: "1px solid #000" }}></td>
-              <td style={{ paddingTop: "10px", fontWeight: "bold", borderTop: "1px solid #000" }}>Итого по работам:</td>
-              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold", borderTop: "1px solid #000" }}>
-                {Math.round(worksCustomerTotal).toLocaleString("ru-RU")} руб.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Section 2: Materials */}
-        <div style={{ 
-          fontSize: "11pt", 
-          fontWeight: "bold", 
-          textTransform: "uppercase",
-          margin: "20px 0 10px 0",
-          padding: "6px 0",
-          borderBottom: "1px solid #000"
-        }}>
-          2. Материалы
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: "11pt" }}>
-          <thead>
-            <tr>
-              <th style={{ width: "30px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>№</th>
-              <th style={{ padding: "6px 4px", textAlign: "left", borderBottom: "1px solid #000" }}>Наименование</th>
-              <th style={{ width: "60px", padding: "6px 4px", textAlign: "center", borderBottom: "1px solid #000" }}>Кол-во</th>
-              <th style={{ width: "100px", padding: "6px 4px", textAlign: "right", borderBottom: "1px solid #000" }}>Сумма</th>
-            </tr>
-          </thead>
-          <tbody>
-            {materials.map((material, index) => {
-              const materialPrice = Math.round(material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100));
-              return (
-                <tr key={material.id}>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {index + 1}
-                  </td>
-                  <td style={{ padding: "6px 4px", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {material.materialName}
-                  </td>
-                  <td style={{ padding: "6px 4px", textAlign: "center", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {material.quantity}
-                  </td>
-                  <td style={{ padding: "6px 4px", textAlign: "right", verticalAlign: "top", borderBottom: "1px solid #999" }}>
-                    {materialPrice.toLocaleString("ru-RU")} руб.
-                  </td>
-                </tr>
-              );
-            })}
-            <tr>
-              <td style={{ paddingTop: "10px", borderTop: "1px solid #000" }}></td>
-              <td colSpan={2} style={{ paddingTop: "10px", fontWeight: "bold", borderTop: "1px solid #000" }}>Итого по материалам:</td>
-              <td style={{ paddingTop: "10px", textAlign: "right", fontWeight: "bold", borderTop: "1px solid #000" }}>
-                {Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} руб.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* Grand Total */}
-        <table style={{ 
-          width: "100%", 
-          borderCollapse: "collapse",
-          marginTop: "24px", 
-          border: "2px solid #000"
-        }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: "10px", fontWeight: "bold", fontSize: "12pt", textTransform: "uppercase" }}>
-                Итого к оплате:
-              </td>
-              <td style={{ padding: "10px", textAlign: "right", fontWeight: "bold", fontSize: "14pt" }}>
-                {Math.round(customerGrandTotalWithVat).toLocaleString("ru-RU")} руб.
-              </td>
-            </tr>
-            {customerCalc.vatRate === 22 && (
-              <tr>
-                <td style={{ padding: "6px 10px", fontSize: "10pt" }}>
-                  В том числе НДС:
-                </td>
-                <td style={{ padding: "6px 10px", textAlign: "right", fontSize: "10pt" }}>
-                  {Math.round(totalVat).toLocaleString("ru-RU")} руб.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {/* Signature Section */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "40px" }}>
-          <tbody>
-            <tr>
-              <td style={{ width: "35%", padding: "4px 0", verticalAlign: "bottom" }}>
-                {engineerEmployee?.position || "Инженер"}
-              </td>
-              <td style={{ width: "30%", padding: "4px 0", textAlign: "center", verticalAlign: "bottom", borderBottom: "1px solid #000" }}>
-                &nbsp;
-              </td>
-              <td style={{ width: "35%", padding: "4px 0", textAlign: "right", verticalAlign: "bottom" }}>
-                {getEngineerNameWithInitials()}
-              </td>
-            </tr>
-            <tr>
-              <td style={{ fontSize: "8pt", color: "#666", paddingTop: "2px" }}></td>
-              <td style={{ fontSize: "8pt", color: "#666", paddingTop: "2px", textAlign: "center" }}>(подпись)</td>
-              <td style={{ fontSize: "8pt", color: "#666", paddingTop: "2px", textAlign: "right" }}>(расшифровка)</td>
-            </tr>
-          </tbody>
-        </table>
+      {/* Hidden PDF Content */}
+      <div className="fixed left-[-9999px] top-0">
+        <CustomerEstimatePDF
+          ref={pdfContentRef}
+          estimateNumber={watch("estimateNumber")}
+          estimateDate={watch("estimateDate")}
+          clientName={selectedRequest?.clientName || ""}
+          objectName={selectedRequest?.serviceObjectName || ""}
+          objectAddress={selectedRequest?.serviceObjectAddress}
+          workBlocks={workBlocks}
+          materials={materials}
+          customerCalc={customerCalc}
+          engineerName={getEngineerNameWithInitials()}
+          engineerPosition={engineerEmployee?.position || "Инженер"}
+        />
       </div>
     </form>
   );
