@@ -94,6 +94,14 @@ export function EstimateForm({
     (estimate?.customerCalculation as any)?.executorCompany || "ooo"
   );
 
+  // Handler for company selection - automatically sets VAT rate
+  const handleCompanyChange = (company: string) => {
+    setSelectedCompany(company);
+    // ООО → НДС 22%, ИП → НДС 0%
+    const newVatRate: VatRate = company === "ooo" ? 22 : 0;
+    setCustomerCalc(prev => ({ ...prev, vatRate: newVatRate }));
+  };
+
   const status = watch("status");
   const type = watch("type");
   const requestId = watch("requestId");
@@ -662,7 +670,7 @@ export function EstimateForm({
               <Label>Организация-исполнитель</Label>
               <Select
                 value={selectedCompany}
-                onValueChange={setSelectedCompany}
+                onValueChange={handleCompanyChange}
                 disabled={readOnly}
               >
                 <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
