@@ -399,8 +399,8 @@ export function EstimateForm({
     `;
   };
 
-  const generateCustomerPDF = () => {
-    generateCustomerEstimatePDF({
+  const generateCustomerPDF = async () => {
+    await generateCustomerEstimatePDF({
       estimateNumber: watch("estimateNumber"),
       estimateDate: watch("estimateDate"),
       clientName: estimate?.clientName || selectedRequest?.clientName || "",

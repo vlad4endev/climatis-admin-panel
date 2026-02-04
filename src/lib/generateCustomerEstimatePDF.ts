@@ -9,6 +9,10 @@ import {
   calculateMaterialsVat,
 } from "@/types/estimate";
 
+// Import fonts
+import RobotoRegular from "@/assets/fonts/Roboto-Regular.ttf";
+import RobotoBold from "@/assets/fonts/Roboto-Bold.ttf";
+
 interface GeneratePDFParams {
   estimateNumber: string;
   estimateDate: string;
@@ -36,7 +40,24 @@ const formatDate = (dateStr: string): string => {
   return `${day}.${month}.${year}г.`;
 };
 
-export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
+// Convert ArrayBuffer to base64 string
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
+// Load font file and convert to base64
+const loadFontAsBase64 = async (fontUrl: string): Promise<string> => {
+  const response = await fetch(fontUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  return arrayBufferToBase64(arrayBuffer);
+};
+
+export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Promise<void> {
   const {
     estimateNumber,
     estimateDate,
@@ -48,6 +69,12 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
     customerCalc,
     engineerName,
   } = params;
+
+  // Load fonts
+  const [robotoRegularBase64, robotoBoldBase64] = await Promise.all([
+    loadFontAsBase64(RobotoRegular),
+    loadFontAsBase64(RobotoBold),
+  ]);
 
   // Calculate totals
   const worksTotal = workBlocks.reduce((sum, block) => sum + calculateWorkBlockTotal(block), 0);
@@ -76,14 +103,21 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
     format: "a4",
   });
 
+  // Add Roboto fonts with Cyrillic support
+  doc.addFileToVFS("Roboto-Regular.ttf", robotoRegularBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  
+  doc.addFileToVFS("Roboto-Bold.ttf", robotoBoldBase64);
+  doc.addFont("Roboto-Bold.ttf", "Roboto", "bold");
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
   
   let yPos = 20;
 
-  // Helper function to add text
+  // Helper function to add text with Roboto font
   const addText = (text: string, x: number, y: number, options: { fontStyle?: string; fontSize?: number; align?: "left" | "center" | "right" } = {}) => {
-    doc.setFont("helvetica", options.fontStyle || "normal");
+    doc.setFont("Roboto", options.fontStyle || "normal");
     doc.setFontSize(options.fontSize || 10);
     doc.text(text, x, y, { align: options.align || "left" });
   };
@@ -157,7 +191,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
     body: worksData,
     margin: { left: margin, right: margin },
     styles: {
-      font: "helvetica",
+      font: "Roboto",
       fontSize: 9,
       cellPadding: 2,
       lineColor: [0, 0, 0],
@@ -241,7 +275,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
     body: materialsData,
     margin: { left: margin, right: margin },
     styles: {
-      font: "helvetica",
+      font: "Roboto",
       fontSize: 9,
       cellPadding: 2,
       lineColor: [0, 0, 0],
