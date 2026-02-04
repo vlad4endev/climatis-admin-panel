@@ -341,10 +341,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 4;
-  // Second line: НДС with italic note
+  // Second line: НДС (bold) with italic note
   const ndsLabel = "НДС ";
   const ndsNote = "(0 либо 22%, как указано в расчете):";
-  doc.setFont("NotoSerif", "normal");
+  doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
   const ndsLabelWidth = doc.getTextWidth(ndsLabel);
   doc.setFont("NotoSerif", "italic");
@@ -353,7 +353,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const ndsTotalWidth = ndsLabelWidth + ndsNoteWidth;
   const ndsStartX = labelEndX - ndsTotalWidth;
   
-  addText(ndsLabel, ndsStartX, yPos, { fontSize: 9 });
+  addText(ndsLabel, ndsStartX, yPos, { fontStyle: "bold", fontSize: 9 });
   addText(ndsNote, ndsStartX + ndsLabelWidth, yPos, { fontStyle: "italic", fontSize: 9 });
   addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
