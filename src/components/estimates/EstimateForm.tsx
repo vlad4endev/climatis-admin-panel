@@ -772,6 +772,46 @@ export function EstimateForm({
                 />
               </div>
             </div>
+            
+            {/* Materials list with amounts */}
+            {materials.length > 0 && (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-2 font-medium">Наименование</th>
+                      <th className="text-center p-2 font-medium w-20">Кол-во</th>
+                      <th className="text-right p-2 font-medium w-28">Без НДС</th>
+                      <th className="text-right p-2 font-medium w-28">С НДС</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {materials.map((material) => {
+                      const baseAmount = material.quantity * material.pricePerUnit;
+                      const amountWithMarkup = baseAmount * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+                      // НДС уже включён в цену материалов, выделяем его
+                      const amountWithVat = amountWithMarkup;
+                      const amountWithoutVat = customerCalc.vatRate === 22 
+                        ? amountWithMarkup * 100 / 122 
+                        : amountWithMarkup;
+                      return (
+                        <tr key={material.id} className="border-t">
+                          <td className="p-2">{material.materialName || "—"}</td>
+                          <td className="p-2 text-center">{material.quantity}</td>
+                          <td className="p-2 text-right tabular-nums">
+                            {Math.round(amountWithoutVat).toLocaleString("ru-RU")} ₽
+                          </td>
+                          <td className="p-2 text-right tabular-nums">
+                            {Math.round(amountWithVat).toLocaleString("ru-RU")} ₽
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
             <div className="bg-background/50 p-3 rounded space-y-1 text-sm">
               <div className="flex justify-between">
                 <span>Базовая стоимость материалов:</span>
