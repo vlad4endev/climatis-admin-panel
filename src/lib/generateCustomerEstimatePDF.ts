@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable, { UserOptions } from "jspdf-autotable";
 import {
   WorkBlock,
   Material,
@@ -8,14 +8,6 @@ import {
   calculateWorksVat,
   calculateMaterialsVat,
 } from "@/types/estimate";
-
-// Extend jsPDF types for autotable
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: { finalY: number };
-  }
-}
 
 interface GeneratePDFParams {
   estimateNumber: string;
@@ -86,12 +78,11 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
-  const contentWidth = pageWidth - margin * 2;
   
   let yPos = 20;
 
   // Helper function to add text
-  const addText = (text: string, x: number, y: number, options: any = {}) => {
+  const addText = (text: string, x: number, y: number, options: { fontStyle?: string; fontSize?: number; align?: "left" | "center" | "right" } = {}) => {
     doc.setFont("helvetica", options.fontStyle || "normal");
     doc.setFontSize(options.fontSize || 10);
     doc.text(text, x, y, { align: options.align || "left" });
@@ -139,7 +130,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
   yPos += 4;
 
   // Works table data
-  const worksData: any[] = [];
+  const worksData: string[][] = [];
   
   if (workBlocks.length > 0) {
     workBlocks.forEach((block, index) => {
@@ -160,7 +151,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
   worksData.push(["", `НДС ${vatNote}:`, formatCurrency(worksVat)]);
   worksData.push(["", "ВСЕГО, по статье РАБОТЫ:", formatCurrency(worksWithVat)]);
 
-  doc.autoTable({
+  const worksTableOptions: UserOptions = {
     startY: yPos,
     head: [["№", "Перечень выполняемых работ", "Стоимость, руб"]],
     body: worksData,
@@ -183,7 +174,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
       1: { cellWidth: "auto" },
       2: { cellWidth: 30, halign: "right" },
     },
-    didParseCell: (data: any) => {
+    didParseCell: (data) => {
       const rowIndex = data.row.index;
       const isLastRow = rowIndex === worksData.length - 1;
       const isSecondLastRow = rowIndex === worksData.length - 2;
@@ -211,9 +202,10 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
         data.cell.styles.halign = "right";
       }
     },
-  });
+  };
 
-  yPos = doc.lastAutoTable.finalY + 8;
+  autoTable(doc, worksTableOptions);
+  yPos = (doc as any).lastAutoTable.finalY + 8;
 
   // === 2. МАТЕРИАЛЫ ===
   addText("2. Материалы", margin, yPos, { fontStyle: "bold" });
@@ -222,7 +214,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
   yPos += 4;
 
   // Materials table data
-  const materialsData: any[] = [];
+  const materialsData: string[][] = [];
   
   if (materials.length > 0) {
     materials.forEach((material, index) => {
@@ -243,7 +235,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
   materialsData.push(["", "ВСЕГО по статье МАТЕРИАЛЫ:", "", "", formatCurrency(materialsCustomerTotal)]);
   materialsData.push(["", `в т.ч. НДС ${vatNote}:`, "", "", formatCurrency(materialsVat)]);
 
-  doc.autoTable({
+  const materialsTableOptions: UserOptions = {
     startY: yPos,
     head: [["№", "Спецификация используемых материалов", "Ед. изм.", "Кол-во", "Стоимость, руб"]],
     body: materialsData,
@@ -268,7 +260,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
       3: { cellWidth: 18, halign: "center" },
       4: { cellWidth: 30, halign: "right" },
     },
-    didParseCell: (data: any) => {
+    didParseCell: (data) => {
       const rowIndex = data.row.index;
       const isLastRow = rowIndex === materialsData.length - 1;
       const isSecondLastRow = rowIndex === materialsData.length - 2;
@@ -286,9 +278,10 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
         data.cell.styles.halign = "right";
       }
     },
-  });
+  };
 
-  yPos = doc.lastAutoTable.finalY + 8;
+  autoTable(doc, materialsTableOptions);
+  yPos = (doc as any).lastAutoTable.finalY + 8;
 
   // === FINAL TOTALS (no table borders) ===
   doc.setLineWidth(0.3);
@@ -304,6 +297,7 @@ export function generateCustomerEstimatePDF(params: GeneratePDFParams): void {
   
   yPos += 6;
   // Yellow background for final total
+  const contentWidth = pageWidth - margin * 2;
   doc.setFillColor(255, 255, 0);
   doc.rect(margin, yPos - 4, contentWidth, 8, "F");
   addText("ВСЕГО по расчету:", margin + 2, yPos, { fontStyle: "bold", fontSize: 11 });
