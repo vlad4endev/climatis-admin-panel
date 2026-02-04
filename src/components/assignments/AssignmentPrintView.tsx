@@ -79,8 +79,9 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
                 ))}
               </tbody>
             </table>
-            <div className="font-bold text-sm text-right py-1">
-              Итого по работам: {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
+            <div className="font-bold text-sm py-1 flex justify-between">
+              <span className="flex-1 text-center">Итого:</span>
+              <span className="w-28 text-right">{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</span>
             </div>
           </div>
         )}
