@@ -657,6 +657,32 @@ export function EstimateForm({
 
         <TabsContent value="customer" className="space-y-4 mt-4">
           <div className="bg-form-section p-4 rounded-lg space-y-4">
+            <h3 className="font-semibold text-form-label">Исполнитель</h3>
+            <div>
+              <Label>Организация-исполнитель</Label>
+              <Select
+                value={selectedCompany}
+                onValueChange={setSelectedCompany}
+                disabled={readOnly}
+              >
+                <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COMPANY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                Выбранная организация будет указана в документах как исполнитель
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-form-section p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-form-label">Работа</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -790,32 +816,6 @@ export function EstimateForm({
                   className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="bg-form-section p-4 rounded-lg space-y-4">
-            <h3 className="font-semibold text-form-label">Исполнитель</h3>
-            <div>
-              <Label>Организация-исполнитель</Label>
-              <Select
-                value={selectedCompany}
-                onValueChange={setSelectedCompany}
-                disabled={readOnly}
-              >
-                <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMPANY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-2">
-                Выбранная организация будет указана в документах как исполнитель
-              </p>
             </div>
           </div>
 
