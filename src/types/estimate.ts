@@ -28,6 +28,8 @@ export interface Material {
   pricePerUnit: number;
 }
 
+export type VatRate = 0 | 22;
+
 export interface CustomerCalculation {
   overheadPercent: number; // Накладные расходы (работа)
   estimatedProfitPercent: number; // Сметная прибыль (работа)
@@ -35,6 +37,7 @@ export interface CustomerCalculation {
   warehousePercent: number; // Заготовительно-складские расходы (материалы)
   otherName?: string; // Название дополнительного расхода
   otherPercent?: number; // Процент к общей сумме
+  vatRate: VatRate; // Ставка НДС: только 0 или 22
 }
 
 export const DEFAULT_CUSTOMER_CALCULATION: CustomerCalculation = {
@@ -44,7 +47,27 @@ export const DEFAULT_CUSTOMER_CALCULATION: CustomerCalculation = {
   warehousePercent: 3,
   otherName: "",
   otherPercent: undefined,
+  vatRate: 0, // По умолчанию без НДС
 };
+
+// Расчёт НДС по работам (начисляется сверху)
+export function calculateWorksVat(worksCustomerTotal: number, vatRate: VatRate): number {
+  return vatRate === 22 ? Math.round(worksCustomerTotal * 0.22 * 100) / 100 : 0;
+}
+
+// Расчёт НДС по материалам (выделяется из суммы, т.к. уже включён в цену)
+export function calculateMaterialsVat(materialsCustomerTotal: number, vatRate: VatRate): number {
+  return vatRate === 22 ? Math.round(materialsCustomerTotal * 22 / 122 * 100) / 100 : 0;
+}
+
+// Итоговая сумма с НДС (worksVat добавляется, materialsVat уже включён)
+export function calculateGrandTotalWithVat(
+  customerGrandTotal: number,
+  worksVat: number,
+  vatRate: VatRate
+): number {
+  return vatRate === 22 ? Math.round((customerGrandTotal + worksVat) * 100) / 100 : customerGrandTotal;
+}
 
 export interface Estimate {
   id: string;
