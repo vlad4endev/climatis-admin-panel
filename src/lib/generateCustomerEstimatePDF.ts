@@ -319,48 +319,63 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   
   yPos += 5;
   const totalsValueX = pageWidth - marginRight;
-  const valueWidth = 30; // Width reserved for value
-  const labelEndX = totalsValueX - valueWidth;
   
-  // First line: ИТОГО with italic note
-  doc.setFont("NotoSerif", "bold");
-  doc.setFontSize(9);
+  // First line: ИТОГО with italic note - right aligned
   const itogoLabel = "ИТОГО, по расчету без НДС ";
   const itogoNote = "(здесь суммы по формуле, без НДС):";
-  const itogoNoteWidth = doc.getTextWidth(itogoNote);
-  doc.setFont("NotoSerif", "italic");
-  const itogoLabelWidth = doc.getTextWidth(itogoLabel);
-  doc.setFont("NotoSerif", "bold");
+  const itogoValue = formatCurrency(grandTotalWithoutVat);
   
-  // Calculate positions for right alignment
-  const itogoTotalWidth = doc.getTextWidth(itogoLabel) + itogoNoteWidth;
-  const itogoStartX = labelEndX - itogoTotalWidth;
-  
-  addText(itogoLabel, itogoStartX, yPos, { fontStyle: "bold", fontSize: 9 });
-  addText(itogoNote, itogoStartX + doc.getTextWidth(itogoLabel), yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
-  
-  yPos += 4;
-  // Second line: НДС (bold) with italic note
-  const ndsLabel = "НДС ";
-  const ndsNote = "(0 либо 22%, как указано в расчете):";
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
+  const itogoValueWidth = doc.getTextWidth(itogoValue);
+  const itogoLabelWidth = doc.getTextWidth(itogoLabel);
+  doc.setFont("NotoSerif", "italic");
+  const itogoNoteWidth = doc.getTextWidth(itogoNote);
+  
+  const itogoValueX = totalsValueX - itogoValueWidth;
+  const itogoNoteX = itogoValueX - 3 - itogoNoteWidth;
+  const itogoLabelX = itogoNoteX - itogoLabelWidth;
+  
+  addText(itogoLabel, itogoLabelX, yPos, { fontStyle: "bold", fontSize: 9 });
+  addText(itogoNote, itogoNoteX, yPos, { fontStyle: "italic", fontSize: 9 });
+  addText(itogoValue, totalsValueX, yPos, { align: "right", fontSize: 9 });
+  
+  yPos += 4;
+  // Second line: НДС (bold) with italic note - right aligned
+  const ndsLabel = "НДС ";
+  const ndsNote = "(0 либо 22%, как указано в расчете):";
+  const ndsValue = formatCurrency(grandTotalVat);
+  
+  doc.setFont("NotoSerif", "bold");
+  doc.setFontSize(9);
+  const ndsValueWidth = doc.getTextWidth(ndsValue);
   const ndsLabelWidth = doc.getTextWidth(ndsLabel);
   doc.setFont("NotoSerif", "italic");
   const ndsNoteWidth = doc.getTextWidth(ndsNote);
   
-  const ndsTotalWidth = ndsLabelWidth + ndsNoteWidth;
-  const ndsStartX = labelEndX - ndsTotalWidth;
+  const ndsValueX = totalsValueX - ndsValueWidth;
+  const ndsNoteX = ndsValueX - 3 - ndsNoteWidth;
+  const ndsLabelX = ndsNoteX - ndsLabelWidth;
   
-  addText(ndsLabel, ndsStartX, yPos, { fontStyle: "bold", fontSize: 9 });
-  addText(ndsNote, ndsStartX + ndsLabelWidth, yPos, { fontStyle: "italic", fontSize: 9 });
-  addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
+  addText(ndsLabel, ndsLabelX, yPos, { fontStyle: "bold", fontSize: 9 });
+  addText(ndsNote, ndsNoteX, yPos, { fontStyle: "italic", fontSize: 9 });
+  addText(ndsValue, totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 5;
-  // Final total line (no background)
-  addText("ВСЕГО по расчету:", marginLeft + 1, yPos, { fontStyle: "bold", fontSize: 10 });
-  addText(formatCurrency(grandTotalWithVat), totalsValueX - 1, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
+  // Final total line - right aligned
+  const vsegoLabel = "ВСЕГО по расчету:";
+  const vsegoValue = formatCurrency(grandTotalWithVat);
+  
+  doc.setFont("NotoSerif", "bold");
+  doc.setFontSize(10);
+  const vsegoValueWidth = doc.getTextWidth(vsegoValue);
+  const vsegoLabelWidth = doc.getTextWidth(vsegoLabel);
+  
+  const vsegoValueX = totalsValueX - vsegoValueWidth;
+  const vsegoLabelX = vsegoValueX - 3 - vsegoLabelWidth;
+  
+  addText(vsegoLabel, vsegoLabelX, yPos, { fontStyle: "bold", fontSize: 10 });
+  addText(vsegoValue, totalsValueX, yPos, { align: "right", fontStyle: "bold", fontSize: 10 });
 
   // === SIGNATURE ===
   yPos += 25;
