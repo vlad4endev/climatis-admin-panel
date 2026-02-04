@@ -163,8 +163,6 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // === 1. РАБОТЫ ===
   yPos += 10;
   addText("1. РАБОТЫ", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
-  doc.setLineWidth(0.3);
-  doc.line(marginLeft, yPos + 0.5, marginLeft + 18, yPos + 0.5);
 
   yPos += 3;
 
@@ -236,7 +234,6 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // === 2. Материалы ===
   addText("2. Материалы", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
-  doc.line(marginLeft, yPos + 0.5, marginLeft + 22, yPos + 0.5);
 
   yPos += 3;
 
