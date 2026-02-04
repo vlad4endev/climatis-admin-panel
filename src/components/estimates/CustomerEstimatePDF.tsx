@@ -186,10 +186,10 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             </tr>
             {/* ВСЕГО по работам */}
             <tr>
-              <td colSpan={2} style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold", backgroundColor: "#FFFF00" }}>
+              <td colSpan={2} style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold" }}>
                 ВСЕГО, по статье РАБОТЫ:
               </td>
-              <td style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold", backgroundColor: "#FFFF00" }}>
+              <td style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold" }}>
                 {formatCurrency(worksWithVat)}
               </td>
             </tr>
@@ -243,10 +243,10 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             )}
             {/* ВСЕГО по материалам */}
             <tr>
-              <td colSpan={4} style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold", backgroundColor: "#FFFF00" }}>
+              <td colSpan={4} style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold" }}>
                 ВСЕГО по статье МАТЕРИАЛЫ:
               </td>
-              <td style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold", backgroundColor: "#FFFF00" }}>
+              <td style={{ padding: "4px 4px", textAlign: "right", border: "1px solid #000", fontWeight: "bold" }}>
                 {formatCurrency(materialsCustomerTotal)}
               </td>
             </tr>
@@ -287,10 +287,10 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             </tr>
             {/* ВСЕГО по расчету */}
             <tr>
-              <td style={{ padding: "5px 6px", fontWeight: "bold", border: "1px solid #000", backgroundColor: "#FFFF00", textAlign: "right" }}>
+              <td style={{ padding: "5px 6px", fontWeight: "bold", border: "1px solid #000", textAlign: "right" }}>
                 ВСЕГО по расчету:
               </td>
-              <td style={{ padding: "5px 6px", textAlign: "right", fontWeight: "bold", border: "1px solid #000", backgroundColor: "#FFFF00" }}>
+              <td style={{ padding: "5px 6px", textAlign: "right", fontWeight: "bold", border: "1px solid #000" }}>
                 {formatCurrency(grandTotalWithVat)}
               </td>
             </tr>
