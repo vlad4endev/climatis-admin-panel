@@ -250,23 +250,26 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   
   if (materials.length > 0) {
     materials.forEach((material, index) => {
-      const materialPrice = material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+      const unitPriceWithMarkup = material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+      const materialPrice = material.quantity * unitPriceWithMarkup;
       materialsBodyData.push([
         (index + 1).toString(),
         `${material.materialName} (с учетом транспортных и заготовительно складских расходов)`,
         "шт",
         material.quantity.toString(),
+        formatCurrency(unitPriceWithMarkup),
         formatCurrency(materialPrice),
       ]);
     });
   } else {
-    materialsBodyData.push(["", "Материалы не указаны", "", "", ""]);
+    materialsBodyData.push(["", "Материалы не указаны", "", "", "", ""]);
   }
 
   // Summary rows for materials
   materialsBodyData.push([
     "",
     { content: "ВСЕГО по статье МАТЕРИАЛЫ:", styles: { halign: "right", fontStyle: "bold" } },
+    "",
     "",
     "",
     { content: formatCurrency(materialsCustomerTotal), styles: { fontStyle: "bold" } },
@@ -276,12 +279,13 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     { content: `в т.ч. НДС ${vatNote}:`, styles: { halign: "right" } },
     "",
     "",
+    "",
     formatCurrency(materialsVat),
   ]);
 
   const materialsTableOptions: UserOptions = {
     startY: yPos,
-    head: [["№", "Спецификация используемых материалов", "Ед. изм.", "Кол-во", "Стоимость, руб"]],
+    head: [["№", "Спецификация используемых материалов", "Ед. изм.", "Кол-во", "Цена за ед.", "Стоимость, руб"]],
     body: materialsBodyData,
     margin: { left: marginLeft, right: marginRight },
     tableWidth: "auto",
@@ -306,7 +310,8 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
       1: { cellWidth: "auto" },
       2: { cellWidth: 15, halign: "center" },
       3: { cellWidth: 15, halign: "center" },
-      4: { cellWidth: 28, halign: "right" },
+      4: { cellWidth: 24, halign: "right" },
+      5: { cellWidth: 28, halign: "right" },
     },
   };
 
