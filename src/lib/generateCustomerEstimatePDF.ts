@@ -147,7 +147,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // === REQUISITES ===
   yPos += 10;
   const labelX = marginLeft;
-  const valueX = marginLeft + 25;
+  const valueX = 55; // Positioned closer to center like in example
   
   addText("Заказчик:", labelX, yPos, { fontStyle: "bold", fontSize: 10 });
   addText(clientName || "—", valueX, yPos, { fontSize: 10 });
