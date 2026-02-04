@@ -308,19 +308,20 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   autoTable(doc, materialsTableOptions);
   yPos = (doc as any).lastAutoTable.finalY + 5;
 
-  // === FINAL TOTALS (no table borders) ===
+  // === FINAL TOTALS (no table borders, right-aligned) ===
   doc.setLineWidth(0.3);
   doc.line(marginLeft, yPos, pageWidth - marginRight, yPos);
   
   yPos += 5;
-  const totalsLabelX = marginLeft;
   const totalsValueX = pageWidth - marginRight;
+  const valueWidth = 30; // Width reserved for value
+  const labelEndX = totalsValueX - valueWidth;
   
-  addText(`ИТОГО, по расчету без НДС (здесь суммы по форму|ле, без НДС):`, totalsLabelX, yPos, { fontStyle: "bold", fontSize: 9 });
+  addText(`ИТОГО, по расчету без НДС (здесь суммы по форму|ле, без НДС):`, labelEndX, yPos, { fontStyle: "bold", fontSize: 9, align: "right" });
   addText(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 4;
-  addText(`НДС ${vatNote}:`, totalsLabelX, yPos, { fontSize: 9 });
+  addText(`НДС ${vatNote}:`, labelEndX, yPos, { fontSize: 9, align: "right" });
   addText(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right", fontSize: 9 });
   
   yPos += 5;
