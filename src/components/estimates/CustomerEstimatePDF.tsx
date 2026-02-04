@@ -137,12 +137,17 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
           1. РАБОТЫ
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "35px" }} />
+            <col style={{ width: "auto" }} />
+            <col style={{ width: "120px" }} />
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ ...headerCellStyle, width: "35px" }}>№</th>
+              <th style={headerCellStyle}>№</th>
               <th style={{ ...headerCellStyle, textAlign: "left" }}>Перечень выполняемых работ</th>
-              <th style={{ ...headerCellStyle, width: "120px" }}>Стоимость, руб.</th>
+              <th style={headerCellStyle}>Стоимость, руб.</th>
             </tr>
           </thead>
           <tbody>
@@ -187,14 +192,21 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
           2. МАТЕРИАЛЫ
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "35px" }} />
+            <col style={{ width: "auto" }} />
+            <col style={{ width: "55px" }} />
+            <col style={{ width: "55px" }} />
+            <col style={{ width: "100px" }} />
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ ...headerCellStyle, width: "35px" }}>№</th>
+              <th style={headerCellStyle}>№</th>
               <th style={{ ...headerCellStyle, textAlign: "left" }}>Спецификация используемых материалов</th>
-              <th style={{ ...headerCellStyle, width: "55px" }}>Ед.<br/>изм.</th>
-              <th style={{ ...headerCellStyle, width: "55px" }}>Кол-во</th>
-              <th style={{ ...headerCellStyle, width: "100px" }}>Стоимость,<br/>руб.</th>
+              <th style={headerCellStyle}>Ед.<br/>изм.</th>
+              <th style={headerCellStyle}>Кол-во</th>
+              <th style={headerCellStyle}>Стоимость,<br/>руб.</th>
             </tr>
           </thead>
           <tbody>
@@ -232,11 +244,15 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
         </table>
 
         {/* Final Totals */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "auto" }} />
+            <col style={{ width: "150px" }} />
+          </colgroup>
           <tbody>
             <tr>
               <td style={{ ...cellStyle, fontWeight: "bold" }}>ИТОГО, по расчету без НДС:</td>
-              <td style={{ ...cellStyle, width: "130px", textAlign: "right" }}>{formatCurrency(grandTotalWithoutVat)}</td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(grandTotalWithoutVat)}</td>
             </tr>
             <tr>
               <td style={cellStyle}>НДС ({vatPercent}%):</td>
