@@ -781,28 +781,19 @@ export function EstimateForm({
                     <tr>
                       <th className="text-left p-2 font-medium">Наименование</th>
                       <th className="text-center p-2 font-medium w-20">Кол-во</th>
-                      <th className="text-right p-2 font-medium w-28">Без НДС</th>
-                      <th className="text-right p-2 font-medium w-28">С НДС</th>
+                      <th className="text-right p-2 font-medium w-28">Сумма</th>
                     </tr>
                   </thead>
                   <tbody>
                     {materials.map((material) => {
                       const baseAmount = material.quantity * material.pricePerUnit;
-                      const amountWithMarkup = baseAmount * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-                      // НДС уже включён в цену материалов, выделяем его
-                      const amountWithVat = amountWithMarkup;
-                      const amountWithoutVat = customerCalc.vatRate === 22 
-                        ? amountWithMarkup * 100 / 122 
-                        : amountWithMarkup;
+                      const totalAmount = baseAmount * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
                       return (
                         <tr key={material.id} className="border-t">
                           <td className="p-2">{material.materialName || "—"}</td>
                           <td className="p-2 text-center">{material.quantity}</td>
                           <td className="p-2 text-right tabular-nums">
-                            {Math.round(amountWithoutVat).toLocaleString("ru-RU")} ₽
-                          </td>
-                          <td className="p-2 text-right tabular-nums">
-                            {Math.round(amountWithVat).toLocaleString("ru-RU")} ₽
+                            {Math.round(totalAmount).toLocaleString("ru-RU")} ₽
                           </td>
                         </tr>
                       );
