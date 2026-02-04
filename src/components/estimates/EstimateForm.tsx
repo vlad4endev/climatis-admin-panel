@@ -297,11 +297,11 @@ export function EstimateForm({
           <table class="requisites" style="width: 100%; margin-bottom: 24px;">
             <tr>
               <td class="label">Заказчик:</td>
-              <td>${selectedRequest?.clientName || "—"}</td>
+              <td>${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
             </tr>
             <tr>
               <td class="label">Объект:</td>
-              <td>${selectedRequest?.serviceObjectName || "—"}${selectedRequest?.serviceObjectAddress ? `, ${selectedRequest.serviceObjectAddress}` : ""}</td>
+              <td>${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
             </tr>
             <tr>
               <td class="label">Исполнитель:</td>
@@ -928,9 +928,9 @@ export function EstimateForm({
           ref={pdfContentRef}
           estimateNumber={watch("estimateNumber")}
           estimateDate={watch("estimateDate")}
-          clientName={selectedRequest?.clientName || ""}
-          objectName={selectedRequest?.serviceObjectName || ""}
-          objectAddress={selectedRequest?.serviceObjectAddress}
+          clientName={estimate?.clientName || selectedRequest?.clientName || ""}
+          objectName={estimate?.objectName || selectedRequest?.serviceObjectName || ""}
+          objectAddress={estimate?.objectAddress || selectedRequest?.serviceObjectAddress}
           workBlocks={workBlocks}
           materials={materials}
           customerCalc={customerCalc}
