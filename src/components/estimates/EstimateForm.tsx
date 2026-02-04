@@ -85,6 +85,15 @@ export function EstimateForm({
     estimate?.customerCalculation || DEFAULT_CUSTOMER_CALCULATION
   );
 
+  // Company options for executor selection
+  const COMPANY_OPTIONS = [
+    { value: "ooo", label: 'ООО "Климатис"' },
+    { value: "ip", label: "ИП Щеткин А.Г." },
+  ];
+  const [selectedCompany, setSelectedCompany] = useState<string>(
+    (estimate?.customerCalculation as any)?.executorCompany || "ooo"
+  );
+
   const status = watch("status");
   const type = watch("type");
   const requestId = watch("requestId");
@@ -175,8 +184,12 @@ export function EstimateForm({
       createdByName: employee?.fullName || "",
       workBlocks,
       materials,
-      customerCalculation: customerCalc,
+      customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
     });
+  };
+
+  const getExecutorName = () => {
+    return COMPANY_OPTIONS.find(c => c.value === selectedCompany)?.label || 'ООО "Климатис"';
   };
 
   const selectedRequest = requests.find((r) => r.id === requestId);
@@ -301,7 +314,7 @@ export function EstimateForm({
             </tr>
             <tr>
               <td class="label">Исполнитель:</td>
-              <td>ООО «Климатис»</td>
+              <td>${getExecutorName()}</td>
             </tr>
           </table>
           
@@ -410,6 +423,7 @@ export function EstimateForm({
       materials,
       customerCalc,
       engineerName: getEngineerNameWithInitials(),
+      executorCompany: getExecutorName(),
     });
   };
 
@@ -776,6 +790,32 @@ export function EstimateForm({
                   className={readOnly ? "bg-input-readonly" : ""}
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="bg-form-section p-4 rounded-lg space-y-4">
+            <h3 className="font-semibold text-form-label">Исполнитель</h3>
+            <div>
+              <Label>Организация-исполнитель</Label>
+              <Select
+                value={selectedCompany}
+                onValueChange={setSelectedCompany}
+                disabled={readOnly}
+              >
+                <SelectTrigger className={readOnly ? "bg-input-readonly" : ""}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COMPANY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                Выбранная организация будет указана в документах как исполнитель
+              </p>
             </div>
           </div>
 
