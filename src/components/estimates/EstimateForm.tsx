@@ -793,41 +793,6 @@ export function EstimateForm({
           </div>
 
           <div className="bg-form-section p-4 rounded-lg space-y-4">
-            <h3 className="font-semibold text-form-label">Другое</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Наименование</Label>
-                <Input
-                  value={customerCalc.otherName || ""}
-                  onChange={(e) => setCustomerCalc(prev => ({
-                    ...prev,
-                    otherName: e.target.value
-                  }))}
-                  placeholder="Например: НДС"
-                  readOnly={readOnly}
-                  tabIndex={readOnly ? -1 : undefined}
-                  className={readOnly ? "bg-input-readonly" : ""}
-                />
-              </div>
-              <div>
-                <Label>Процент к общей сумме, %</Label>
-                <Input
-                  type="number"
-                  value={customerCalc.otherPercent ?? ""}
-                  onChange={(e) => setCustomerCalc(prev => ({
-                    ...prev,
-                    otherPercent: e.target.value ? parseFloat(e.target.value) : undefined
-                  }))}
-                  placeholder="0"
-                  readOnly={readOnly}
-                  tabIndex={readOnly ? -1 : undefined}
-                  className={readOnly ? "bg-input-readonly" : ""}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-form-section p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-form-label">НДС</h3>
             <div>
               <Label>Ставка НДС</Label>
@@ -872,6 +837,41 @@ export function EstimateForm({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="bg-form-section p-4 rounded-lg space-y-4">
+            <h3 className="font-semibold text-form-label">Другое</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Наименование</Label>
+                <Input
+                  value={customerCalc.otherName || ""}
+                  onChange={(e) => setCustomerCalc(prev => ({
+                    ...prev,
+                    otherName: e.target.value
+                  }))}
+                  placeholder="Например: Доп. расходы"
+                  readOnly={readOnly}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
+                />
+              </div>
+              <div>
+                <Label>Процент к общей сумме, %</Label>
+                <Input
+                  type="number"
+                  value={customerCalc.otherPercent ?? ""}
+                  onChange={(e) => setCustomerCalc(prev => ({
+                    ...prev,
+                    otherPercent: e.target.value ? parseFloat(e.target.value) : undefined
+                  }))}
+                  placeholder="0"
+                  readOnly={readOnly}
+                  tabIndex={readOnly ? -1 : undefined}
+                  className={readOnly ? "bg-input-readonly" : ""}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="bg-primary/5 p-4 rounded-lg space-y-3 border-2 border-primary/20">
