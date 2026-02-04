@@ -1,9 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useCreateEstimate, useUpdateEstimate } from "@/hooks/useEstimates";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { FileDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +40,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
-import { CustomerEstimatePDF } from "./CustomerEstimatePDF";
+import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -198,8 +196,6 @@ export function EstimateForm({
     const initials = parts.slice(1).map(p => p.charAt(0).toUpperCase() + ".").join("");
     return `${surname} ${initials}`;
   };
-
-  const pdfContentRef = useRef<HTMLDivElement>(null);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "—";
@@ -403,40 +399,18 @@ export function EstimateForm({
     `;
   };
 
-  const generateCustomerPDF = async () => {
-    if (!pdfContentRef.current) return;
-
-    const canvas = await html2canvas(pdfContentRef.current, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
+  const generateCustomerPDF = () => {
+    generateCustomerEstimatePDF({
+      estimateNumber: watch("estimateNumber"),
+      estimateDate: watch("estimateDate"),
+      clientName: estimate?.clientName || selectedRequest?.clientName || "",
+      objectName: estimate?.objectName || selectedRequest?.serviceObjectName || "",
+      objectAddress: estimate?.objectAddress || selectedRequest?.serviceObjectAddress,
+      workBlocks,
+      materials,
+      customerCalc,
+      engineerName: getEngineerNameWithInitials(),
     });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // A4 dimensions: 210mm x 297mm; margins: 12mm on all sides
-    const margin = 12;
-    const contentWidth = pdfWidth - 2 * margin;
-    const contentHeight = pdfHeight - 2 * margin;
-
-    // Calculate image dimensions in mm (canvas pixels / 96 dpi * 25.4 mm/inch)
-    const imgWidthMM = (canvas.width / 2) * 25.4 / 96; // scale=2 in html2canvas
-    const imgHeightMM = (canvas.height / 2) * 25.4 / 96;
-
-    // Scale to fit within content area while preserving aspect ratio
-    const scaleRatio = Math.min(contentWidth / imgWidthMM, contentHeight / imgHeightMM);
-    const renderW = Math.round(imgWidthMM * scaleRatio * 100) / 100;
-    const renderH = Math.round(imgHeightMM * scaleRatio * 100) / 100;
-
-    pdf.addImage(imgData, "PNG", margin, margin, renderW, renderH);
-
-    const estimateName = watch("name");
-    const estimateNumber = watch("estimateNumber");
-    const fileName = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.pdf`;
-    pdf.save(fileName);
   };
 
   const generateCustomerDOCX = () => {
@@ -921,23 +895,6 @@ export function EstimateForm({
           <Button type="submit">{estimate ? "Сохранить" : "Создать"}</Button>
         </div>
       )}
-
-      {/* Hidden PDF Content */}
-      <div className="fixed left-[-9999px] top-0">
-        <CustomerEstimatePDF
-          ref={pdfContentRef}
-          estimateNumber={watch("estimateNumber")}
-          estimateDate={watch("estimateDate")}
-          clientName={estimate?.clientName || selectedRequest?.clientName || ""}
-          objectName={estimate?.objectName || selectedRequest?.serviceObjectName || ""}
-          objectAddress={estimate?.objectAddress || selectedRequest?.serviceObjectAddress}
-          workBlocks={workBlocks}
-          materials={materials}
-          customerCalc={customerCalc}
-          engineerName={getEngineerNameWithInitials()}
-          engineerPosition={engineerEmployee?.position || "Инженер"}
-        />
-      </div>
     </form>
   );
 }
