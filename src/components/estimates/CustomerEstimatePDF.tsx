@@ -21,7 +21,7 @@ interface CustomerEstimatePDFProps {
   engineerPosition: string;
 }
 
-// Format number with 2 decimal places and space as thousands separator, comma for decimal
+// Format number with 2 decimal places and space as thousands separator
 const formatCurrency = (value: number): string => {
   return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ").replace(".", ",");
 };
@@ -36,15 +36,6 @@ const formatDate = (dateStr: string): string => {
   return `${day}.${month}.${year}`;
 };
 
-// Pad string to fixed width for alignment
-const padRight = (str: string, width: number): string => {
-  return str.length >= width ? str.substring(0, width) : str + " ".repeat(width - str.length);
-};
-
-const padLeft = (str: string, width: number): string => {
-  return str.length >= width ? str.substring(0, width) : " ".repeat(width - str.length) + str;
-};
-
 export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePDFProps>(
   (
     {
@@ -57,6 +48,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
       materials,
       customerCalc,
       engineerName,
+      engineerPosition,
     },
     ref
   ) => {
@@ -79,105 +71,199 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
     const vatPercent = customerCalc.vatRate === 22 ? "22" : "0";
     const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;
 
-    // Generate work rows
-    const workRows = workBlocks.map((block, index) => {
-      const blockBase = calculateWorkBlockTotal(block);
-      const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-      const desc = `${block.description || "Работа"} (с учётом накладных, сметной прибыли)`;
-      return { num: index + 1, description: desc, price: formatCurrency(blockCustomerPrice) };
-    });
+    const cellStyle: React.CSSProperties = {
+      border: "1px solid #000",
+      padding: "6px 8px",
+      verticalAlign: "middle",
+    };
 
-    // Generate material rows
-    const materialRows = materials.map((material, index) => {
-      const materialPrice = material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-      const desc = `${material.materialName} (с учётом транспортных и заготовительно складских расходов)`;
-      return { 
-        num: index + 1, 
-        description: desc, 
-        unit: "шт", 
-        qty: String(material.quantity), 
-        price: formatCurrency(materialPrice) 
-      };
-    });
+    const headerCellStyle: React.CSSProperties = {
+      ...cellStyle,
+      fontWeight: "bold",
+      textAlign: "center",
+      backgroundColor: "#f5f5f5",
+    };
 
     return (
       <div
         ref={ref}
         style={{
           width: "794px",
-          padding: "25px 30px",
-          fontFamily: "'Courier New', Courier, monospace",
-          fontSize: "10pt",
-          lineHeight: "1.4",
+          padding: "40px 50px",
+          fontFamily: "'Times New Roman', Times, serif",
+          fontSize: "11pt",
+          lineHeight: "1.5",
           color: "#000",
           backgroundColor: "#fff",
-          whiteSpace: "pre-wrap",
         }}
       >
-        <pre style={{ 
-          fontFamily: "'Courier New', Courier, monospace", 
-          fontSize: "10pt", 
-          margin: 0,
-          whiteSpace: "pre-wrap",
-          wordWrap: "break-word"
-        }}>
-{`СОГЛАСОВАНО:                                       к Договору № ___ от _______________
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+          <div>
+            <div style={{ fontWeight: "bold" }}>СОГЛАСОВАНО:</div>
+            <div style={{ borderBottom: "1px solid #000", width: "180px", marginTop: "30px", marginBottom: "5px" }}></div>
+            <div>"___" _____________ 2026 г.</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            к Договору № _______ от __________
+          </div>
+        </div>
 
-"__" _______________ 2026 г.                        _______________________________
+        {/* Title */}
+        <div style={{ textAlign: "center", margin: "30px 0" }}>
+          <div style={{ fontSize: "16pt", fontWeight: "bold" }}>РАСЧЕТ СТОИМОСТИ</div>
+          <div style={{ marginTop: "8px" }}>№ {estimateNumber || "б/н"} от {formatDate(estimateDate)} г.</div>
+        </div>
 
-                          РАСЧЁТ СТОИМОСТИ
+        {/* Requisites */}
+        <table style={{ width: "100%", marginBottom: "25px", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td style={{ width: "100px", fontWeight: "bold", padding: "3px 0" }}>Заказчик:</td>
+              <td style={{ padding: "3px 0 3px 15px" }}>{clientName || "—"}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: "bold", padding: "3px 0" }}>Объект:</td>
+              <td style={{ padding: "3px 0 3px 15px" }}>{objectFull || "—"}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: "bold", padding: "3px 0" }}>Исполнитель:</td>
+              <td style={{ padding: "3px 0 3px 15px" }}>ООО «Климатис»</td>
+            </tr>
+          </tbody>
+        </table>
 
-                          № ${padRight(estimateNumber || "б/н", 15)} от ${formatDate(estimateDate)} г.
+        {/* Section 1: РАБОТЫ */}
+        <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
+          1. РАБОТЫ
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+          <thead>
+            <tr>
+              <th style={{ ...headerCellStyle, width: "35px" }}>№</th>
+              <th style={{ ...headerCellStyle, textAlign: "left" }}>Перечень выполняемых работ</th>
+              <th style={{ ...headerCellStyle, width: "120px" }}>Стоимость, руб.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workBlocks.length > 0 ? (
+              workBlocks.map((block, index) => {
+                const blockBase = calculateWorkBlockTotal(block);
+                const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+                return (
+                  <tr key={block.id}>
+                    <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
+                    <td style={{ ...cellStyle, textAlign: "left" }}>{block.description || "Работа"}</td>
+                    <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(blockCustomerPrice)}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={3} style={{ ...cellStyle, textAlign: "center", fontStyle: "italic", color: "#666" }}>
+                  Работы не указаны
+                </td>
+              </tr>
+            )}
+            <tr>
+              <td style={cellStyle}></td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold" }}>ИТОГО:</td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksCustomerTotal)}</td>
+            </tr>
+            <tr>
+              <td style={cellStyle}></td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>НДС ({vatPercent}%):</td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat)}</td>
+            </tr>
+            <tr>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}></td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО, по статье РАБОТЫ:</td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(worksWithVat)}</td>
+            </tr>
+          </tbody>
+        </table>
 
-Заказчик:               ${clientName || "—"}
+        {/* Section 2: МАТЕРИАЛЫ */}
+        <div style={{ fontWeight: "bold", marginBottom: "8px", borderBottom: "1px solid #000", paddingBottom: "2px" }}>
+          2. МАТЕРИАЛЫ
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+          <thead>
+            <tr>
+              <th style={{ ...headerCellStyle, width: "35px" }}>№</th>
+              <th style={{ ...headerCellStyle, textAlign: "left" }}>Спецификация используемых материалов</th>
+              <th style={{ ...headerCellStyle, width: "55px" }}>Ед.<br/>изм.</th>
+              <th style={{ ...headerCellStyle, width: "55px" }}>Кол-во</th>
+              <th style={{ ...headerCellStyle, width: "100px" }}>Стоимость,<br/>руб.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {materials.length > 0 ? (
+              materials.map((material, index) => {
+                const materialPrice = material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+                return (
+                  <tr key={material.id}>
+                    <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
+                    <td style={{ ...cellStyle, textAlign: "left" }}>{material.materialName}</td>
+                    <td style={{ ...cellStyle, textAlign: "center" }}>шт</td>
+                    <td style={{ ...cellStyle, textAlign: "center" }}>{material.quantity}</td>
+                    <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(materialPrice)}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={5} style={{ ...cellStyle, textAlign: "center", fontStyle: "italic", color: "#666" }}>
+                  Материалы не указаны
+                </td>
+              </tr>
+            )}
+            <tr>
+              <td style={{ ...cellStyle, backgroundColor: "#FFFF99" }}></td>
+              <td colSpan={3} style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО по статье МАТЕРИАЛЫ:</td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#FFFF99" }}>{formatCurrency(materialsCustomerTotal)}</td>
+            </tr>
+            <tr>
+              <td style={cellStyle}></td>
+              <td colSpan={3} style={{ ...cellStyle, textAlign: "right" }}>в т.ч. НДС ({vatPercent}%):</td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(materialsVat)}</td>
+            </tr>
+          </tbody>
+        </table>
 
-Объект:                 ${objectFull || "—"}
+        {/* Final Totals */}
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
+          <tbody>
+            <tr>
+              <td style={{ ...cellStyle, fontWeight: "bold" }}>ИТОГО, по расчету без НДС:</td>
+              <td style={{ ...cellStyle, width: "130px", textAlign: "right" }}>{formatCurrency(grandTotalWithoutVat)}</td>
+            </tr>
+            <tr>
+              <td style={cellStyle}>НДС ({vatPercent}%):</td>
+              <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(worksVat + materialsVat)}</td>
+            </tr>
+            <tr>
+              <td style={{ ...cellStyle, fontWeight: "bold", backgroundColor: "#FFFF99" }}>ВСЕГО ПО РАСЧЕТУ:</td>
+              <td style={{ ...cellStyle, textAlign: "right", fontWeight: "bold", fontSize: "13pt", backgroundColor: "#FFFF99" }}>{formatCurrency(grandTotalWithVat)} руб.</td>
+            </tr>
+          </tbody>
+        </table>
 
-Исполнитель:            ООО «Климатис» (ИП Щеткин А.Г.)
-
-1. РАБОТЫ
-
-________________________________________________________________________________
-
-| №  | Перечень выполняемых работ                              | Стоимость, руб |
-|----|----------------------------------------------------------|----------------|
-${workRows.length > 0 
-  ? workRows.map(row => 
-      `| ${padRight(String(row.num), 2)} | ${padRight(row.description, 56)} | ${padLeft(row.price, 14)} |`
-    ).join("\n")
-  : `|    | Работы не указаны                                        |                |`
-}
-|    | ИТОГО:                                                   | ${padLeft(formatCurrency(worksCustomerTotal), 14)} |
-|    | НДС (${vatPercent}%, как указано в расчёте):                         | ${padLeft(formatCurrency(worksVat), 14)} |
-|    | ВСЕГО по статье РАБОТЫ:                                  | ${padLeft(formatCurrency(worksWithVat), 14)} |
-________________________________________________________________________________
-
-2. МАТЕРИАЛЫ
-
-________________________________________________________________________________
-
-| №  | Спецификация используемых материалов        | Ед.изм | Кол-во | Стоимость, руб |
-|----|---------------------------------------------|--------|--------|----------------|
-${materialRows.length > 0 
-  ? materialRows.map(row => 
-      `| ${padRight(String(row.num), 2)} | ${padRight(row.description, 43)} | ${padRight(row.unit, 6)} | ${padLeft(row.qty, 6)} | ${padLeft(row.price, 14)} |`
-    ).join("\n")
-  : `|    | Материалы не указаны                        |        |        |                |`
-}
-|    | ВСЕГО по статье МАТЕРИАЛЫ:                  |        |        | ${padLeft(formatCurrency(materialsCustomerTotal), 14)} |
-|    | в т.ч. НДС (${vatPercent}%, как указано в расчёте):      |        |        | ${padLeft(formatCurrency(materialsVat), 14)} |
-________________________________________________________________________________
-
-ИТОГО по расчёту без НДС (здесь сумма по формуле без НДС):            ${padLeft(formatCurrency(grandTotalWithoutVat), 14)}
-
-НДС (${vatPercent}%, как указано в расчёте):                                      ${padLeft(formatCurrency(worksVat + materialsVat), 14)}
-
-ВСЕГО по расчёту:                                                     ${padLeft(formatCurrency(grandTotalWithVat), 14)}
-
-
-Расчёт составил                                                       ${engineerName || "________________"}
-`}
-        </pre>
+        {/* Signature */}
+        <table style={{ width: "100%", marginTop: "30px" }}>
+          <tbody>
+            <tr>
+              <td style={{ width: "30%", verticalAlign: "bottom" }}>Расчет составил:</td>
+              <td style={{ width: "40%", textAlign: "center", verticalAlign: "bottom", borderBottom: "1px solid #000" }}></td>
+              <td style={{ width: "30%", textAlign: "right", verticalAlign: "bottom" }}>{engineerName || "________________"}</td>
+            </tr>
+            <tr>
+              <td style={{ fontSize: "9pt", color: "#666" }}>{engineerPosition || "Инженер"}</td>
+              <td style={{ fontSize: "9pt", color: "#666", textAlign: "center" }}>(подпись)</td>
+              <td style={{ fontSize: "9pt", color: "#666", textAlign: "right" }}>(ФИО)</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
