@@ -16,20 +16,20 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
     const worksTotal = assignment.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
 
     return (
-      <div ref={ref} className="p-6 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
-        <div className="text-center mb-4">
-          <h1 className="text-xl font-bold mb-1">ЗАДАНИЕ НА ВЫПОЛНЕНИЕ РАБОТ</h1>
-          <p className="text-base">№ {assignment.assignmentNumber}</p>
-          <p className="text-sm text-gray-600">
+      <div ref={ref} className="p-4 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.3', width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}>
+        <div className="text-center mb-3">
+          <h1 className="text-base font-bold mb-0.5">ЗАДАНИЕ НА ВЫПОЛНЕНИЕ РАБОТ</h1>
+          <p className="text-sm">№ {assignment.assignmentNumber}</p>
+          <p className="text-xs text-gray-600">
             от {new Date(assignment.createdAt).toLocaleDateString('ru-RU')}
           </p>
         </div>
 
-        <div className="mb-4 border-b pb-3">
-          <table className="w-full text-sm">
+        <div className="mb-3 border-b pb-2">
+          <table className="w-full text-xs">
             <tbody>
               <tr>
-                <td className="py-0.5 text-gray-600 w-24">Заявка:</td>
+                <td className="py-0.5 text-gray-600 w-20">Заявка:</td>
                 <td className="py-0.5 font-medium">{assignment.requestNumber}</td>
               </tr>
               <tr>
@@ -57,54 +57,54 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
         </div>
 
         {assignment.workBlocks && assignment.workBlocks.length > 0 && (
-          <div className="mb-4">
-            <h2 className="text-base font-bold mb-2 border-b pb-1">Перечень работ</h2>
-            <table className="w-full text-sm border-collapse mb-1">
+          <div className="mb-3">
+            <h2 className="text-xs font-bold mb-1 border-b pb-0.5">Перечень работ</h2>
+            <table className="w-full text-xs border-collapse mb-0.5">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border p-1.5 text-left w-8">№</th>
-                  <th className="border p-1.5 text-left">Описание работ</th>
-                  <th className="border p-1.5 text-center w-20">Время, ч</th>
-                  <th className="border p-1.5 text-right w-28">Фонд оплаты, руб.</th>
+                  <th className="border p-1 text-left w-6">№</th>
+                  <th className="border p-1 text-left">Описание работ</th>
+                  <th className="border p-1 text-center w-16">Время, ч</th>
+                  <th className="border p-1 text-right w-24">Фонд оплаты, руб.</th>
                 </tr>
               </thead>
               <tbody>
                 {assignment.workBlocks.map((block, blockIndex) => (
                   <tr key={block.id}>
-                    <td className="border p-1.5">{blockIndex + 1}</td>
-                    <td className="border p-1.5">{block.description || "Без описания"}</td>
-                    <td className="border p-1.5 text-center">{calculateBlockHours(block)}</td>
-                    <td className="border p-1.5 text-right">{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')}</td>
+                    <td className="border p-1">{blockIndex + 1}</td>
+                    <td className="border p-1">{block.description || "Без описания"}</td>
+                    <td className="border p-1 text-center">{calculateBlockHours(block)}</td>
+                    <td className="border p-1 text-right">{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="font-bold text-sm py-1 flex justify-between">
+            <div className="font-bold text-xs py-0.5 flex justify-between">
               <span className="flex-1 text-center">Итого:</span>
-              <span className="w-28 text-right">{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</span>
+              <span className="w-24 text-right">{Math.round(worksTotal).toLocaleString('ru-RU')} ₽</span>
             </div>
           </div>
         )}
 
         {assignment.materials && assignment.materials.length > 0 && (
-          <div className="mb-4">
-            <h2 className="text-base font-bold mb-2 border-b pb-1">Материалы</h2>
-            <table className="w-full text-sm border-collapse">
+          <div className="mb-3">
+            <h2 className="text-xs font-bold mb-1 border-b pb-0.5">Материалы</h2>
+            <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border p-1.5 text-left w-8">№</th>
-                  <th className="border p-1.5 text-left">Наименование</th>
-                  <th className="border p-1.5 text-center w-16">Ед. изм.</th>
-                  <th className="border p-1.5 text-right w-16">Кол-во</th>
+                  <th className="border p-1 text-left w-6">№</th>
+                  <th className="border p-1 text-left">Наименование</th>
+                  <th className="border p-1 text-center w-14">Ед. изм.</th>
+                  <th className="border p-1 text-right w-14">Кол-во</th>
                 </tr>
               </thead>
               <tbody>
                 {assignment.materials.map((material, index) => (
                   <tr key={material.id || index}>
-                    <td className="border p-1.5">{index + 1}</td>
-                    <td className="border p-1.5">{material.materialName}</td>
-                    <td className="border p-1.5 text-center">шт</td>
-                    <td className="border p-1.5 text-right">{material.quantity}</td>
+                    <td className="border p-1">{index + 1}</td>
+                    <td className="border p-1">{material.materialName}</td>
+                    <td className="border p-1 text-center">шт</td>
+                    <td className="border p-1 text-right">{material.quantity}</td>
                   </tr>
                 ))}
               </tbody>
@@ -113,21 +113,21 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
         )}
 
         {assignment.engineerComment && (
-          <div className="mb-4">
-            <h2 className="text-base font-bold mb-1 border-b pb-1">Комментарии инженера:</h2>
-            <p className="text-sm whitespace-pre-wrap">{assignment.engineerComment}</p>
+          <div className="mb-3">
+            <h2 className="text-xs font-bold mb-0.5 border-b pb-0.5">Комментарии инженера:</h2>
+            <p className="text-xs whitespace-pre-wrap">{assignment.engineerComment}</p>
           </div>
         )}
 
         {assignment.comments && (
-          <div className="mb-4">
-            <h2 className="text-base font-bold mb-1 border-b pb-1">Комментарии</h2>
-            <p className="text-sm whitespace-pre-wrap">{assignment.comments}</p>
+          <div className="mb-3">
+            <h2 className="text-xs font-bold mb-0.5 border-b pb-0.5">Комментарии</h2>
+            <p className="text-xs whitespace-pre-wrap">{assignment.comments}</p>
           </div>
         )}
 
-        <div className="mt-6 pt-3 border-t">
-          <div className="grid grid-cols-2 gap-6 text-sm">
+        <div className="mt-4 pt-2 border-t">
+          <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
               <p className="mb-6">Задание выдал: _____________________</p>
               <p>Дата: _____________________</p>
