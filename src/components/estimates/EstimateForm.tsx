@@ -772,24 +772,24 @@ export function EstimateForm({
                 />
               </div>
             </div>
-            
-            {/* Materials list with amounts */}
-            {materials.length > 0 && (
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-2 font-medium">Наименование</th>
-                      <th className="text-center p-2 font-medium w-20">Кол-во</th>
-                      <th className="text-right p-2 font-medium w-28">Сумма</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {materials.map((material) => {
+
+            {/* Materials list with amounts - always render to avoid DOM reconciliation issues */}
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-2 font-medium">Наименование</th>
+                    <th className="text-center p-2 font-medium w-20">Кол-во</th>
+                    <th className="text-right p-2 font-medium w-28">Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {materials.length > 0 ? (
+                    materials.map((material) => {
                       const baseAmount = material.quantity * material.pricePerUnit;
                       const totalAmount = baseAmount * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
                       return (
-                        <tr key={material.id} className="border-t">
+                        <tr key={material.id || `material-${Math.random()}`} className="border-t">
                           <td className="p-2">{material.materialName || "—"}</td>
                           <td className="p-2 text-center">{material.quantity}</td>
                           <td className="p-2 text-right tabular-nums">
@@ -797,12 +797,18 @@ export function EstimateForm({
                           </td>
                         </tr>
                       );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="p-4 text-center text-muted-foreground">
+                        Материалы не добавлены
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
             <div className="bg-background/50 p-3 rounded space-y-1 text-sm">
               <div className="flex justify-between">
                 <span>Базовая стоимость материалов:</span>
