@@ -327,18 +327,20 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   yPos += 5;
   // Align values with table's last column (accounting for cell padding)
   const totalsValueX = pageWidth - marginRight - 1.5;
+  // Align labels to end roughly under "Цена за ед." column (before last 28mm column)
+  const totalsLabelX = pageWidth - marginRight - 28 - 1.5;
   
-  // First line: ИТОГО - description left, value right-aligned with table
+  // First line: ИТОГО
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  doc.text("ИТОГО, по расчету без НДС:", marginLeft, yPos);
+  doc.text("ИТОГО, по расчету без НДС:", totalsLabelX, yPos, { align: "right" });
   doc.text(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 5;
-  // Second line: НДС - description left, value right-aligned with table
+  // Second line: НДС
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  doc.text(vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:", marginLeft, yPos);
+  doc.text(vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:", totalsLabelX, yPos, { align: "right" });
   doc.text(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 6;
@@ -347,7 +349,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.line(marginLeft, yPos + 1, pageWidth - marginRight, yPos + 1);
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(10);
-  doc.text("ВСЕГО по расчету:", marginLeft, yPos);
+  doc.text("ВСЕГО по расчету:", totalsLabelX, yPos, { align: "right" });
   doc.text(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right" });
 
   // === SIGNATURE ===
