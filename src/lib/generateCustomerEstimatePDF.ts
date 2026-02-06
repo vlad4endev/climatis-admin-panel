@@ -97,7 +97,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const grandTotalVat = worksVat + materialsVat;
   const grandTotalWithVat = grandTotalWithoutVat + worksVat;
 
-  const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "0%";
+  const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
   const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;
 
   // Create PDF (A4 format)
@@ -201,7 +201,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   ]);
   worksBodyData.push([
     "",
-    { content: `НДС ${vatRateLabel}:`, styles: { halign: "right" } },
+    { content: vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:", styles: { halign: "right" } },
     formatCurrency(worksVat),
   ]);
   worksBodyData.push([
@@ -278,7 +278,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   ]);
   materialsBodyData.push([
     "",
-    { content: `в т.ч. НДС ${vatRateLabel}:`, styles: { halign: "right" } },
+    { content: vatRateLabel ? `в т.ч. НДС ${vatRateLabel}:` : "в т.ч. НДС:", styles: { halign: "right" } },
     "",
     "",
     "",
@@ -338,7 +338,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Second line: НДС - description left, value right-aligned with table
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  doc.text(`НДС ${vatRateLabel}:`, marginLeft, yPos);
+  doc.text(vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:", marginLeft, yPos);
   doc.text(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 6;
