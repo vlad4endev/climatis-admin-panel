@@ -97,7 +97,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const grandTotalVat = worksVat + materialsVat;
   const grandTotalWithVat = grandTotalWithoutVat + worksVat;
 
-  const vatNote = `(0 либо 22%, как указано в расчете)`;
+  const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "0%";
   const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;
 
   // Create PDF (A4 format)
@@ -201,7 +201,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   ]);
   worksBodyData.push([
     "",
-    { content: `НДС ${vatNote}:`, styles: { halign: "right" } },
+    { content: `НДС ${vatRateLabel}:`, styles: { halign: "right" } },
     formatCurrency(worksVat),
   ]);
   worksBodyData.push([
@@ -278,7 +278,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   ]);
   materialsBodyData.push([
     "",
-    { content: `в т.ч. НДС ${vatNote}:`, styles: { halign: "right" } },
+    { content: `в т.ч. НДС ${vatRateLabel}:`, styles: { halign: "right" } },
     "",
     "",
     "",
@@ -329,28 +329,16 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   const totalsValueX = pageWidth - marginRight - 1.5;
   
   // First line: ИТОГО - description left, value right-aligned with table
-  const itogo1 = "ИТОГО, по расчету без НДС ";
-  const itogo2 = "(здесь суммы по формуле, без НДС):";
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  doc.text(itogo1, marginLeft, yPos);
-  const itogo1Width = doc.getTextWidth(itogo1);
-  doc.setFont("NotoSerif", "italic");
-  doc.text(itogo2, marginLeft + itogo1Width, yPos);
-  doc.setFont("NotoSerif", "bold");
+  doc.text("ИТОГО, по расчету без НДС:", marginLeft, yPos);
   doc.text(formatCurrency(grandTotalWithoutVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 5;
   // Second line: НДС - description left, value right-aligned with table
-  const nds1 = "НДС ";
-  const nds2 = "(0 либо 22%, как указано в расчете):";
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
-  doc.text(nds1, marginLeft, yPos);
-  const nds1Width = doc.getTextWidth(nds1);
-  doc.setFont("NotoSerif", "italic");
-  doc.text(nds2, marginLeft + nds1Width, yPos);
-  doc.setFont("NotoSerif", "bold");
+  doc.text(`НДС ${vatRateLabel}:`, marginLeft, yPos);
   doc.text(formatCurrency(grandTotalVat), totalsValueX, yPos, { align: "right" });
   
   yPos += 6;
