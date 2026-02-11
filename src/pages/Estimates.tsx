@@ -152,10 +152,8 @@ export default function Estimates() {
           </Badge>
         ),
       },
-      { key: "type", label: "Тип расчёта", type: "select", options: ESTIMATE_TYPES, filterable: true },
       { key: "createdByName", label: "Расчёт составил", type: "text", searchable: true },
       { key: "requestName", label: "Заявка", type: "text", searchable: true },
-      { key: "engineerComment", label: "Комментарий инженера", type: "text", searchable: true },
     ],
     onRowClick: (estimate) => setViewingEstimate(estimate),
     onDelete: (id) => deleteMutation.mutate(id),
