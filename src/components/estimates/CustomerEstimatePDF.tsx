@@ -144,8 +144,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             </tr>
             {estimateName && (
             <tr>
-              <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Расчёт:</td>
-              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{estimateName}</td>
+              <td colSpan={2} style={{ padding: "2px 0 0 0", verticalAlign: "top" }}>{estimateName}</td>
             </tr>
             )}
           </tbody>

@@ -174,8 +174,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   
   if (estimateName) {
     yPos += 5;
-    addText("Расчёт:", labelX, yPos, { fontStyle: "bold", fontSize: 10 });
-    addText(estimateName, valueX, yPos, { fontSize: 10 });
+    addText(estimateName, marginLeft, yPos, { fontSize: 10 });
   }
 
   // === 1. РАБОТЫ ===

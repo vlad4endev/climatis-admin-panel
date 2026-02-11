@@ -321,8 +321,7 @@ export function EstimateForm({
             <td style="border: none; padding: 0; vertical-align: top;">${getExecutorName()}</td>
           </tr>
           <tr>
-            <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Расчёт:</td>
-            <td style="border: none; padding: 0; vertical-align: top;">${watch("name") || "—"}</td>
+            <td colspan="2" style="border: none; padding: 2px 0 0 0; vertical-align: top;">${watch("name") || ""}</td>
           </tr>
         </table>
 
