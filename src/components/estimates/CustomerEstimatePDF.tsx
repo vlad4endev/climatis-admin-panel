@@ -230,7 +230,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                   <tr key={material.id}>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
                     <td style={{ ...cellStyle, textAlign: "left" }}>
-                      {material.materialName} <span style={{ fontStyle: "italic", color: "#666", fontSize: "8pt" }}>(с учетом транспортных и заготовительно складских расходов)</span>
+                      {material.materialName}
                     </td>
                     <td style={{ ...cellStyle, textAlign: "center" }}>шт</td>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{material.quantity}</td>

@@ -263,7 +263,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
       const materialPrice = material.quantity * unitPriceWithMarkup;
       materialsBodyData.push([
         (index + 1).toString(),
-        `${material.materialName} (с учетом транспортных и заготовительно складских расходов)`,
+        material.materialName,
         "шт",
         material.quantity.toString(),
         formatCurrency(unitPriceWithMarkup),

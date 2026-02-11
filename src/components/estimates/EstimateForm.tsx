@@ -382,7 +382,7 @@ export function EstimateForm({
               const materialPrice = material.quantity * unitPriceWithMarkup;
               return `<tr>
                 <td style="text-align: center;">${index + 1}</td>
-                <td>${material.materialName} (с учетом транспортных и заготовительно складских расходов)</td>
+                <td>${material.materialName}</td>
                 <td style="text-align: center;">шт</td>
                 <td style="text-align: center;">${material.quantity}</td>
                 <td style="text-align: right;">${formatCurrency(unitPriceWithMarkup)}</td>
