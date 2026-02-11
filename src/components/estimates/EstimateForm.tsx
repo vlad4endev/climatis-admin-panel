@@ -313,18 +313,18 @@ export function EstimateForm({
         <p style="text-align: center; font-size: 10pt; margin-top: 1mm;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</p>
 
         <!-- REQUISITES -->
-        <table style="width: 100%; border: none; margin-top: 4mm;">
+        <table style="width: 100%; border: none; margin-top: 4mm; line-height: 1.1;">
           <tr>
-            <td style="width: 35mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Заказчик:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
+            <td style="width: 35mm; font-weight: bold; border: none; padding: 0.3mm 0; vertical-align: top;">Заказчик:</td>
+            <td style="border: none; padding: 0.3mm 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
           </tr>
           <tr>
-            <td style="width: 35mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Объект:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
+            <td style="width: 35mm; font-weight: bold; border: none; padding: 0.3mm 0; vertical-align: top;">Объект:</td>
+            <td style="border: none; padding: 0.3mm 0; vertical-align: top;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
           </tr>
           <tr>
-            <td style="width: 35mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Исполнитель:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${getExecutorName()}</td>
+            <td style="width: 35mm; font-weight: bold; border: none; padding: 0.3mm 0; vertical-align: top;">Исполнитель:</td>
+            <td style="border: none; padding: 0.3mm 0; vertical-align: top;">${getExecutorName()}</td>
           </tr>
         </table>
 
