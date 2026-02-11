@@ -185,7 +185,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
       const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
       worksBodyData.push([
         (index + 1).toString(),
-        `${block.description || "Работа"} (с учетом накладных, сметной прибыли)`,
+        `${block.description || "Работа"}`,
         formatCurrency(blockCustomerPrice),
       ]);
     });

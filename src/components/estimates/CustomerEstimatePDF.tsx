@@ -162,7 +162,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
                   <tr key={block.id}>
                     <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
                     <td style={{ ...cellStyle, textAlign: "left" }}>
-                      {block.description || "Работа"} <span style={{ fontStyle: "italic", color: "#666", fontSize: "8pt" }}>(с учетом накладных, сметной прибыли)</span>
+                      {block.description || "Работа"}
                     </td>
                     <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(blockCustomerPrice)}</td>
                   </tr>
