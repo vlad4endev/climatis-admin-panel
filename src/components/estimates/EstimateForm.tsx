@@ -261,32 +261,32 @@ export function EstimateForm({
           body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 10pt;
-            line-height: 1.3;
+            line-height: 1.15;
             color: #000;
           }
           .container { width: 100%; }
           table { border-collapse: collapse; }
-          .header-table td { padding: 2px 0; vertical-align: top; }
-          .title { text-align: center; margin: 14px 0; }
+          .header-table td { padding: 1px 0; vertical-align: top; }
+          .title { text-align: center; margin: 8px 0; }
           .title h1 { font-size: 12pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-          .title .doc-num { font-size: 10pt; margin-top: 4px; }
-          .requisites td { padding: 2px 0; vertical-align: top; }
+          .title .doc-num { font-size: 10pt; margin-top: 2px; }
+          .requisites td { padding: 1px 0; vertical-align: top; }
           .requisites .label { width: 80px; font-weight: bold; }
-          .section-title { font-size: 10pt; font-weight: bold; margin: 14px 0 6px 0; }
+          .section-title { font-size: 10pt; font-weight: bold; margin: 8px 0 3px 0; }
           .data-table { width: 100%; border: 1px solid #000; }
-          .data-table th, .data-table td { padding: 3px 4px; border: 1px solid #000; vertical-align: top; font-size: 9pt; }
+          .data-table th, .data-table td { padding: 1.5px 3px; border: 1px solid #000; vertical-align: top; font-size: 9pt; }
           .data-table th { font-weight: normal; text-align: center; }
-          .data-table .num { width: 25px; text-align: center; }
+          .data-table .num { width: 20px; text-align: center; }
           .data-table .price { text-align: right; }
-          .data-table .qty { text-align: center; width: 45px; }
-          .data-table .unit { text-align: center; width: 45px; }
-          .data-table .unit-price { text-align: right; width: 80px; }
-          .data-table .total-price { text-align: right; width: 90px; }
-          .totals-section { margin-top: 8px; }
+          .data-table .qty { text-align: center; width: 35px; }
+          .data-table .unit { text-align: center; width: 35px; }
+          .data-table .unit-price { text-align: right; width: 70px; }
+          .data-table .total-price { text-align: right; width: 80px; }
+          .totals-section { margin-top: 4px; }
           .totals-section table { width: 100%; }
-          .totals-section td { padding: 2px 4px; font-size: 9pt; }
-          .signature-table { margin-top: 40px; }
-          .signature-table td { padding: 2px 0; vertical-align: bottom; font-size: 10pt; }
+          .totals-section td { padding: 1px 3px; font-size: 9pt; }
+          .signature-table { margin-top: 25px; }
+          .signature-table td { padding: 1px 0; vertical-align: bottom; font-size: 10pt; }
         </style>
       </head>
       <body>
@@ -295,9 +295,9 @@ export function EstimateForm({
           <table class="header-table" style="width: 100%;">
             <tr>
               <td style="width: 40%;">
-                <div style="font-weight: bold; margin-bottom: 4px;">СОГЛАСОВАНО:</div>
-                <div style="font-size: 10pt; margin-top: 4px;">"___" _____________ 2026 г.</div>
-                <div style="margin-top: 4px;">
+                <div style="font-weight: bold; margin-bottom: 2px;">СОГЛАСОВАНО:</div>
+                <div style="font-size: 10pt; margin-top: 2px;">"___" _____________ 2026 г.</div>
+                <div style="margin-top: 2px;">
                   <span style="display: inline-block; border-bottom: 1px solid #000; width: 35mm;">&nbsp;</span>
                   <span style="display: inline-block; width: 5mm;">&nbsp;</span>
                   <span style="display: inline-block; border-bottom: 1px solid #000; width: 25mm;">&nbsp;</span>
@@ -316,7 +316,7 @@ export function EstimateForm({
           </div>
           
           <!-- Requisites -->
-          <table class="requisites" style="width: 100%; margin-bottom: 14px;">
+          <table class="requisites" style="width: 100%; margin-bottom: 8px;">
             <tr>
               <td class="label">Заказчик:</td>
               <td>${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
