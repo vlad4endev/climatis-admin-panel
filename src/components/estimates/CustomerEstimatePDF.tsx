@@ -20,6 +20,7 @@ interface CustomerEstimatePDFProps {
   engineerName: string;
   engineerPosition: string;
   executorCompany?: string;
+  estimateName?: string;
 }
 
 // Format number with 2 decimal places and space as thousands separator
@@ -50,6 +51,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
       customerCalc,
       engineerName,
       executorCompany = 'ООО «Климатис»',
+      estimateName,
     },
     ref
   ) => {
@@ -140,6 +142,12 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
               <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Исполнитель:</td>
               <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{executorCompany}</td>
             </tr>
+            {estimateName && (
+            <tr>
+              <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Расчёт:</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{estimateName}</td>
+            </tr>
+            )}
           </tbody>
         </table>
 

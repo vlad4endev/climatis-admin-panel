@@ -320,6 +320,10 @@ export function EstimateForm({
             <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Исполнитель:</td>
             <td style="border: none; padding: 0; vertical-align: top;">${getExecutorName()}</td>
           </tr>
+          <tr>
+            <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Расчёт:</td>
+            <td style="border: none; padding: 0; vertical-align: top;">${watch("name") || "—"}</td>
+          </tr>
         </table>
 
         <p style="font-weight: bold; font-size: 10pt; margin-top: 3mm; margin-bottom: 1mm;">1. РАБОТЫ</p>
@@ -437,6 +441,7 @@ export function EstimateForm({
       customerCalc,
       engineerName: getEngineerNameWithInitials(),
       executorCompany: getExecutorName(),
+      estimateName: watch("name") || "",
     });
   };
 
