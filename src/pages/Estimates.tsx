@@ -129,8 +129,8 @@ export default function Estimates() {
   const config: EntityListConfig<Estimate> = {
     getItemId: (item) => item.id,
     fields: [
-      { key: "clientName", label: "Контрагент", type: "text", searchable: true },
-      { key: "objectName", label: "Объект", type: "text", searchable: true },
+      { key: "clientName", label: "Контрагент", type: "text", searchable: true, render: (value) => <span className="block max-w-[160px] truncate" title={value}>{value}</span> },
+      { key: "objectName", label: "Объект", type: "text", searchable: true, render: (value) => <span className="block max-w-[160px] truncate" title={value}>{value}</span> },
       {
         key: "name",
         label: "Расчёт (смета)",
