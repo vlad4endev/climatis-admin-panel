@@ -341,17 +341,17 @@ export function EstimateForm({
               </tr>`;
             }).join("") || '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>'}
             <tr>
-              <td style="border-left: none; border-bottom: none;"></td>
+              <td></td>
               <td style="text-align: right; font-weight: bold;">ИТОГО:</td>
               <td style="text-align: right; font-weight: bold;">${formatCurrency(worksCustomerTotal)}</td>
             </tr>
             <tr>
-              <td style="border-left: none; border-bottom: none;"></td>
+              <td></td>
               <td style="text-align: right;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
               <td style="text-align: right;">${formatCurrency(worksVat)}</td>
             </tr>
             <tr>
-              <td style="border-left: none; border-bottom: none;"></td>
+              <td></td>
               <td style="text-align: right; font-weight: bold;">ВСЕГО, по статье РАБОТЫ:</td>
               <td style="text-align: right; font-weight: bold;">${formatCurrency(worksWithVat)}</td>
             </tr>
@@ -385,12 +385,12 @@ export function EstimateForm({
               </tr>`;
             }).join("") || '<tr><td colspan="6" style="text-align: center; font-style: italic;">Материалы не указаны</td></tr>'}
             <tr>
-              <td style="border-left: none; border-bottom: none;"></td>
+              <td></td>
               <td colspan="4" style="text-align: right; font-weight: bold;">ВСЕГО по статье МАТЕРИАЛЫ:</td>
               <td style="text-align: right; font-weight: bold;">${formatCurrency(materialsCustomerTotal)}</td>
             </tr>
             <tr>
-              <td style="border-left: none; border-bottom: none;"></td>
+              <td></td>
               <td colspan="4" style="text-align: right;">${vatRateLabel ? `в т.ч. НДС ${vatRateLabel}:` : "в т.ч. НДС:"}</td>
               <td style="text-align: right;">${formatCurrency(materialsVat)}</td>
             </tr>
@@ -398,22 +398,22 @@ export function EstimateForm({
         </table>
 
         <!-- FINAL TOTALS -->
-        <div style="border-top: 0.5pt solid #000; margin-top: 3mm;"></div>
-        <table style="width: 100%; border: none; margin-top: 2mm;">
+        <p style="border-bottom: 0.5pt solid #000; margin-top: 5mm;">&nbsp;</p>
+        <table style="width: 100%; border: none;">
           <tr>
-            <td style="text-align: right; font-weight: bold; font-size: 9pt; border: none; padding: 1mm 0;">ИТОГО, по расчету без НДС:</td>
-            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 9pt; border: none; padding: 1mm 0;">${formatCurrency(grandTotalWithoutVat)}</td>
+            <td style="text-align: right; font-weight: normal; font-size: 9pt; border: none; padding: 1mm 0;">ИТОГО, по расчету без НДС:</td>
+            <td style="width: 28mm; text-align: right; font-size: 9pt; border: none; padding: 1mm 0;">${formatCurrency(grandTotalWithoutVat)}</td>
           </tr>
           <tr>
-            <td style="text-align: right; font-weight: bold; font-size: 9pt; border: none; padding: 1mm 0;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
-            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 9pt; border: none; padding: 1mm 0;">${formatCurrency(totalVat)}</td>
+            <td style="text-align: right; font-size: 9pt; border: none; padding: 1mm 0;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
+            <td style="width: 28mm; text-align: right; font-size: 9pt; border: none; padding: 1mm 0;">${formatCurrency(totalVat)}</td>
           </tr>
         </table>
-        <div style="border-top: 0.5pt solid #000;"></div>
-        <table style="width: 100%; border: none; margin-top: 1mm;">
+        <p style="border-bottom: 0.5pt solid #000;">&nbsp;</p>
+        <table style="width: 100%; border: none;">
           <tr>
-            <td style="text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 1mm 0;">ВСЕГО по расчету:</td>
-            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 1mm 0;">${formatCurrency(customerGrandTotalWithVat)}</td>
+            <td style="text-align: right; font-weight: bold; font-style: italic; font-size: 10pt; border: none; padding: 1mm 0;">ВСЕГО по расчету:</td>
+            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 1mm 0; border-bottom: 0.5pt solid #000;">${formatCurrency(customerGrandTotalWithVat)}</td>
           </tr>
         </table>
 
