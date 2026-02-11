@@ -294,11 +294,7 @@ export function EstimateForm({
             <td style="width: 50%; vertical-align: top; border: none; padding: 0;">
               <p style="font-weight: bold; font-size: 10pt;">СОГЛАСОВАНО:</p>
               <p style="font-size: 10pt; margin-top: 4mm;">"____"______________2026 г.</p>
-              <p style="margin-top: 3mm;">
-                <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 35mm;">&nbsp;</span>
-                &nbsp;&nbsp;
-                <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 25mm;">&nbsp;</span>
-              </p>
+              <p style="font-size: 10pt; margin-top: 3mm;">___________________ _____________</p>
             </td>
             <td style="width: 50%; vertical-align: top; text-align: right; border: none; padding: 0;">
               <p style="font-size: 10pt;">к Договору № ___ от ________</p>
@@ -426,9 +422,7 @@ export function EstimateForm({
         <table style="width: 100%; border: none; margin-top: 14mm;">
           <tr>
             <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">Расчет составил</td>
-            <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">
-              <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 35mm;">&nbsp;</span>
-            </td>
+            <td style="border: none; padding: 0; font-size: 10pt; text-align: center; vertical-align: bottom;">___________________</td>
             <td style="border: none; padding: 0; font-size: 10pt; text-align: right; vertical-align: bottom;">${getEngineerNameWithInitials()}</td>
           </tr>
         </table>
