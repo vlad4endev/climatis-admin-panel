@@ -93,6 +93,8 @@ export function useCreateStockMovement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
+      queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
+      queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция создана");
     },
     onError: () => toast.error("Ошибка при создании операции"),
@@ -150,6 +152,8 @@ export function useUpdateStockMovement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
+      queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
+      queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция обновлена");
     },
     onError: () => toast.error("Ошибка при обновлении"),
@@ -192,6 +196,8 @@ export function useDeleteStockMovement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
+      queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
+      queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция удалена");
     },
     onError: () => toast.error("Ошибка при удалении"),
