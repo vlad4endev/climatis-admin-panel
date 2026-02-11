@@ -119,7 +119,7 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
           </div>
         )}
 
-        {assignment.comments && (
+        {assignment.comments && assignment.comments !== assignment.engineerComment && (
           <div className="mb-3">
             <h2 className="text-xs font-bold mb-0.5 border-b pb-0.5">Комментарии</h2>
             <p className="text-xs whitespace-pre-wrap">{assignment.comments}</p>
