@@ -152,7 +152,6 @@ export default function Estimates() {
           </Badge>
         ),
       },
-      { key: "createdByName", label: "Расчёт составил", type: "text", searchable: true },
       { key: "requestName", label: "Заявка", type: "text", searchable: true },
     ],
     onRowClick: (estimate) => setViewingEstimate(estimate),
