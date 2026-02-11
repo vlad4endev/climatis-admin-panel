@@ -203,15 +203,13 @@ export function EstimateForm({
   const selectedRequest = requests.find((r) => r.id === requestId);
   const selectedEmployee = employees.find((e) => e.id === createdById);
   
-  // Find first engineer for document signature
-  const engineerEmployee = employees.find((e) => 
-    e.position?.toLowerCase().includes("инженер")
-  );
+  // Use the employee selected in "Расчёт составил" field for signature
+  const creatorEmployee = selectedEmployee;
   
   // Extract surname + initials (Фамилия И.О.)
   const getEngineerNameWithInitials = () => {
-    if (!engineerEmployee?.fullName) return "____________________";
-    const parts = engineerEmployee.fullName.trim().split(/\s+/);
+    if (!creatorEmployee?.fullName) return "____________________";
+    const parts = creatorEmployee.fullName.trim().split(/\s+/);
     if (parts.length === 1) return parts[0];
     const surname = parts[0];
     const initials = parts.slice(1).map(p => p.charAt(0).toUpperCase() + ".").join("");
