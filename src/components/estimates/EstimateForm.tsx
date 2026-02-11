@@ -262,14 +262,14 @@ export function EstimateForm({
         <style>
           @page {
             size: 210mm 297mm;
-            margin: 15mm 15mm 15mm 20mm;
+            margin: 10mm 10mm 10mm 15mm;
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body { width: 100%; }
           body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 10pt;
-            line-height: 1.3;
+            line-height: 1.15;
             color: #000;
           }
           table { border-collapse: collapse; }
@@ -278,7 +278,7 @@ export function EstimateForm({
           .data-table { width: 100%; border: 0.5pt solid #000; }
           .data-table th,
           .data-table td {
-            padding: 1.5mm 2mm;
+            padding: 1mm 1.5mm;
             border: 0.5pt solid #000;
             vertical-align: middle;
             font-size: 9pt;
@@ -295,8 +295,8 @@ export function EstimateForm({
           <tr>
             <td style="width: 50%; vertical-align: top; border: none; padding: 0;">
               <p style="font-weight: bold; font-size: 10pt;">СОГЛАСОВАНО:</p>
-              <p style="font-size: 10pt; margin-top: 6mm;">"____"______________2026 г.</p>
-              <p style="margin-top: 4mm;">
+              <p style="font-size: 10pt; margin-top: 4mm;">"____"______________2026 г.</p>
+              <p style="margin-top: 3mm;">
                 <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 35mm;">&nbsp;</span>
                 &nbsp;&nbsp;
                 <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 25mm;">&nbsp;</span>
@@ -309,26 +309,26 @@ export function EstimateForm({
         </table>
 
         <!-- TITLE -->
-        <p style="text-align: center; font-size: 14pt; font-weight: bold; margin-top: 10mm; letter-spacing: 0.5pt;">РАСЧЕТ СТОИМОСТИ</p>
-        <p style="text-align: center; font-size: 10pt; margin-top: 2mm;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</p>
+        <p style="text-align: center; font-size: 12pt; font-weight: bold; margin-top: 8mm;">РАСЧЕТ СТОИМОСТИ</p>
+        <p style="text-align: center; font-size: 10pt; margin-top: 1mm;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</p>
 
         <!-- REQUISITES -->
-        <table style="width: 100%; border: none; margin-top: 6mm; line-height: 1.4;">
+        <table style="width: 100%; border: none; margin-top: 4mm;">
           <tr>
-            <td style="width: 30mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Заказчик:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
+            <td style="width: 28mm; font-weight: bold; border: none; padding: 0.5mm 0; vertical-align: top;">Заказчик:</td>
+            <td style="border: none; padding: 0.5mm 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
           </tr>
           <tr>
-            <td style="width: 30mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Объект:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
+            <td style="width: 28mm; font-weight: bold; border: none; padding: 0.5mm 0; vertical-align: top;">Объект:</td>
+            <td style="border: none; padding: 0.5mm 0; vertical-align: top;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
           </tr>
           <tr>
-            <td style="width: 30mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Исполнитель:</td>
-            <td style="border: none; padding: 1mm 0; vertical-align: top;">${getExecutorName()}</td>
+            <td style="width: 28mm; font-weight: bold; border: none; padding: 0.5mm 0; vertical-align: top;">Исполнитель:</td>
+            <td style="border: none; padding: 0.5mm 0; vertical-align: top;">${getExecutorName()}</td>
           </tr>
         </table>
 
-        <p style="font-weight: bold; font-size: 10pt; margin-top: 5mm; margin-bottom: 2mm;">1. РАБОТЫ</p>
+        <p style="font-weight: bold; font-size: 10pt; margin-top: 3mm; margin-bottom: 1mm;">1. РАБОТЫ</p>
         <table class="data-table">
           <thead>
             <tr>
@@ -366,7 +366,7 @@ export function EstimateForm({
         </table>
 
         <!-- 2. Материалы -->
-        <p style="font-weight: bold; font-size: 10pt; margin-top: 4mm; margin-bottom: 2mm;">2. Материалы</p>
+        <p style="font-weight: bold; font-size: 10pt; margin-top: 3mm; margin-bottom: 1mm;">2. Материалы</p>
         <table class="data-table">
           <thead>
             <tr>
@@ -405,27 +405,27 @@ export function EstimateForm({
         </table>
 
         <!-- FINAL TOTALS -->
-        <p style="border-bottom: 0.5pt solid #000; margin-top: 6mm;">&nbsp;</p>
-        <table style="width: 100%; border: none; margin-top: 2mm;">
+        <p style="border-bottom: 0.5pt solid #000; margin-top: 4mm;">&nbsp;</p>
+        <table style="width: 100%; border: none; margin-top: 1mm;">
           <tr>
-            <td style="text-align: right; font-size: 10pt; border: none; padding: 1.5mm 0;">ИТОГО, по расчету без НДС:</td>
-            <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 1.5mm 0;">${formatCurrency(grandTotalWithoutVat)}</td>
+            <td style="text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">ИТОГО, по расчету без НДС:</td>
+            <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(grandTotalWithoutVat)}</td>
           </tr>
           <tr>
-            <td style="text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 1.5mm 0;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
-            <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 1.5mm 0;">${formatCurrency(totalVat)}</td>
+            <td style="text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 0.5mm 0;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
+            <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(totalVat)}</td>
           </tr>
         </table>
         <p style="border-bottom: 0.5pt solid #000;">&nbsp;</p>
         <table style="width: 100%; border: none;">
           <tr>
-            <td style="text-align: right; font-weight: bold; font-style: italic; font-size: 10pt; border: none; padding: 1.5mm 0;">ВСЕГО по расчету:</td>
-            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 1.5mm 0;">${formatCurrency(customerGrandTotalWithVat)}</td>
+            <td style="text-align: right; font-weight: bold; font-style: italic; font-size: 10pt; border: none; padding: 0.5mm 0;">ВСЕГО по расчету:</td>
+            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(customerGrandTotalWithVat)}</td>
           </tr>
         </table>
 
         <!-- SIGNATURE -->
-        <table style="width: 100%; border: none; margin-top: 20mm;">
+        <table style="width: 100%; border: none; margin-top: 14mm;">
           <tr>
             <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">Расчет составил</td>
             <td style="border: none; padding: 0; font-size: 10pt; text-align: right; vertical-align: bottom;">${getEngineerNameWithInitials()}</td>
