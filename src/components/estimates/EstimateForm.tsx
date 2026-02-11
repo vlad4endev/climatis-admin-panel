@@ -419,13 +419,7 @@ export function EstimateForm({
         </table>
 
         <!-- SIGNATURE -->
-        <table style="width: 100%; border: none; margin-top: 14mm;">
-          <tr>
-            <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">Расчет составил</td>
-            <td style="border: none; padding: 0; font-size: 10pt; text-align: center; vertical-align: bottom;">___________________</td>
-            <td style="border: none; padding: 0; font-size: 10pt; text-align: right; vertical-align: bottom;">${getEngineerNameWithInitials()}</td>
-          </tr>
-        </table>
+        <p style="text-align: center; font-size: 10pt; margin-top: 14mm;">Расчет составил ___________________ ${getEngineerNameWithInitials()}</p>
       </body>
       </html>
     `;
