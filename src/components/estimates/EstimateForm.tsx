@@ -249,19 +249,27 @@ export function EstimateForm({
             <w:Zoom>100</w:Zoom>
             <w:DoNotOptimizeForBrowser/>
           </w:WordDocument>
+          <w:Sections>
+            <w:Section>
+              <w:SectionProperties>
+                <w:PaperSize w:Width="11906" w:Height="16838"/>
+                <w:PageMargin w:Top="567" w:Right="567" w:Bottom="567" w:Left="851"/>
+              </w:SectionProperties>
+            </w:Section>
+          </w:Sections>
         </xml>
         <![endif]-->
         <style>
           @page {
             size: 210mm 297mm;
-            margin: 18mm 15mm 15mm 20mm;
+            margin: 10mm 10mm 10mm 15mm;
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body { width: 100%; }
           body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 10pt;
-            line-height: 1.3;
+            line-height: 1.2;
             color: #000;
           }
           table { border-collapse: collapse; }
@@ -270,7 +278,7 @@ export function EstimateForm({
           .data-table { width: 100%; border: 0.5pt solid #000; }
           .data-table th,
           .data-table td {
-            padding: 1.5mm 1.5mm;
+            padding: 1mm 1.5mm;
             border: 0.5pt solid #000;
             vertical-align: middle;
             font-size: 9pt;
@@ -287,7 +295,7 @@ export function EstimateForm({
           <tr>
             <td style="width: 50%; vertical-align: top; border: none; padding: 0;">
               <p style="font-weight: bold; font-size: 10pt;">СОГЛАСОВАНО:</p>
-              <p style="font-size: 10pt; margin-top: 8mm;">"____"______________2026 г.</p>
+              <p style="font-size: 10pt; margin-top: 5mm;">"____"______________2026 г.</p>
               <p style="margin-top: 3mm;">
                 <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 35mm;">&nbsp;</span>
                 &nbsp;&nbsp;
@@ -301,11 +309,11 @@ export function EstimateForm({
         </table>
 
         <!-- TITLE -->
-        <p style="text-align: center; font-size: 12pt; font-weight: bold; margin-top: 12mm; letter-spacing: 1pt;">РАСЧЕТ СТОИМОСТИ</p>
-        <p style="text-align: center; font-size: 10pt; margin-top: 2mm;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</p>
+        <p style="text-align: center; font-size: 12pt; font-weight: bold; margin-top: 6mm; letter-spacing: 1pt;">РАСЧЕТ СТОИМОСТИ</p>
+        <p style="text-align: center; font-size: 10pt; margin-top: 1mm;">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</p>
 
         <!-- REQUISITES -->
-        <table style="width: 100%; border: none; margin-top: 6mm;">
+        <table style="width: 100%; border: none; margin-top: 4mm;">
           <tr>
             <td style="width: 35mm; font-weight: bold; border: none; padding: 1mm 0; vertical-align: top;">Заказчик:</td>
             <td style="border: none; padding: 1mm 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
@@ -320,8 +328,7 @@ export function EstimateForm({
           </tr>
         </table>
 
-        <!-- 1. РАБОТЫ -->
-        <p style="font-weight: bold; font-size: 10pt; margin-top: 6mm; margin-bottom: 2mm;">1. РАБОТЫ</p>
+        <p style="font-weight: bold; font-size: 10pt; margin-top: 4mm; margin-bottom: 1mm;">1. РАБОТЫ</p>
         <table class="data-table">
           <thead>
             <tr>
@@ -359,7 +366,7 @@ export function EstimateForm({
         </table>
 
         <!-- 2. Материалы -->
-        <p style="font-weight: bold; font-size: 10pt; margin-top: 4mm; margin-bottom: 2mm;">2. Материалы</p>
+        <p style="font-weight: bold; font-size: 10pt; margin-top: 3mm; margin-bottom: 1mm;">2. Материалы</p>
         <table class="data-table">
           <thead>
             <tr>
@@ -418,7 +425,7 @@ export function EstimateForm({
         </table>
 
         <!-- SIGNATURE -->
-        <table style="width: 100%; border: none; margin-top: 20mm;">
+        <table style="width: 100%; border: none; margin-top: 12mm;">
           <tr>
             <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">Расчет составил</td>
             <td style="border: none; padding: 0; font-size: 10pt; text-align: right; vertical-align: bottom;">${getEngineerNameWithInitials()}</td>
