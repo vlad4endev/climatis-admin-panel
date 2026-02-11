@@ -19,6 +19,7 @@ interface CustomerEstimatePDFProps {
   customerCalc: CustomerCalculation;
   engineerName: string;
   engineerPosition: string;
+  executorCompany?: string;
 }
 
 // Format number with 2 decimal places and space as thousands separator
@@ -48,6 +49,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
       materials,
       customerCalc,
       engineerName,
+      executorCompany = 'ООО «Климатис»',
     },
     ref
   ) => {
@@ -136,7 +138,7 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             </tr>
             <tr>
               <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Исполнитель:</td>
-              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>ООО «Климатис» (ИП Щеткин А.Г.)</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{executorCompany}</td>
             </tr>
           </tbody>
         </table>

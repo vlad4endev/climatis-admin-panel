@@ -14,6 +14,12 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
     ) || 0;
     const grandTotal = worksTotal + materialsTotal;
 
+    const getExecutorLabel = () => {
+      const execValue = (estimate.customerCalculation as any)?.executorCompany;
+      if (execValue === "ip") return "ИП Щеткин А.Г.";
+      return 'ООО "Климатис"';
+    };
+
     return (
       <div ref={ref} className="bg-white text-black" style={{ 
         fontFamily: 'Arial, sans-serif',
@@ -47,7 +53,7 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
               </tr>
               <tr>
                 <td style={{ padding: '2px 0', color: '#666' }}>Исполнитель:</td>
-                <td style={{ padding: '2px 0', fontWeight: 500 }}>ООО «Климатис»</td>
+                <td style={{ padding: '2px 0', fontWeight: 500 }}>{getExecutorLabel()}</td>
               </tr>
             </tbody>
           </table>
