@@ -426,6 +426,9 @@ export function EstimateForm({
         <table style="width: 100%; border: none; margin-top: 14mm;">
           <tr>
             <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">Расчет составил</td>
+            <td style="border: none; padding: 0; font-size: 10pt; vertical-align: bottom;">
+              <span style="display: inline-block; border-bottom: 0.5pt solid #000; width: 35mm;">&nbsp;</span>
+            </td>
             <td style="border: none; padding: 0; font-size: 10pt; text-align: right; vertical-align: bottom;">${getEngineerNameWithInitials()}</td>
           </tr>
         </table>
