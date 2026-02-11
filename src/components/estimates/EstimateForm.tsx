@@ -233,7 +233,7 @@ export function EstimateForm({
     const estimateNumber = watch("estimateNumber");
     const estimateDate = watch("estimateDate");
     
-    const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "0%";
+    const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
     const worksWithVat = worksCustomerTotal + worksVat;
     const grandTotalWithoutVat = worksCustomerTotal + materialsCustomerTotal;
 
@@ -254,38 +254,39 @@ export function EstimateForm({
         <style>
           @page {
             size: A4 portrait;
-            margin: 15mm 20mm 15mm 25mm;
+            margin: 15mm 15mm 15mm 20mm;
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body { width: 100%; }
           body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10pt;
+            line-height: 1.3;
             color: #000;
           }
           .container { width: 100%; }
           table { border-collapse: collapse; }
-          .header-table td { padding: 4px 0; vertical-align: top; }
-          .title { text-align: center; margin: 20px 0; }
-          .title h1 { font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-          .title .doc-num { font-size: 12pt; margin-top: 8px; }
-          .requisites td { padding: 4px 0; vertical-align: top; }
-          .requisites .label { width: 100px; font-weight: bold; }
-          .section-title { font-size: 12pt; font-weight: bold; margin: 20px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #000; }
+          .header-table td { padding: 2px 0; vertical-align: top; }
+          .title { text-align: center; margin: 14px 0; }
+          .title h1 { font-size: 12pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
+          .title .doc-num { font-size: 10pt; margin-top: 4px; }
+          .requisites td { padding: 2px 0; vertical-align: top; }
+          .requisites .label { width: 80px; font-weight: bold; }
+          .section-title { font-size: 10pt; font-weight: bold; margin: 14px 0 6px 0; }
           .data-table { width: 100%; border: 1px solid #000; }
-          .data-table th, .data-table td { padding: 8px 4px; border: 1px solid #000; vertical-align: top; }
-          .data-table th { background-color: #f5f5f5; font-weight: bold; }
-          .data-table .num { width: 40px; text-align: center; }
+          .data-table th, .data-table td { padding: 3px 4px; border: 1px solid #000; vertical-align: top; font-size: 9pt; }
+          .data-table th { font-weight: normal; text-align: center; }
+          .data-table .num { width: 25px; text-align: center; }
           .data-table .price { text-align: right; }
-          .data-table .qty { text-align: center; width: 60px; }
-          .data-table .unit { text-align: center; width: 60px; }
-          .highlight { background-color: #FFFF99; }
-          .totals-table { width: 100%; border: 2px solid #000; margin-top: 24px; }
-          .totals-table td { padding: 10px; border: 1px solid #000; }
-          .signature-table { margin-top: 50px; }
-          .signature-table td { padding: 4px 0; vertical-align: bottom; }
-          .hint { font-size: 8pt; color: #666; }
+          .data-table .qty { text-align: center; width: 45px; }
+          .data-table .unit { text-align: center; width: 45px; }
+          .data-table .unit-price { text-align: right; width: 80px; }
+          .data-table .total-price { text-align: right; width: 90px; }
+          .totals-section { margin-top: 8px; }
+          .totals-section table { width: 100%; }
+          .totals-section td { padding: 2px 4px; font-size: 9pt; }
+          .signature-table { margin-top: 40px; }
+          .signature-table td { padding: 2px 0; vertical-align: bottom; font-size: 10pt; }
         </style>
       </head>
       <body>
@@ -294,9 +295,13 @@ export function EstimateForm({
           <table class="header-table" style="width: 100%;">
             <tr>
               <td style="width: 40%;">
-                <div style="font-weight: bold; margin-bottom: 8px;">СОГЛАСОВАНО:</div>
-                <div style="border-bottom: 1px solid #000; width: 180px; height: 30px;"></div>
+                <div style="font-weight: bold; margin-bottom: 4px;">СОГЛАСОВАНО:</div>
                 <div style="font-size: 10pt; margin-top: 4px;">"___" _____________ 2026 г.</div>
+                <div style="margin-top: 4px;">
+                  <span style="display: inline-block; border-bottom: 1px solid #000; width: 35mm;">&nbsp;</span>
+                  <span style="display: inline-block; width: 5mm;">&nbsp;</span>
+                  <span style="display: inline-block; border-bottom: 1px solid #000; width: 25mm;">&nbsp;</span>
+                </div>
               </td>
               <td style="width: 60%; text-align: right;">
                 <div style="font-size: 10pt;">к Договору № _______ от __________</div>
@@ -307,11 +312,11 @@ export function EstimateForm({
           <!-- Title -->
           <div class="title">
             <h1>РАСЧЕТ СТОИМОСТИ</h1>
-            <div class="doc-num">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)} г.</div>
+            <div class="doc-num">№ ${estimateNumber || "б/н"} от ${formatDate(estimateDate)}</div>
           </div>
           
           <!-- Requisites -->
-          <table class="requisites" style="width: 100%; margin-bottom: 24px;">
+          <table class="requisites" style="width: 100%; margin-bottom: 14px;">
             <tr>
               <td class="label">Заказчик:</td>
               <td>${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
@@ -333,32 +338,35 @@ export function EstimateForm({
               <tr>
                 <th class="num">№</th>
                 <th>Перечень выполняемых работ</th>
-                <th class="price" style="width: 130px;">Стоимость, руб.</th>
+                <th class="total-price">Стоимость, руб</th>
               </tr>
             </thead>
             <tbody>
               ${workBlocks.map((block, index) => {
                 const blockBase = calculateWorkBlockTotal(block);
                 const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-                return `<tr><td class="num">${index + 1}</td><td>${block.description || "Работа без названия"}</td><td class="price">${formatCurrency(blockCustomerPrice)}</td></tr>`;
+                return `<tr><td class="num">${index + 1}</td><td>${block.description || "Работа"} (с учетом накладных, сметной прибыли)</td><td class="price">${formatCurrency(blockCustomerPrice)}</td></tr>`;
               }).join("") || '<tr><td colspan="3" style="text-align: center; font-style: italic; color: #666;">Работы не указаны</td></tr>'}
               <tr>
-                <td colspan="2" style="text-align: right; font-weight: bold;">ИТОГО:</td>
+                <td></td>
+                <td style="text-align: right; font-weight: bold;">ИТОГО:</td>
                 <td class="price" style="font-weight: bold;">${formatCurrency(worksCustomerTotal)}</td>
               </tr>
               <tr>
-                <td colspan="2" style="text-align: right;">НДС (${vatRateLabel}):</td>
+                <td></td>
+                <td style="text-align: right;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
                 <td class="price">${formatCurrency(worksVat)}</td>
               </tr>
-              <tr class="highlight">
-                <td colspan="2" style="text-align: right; font-weight: bold;">ВСЕГО, по статье РАБОТЫ:</td>
+              <tr>
+                <td></td>
+                <td style="text-align: right; font-weight: bold;">ВСЕГО, по статье РАБОТЫ:</td>
                 <td class="price" style="font-weight: bold;">${formatCurrency(worksWithVat)}</td>
               </tr>
             </tbody>
           </table>
           
           <!-- Section 2: МАТЕРИАЛЫ -->
-          <div class="section-title">2. МАТЕРИАЛЫ</div>
+          <div class="section-title">2. Материалы</div>
           <table class="data-table">
             <thead>
               <tr>
@@ -366,52 +374,57 @@ export function EstimateForm({
                 <th>Спецификация используемых материалов</th>
                 <th class="unit">Ед. изм.</th>
                 <th class="qty">Кол-во</th>
-                <th class="price" style="width: 110px;">Стоимость, руб.</th>
+                <th class="unit-price">Цена за ед.</th>
+                <th class="total-price">Стоимость, руб</th>
               </tr>
             </thead>
             <tbody>
               ${materials.map((material, index) => {
-                const materialPrice = material.quantity * material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-                return `<tr><td class="num">${index + 1}</td><td>${material.materialName}</td><td class="unit">шт.</td><td class="qty">${material.quantity}</td><td class="price">${formatCurrency(materialPrice)}</td></tr>`;
-              }).join("") || '<tr><td colspan="5" style="text-align: center; font-style: italic; color: #666;">Материалы не указаны</td></tr>'}
-              <tr class="highlight">
+                const unitPriceWithMarkup = material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
+                const materialPrice = material.quantity * unitPriceWithMarkup;
+                return `<tr><td class="num">${index + 1}</td><td>${material.materialName} (с учетом транспортных и заготовительно складских расходов)</td><td class="unit">шт</td><td class="qty">${material.quantity}</td><td class="price">${formatCurrency(unitPriceWithMarkup)}</td><td class="price">${formatCurrency(materialPrice)}</td></tr>`;
+              }).join("") || '<tr><td colspan="6" style="text-align: center; font-style: italic; color: #666;">Материалы не указаны</td></tr>'}
+              <tr>
+                <td></td>
                 <td colspan="4" style="text-align: right; font-weight: bold;">ВСЕГО по статье МАТЕРИАЛЫ:</td>
                 <td class="price" style="font-weight: bold;">${formatCurrency(materialsCustomerTotal)}</td>
               </tr>
               <tr>
-                <td colspan="4" style="text-align: right; font-size: 10pt;">в т.ч. НДС (${vatRateLabel}):</td>
-                <td class="price" style="font-size: 10pt;">${formatCurrency(materialsVat)}</td>
+                <td></td>
+                <td colspan="4" style="text-align: right;">${vatRateLabel ? `в т.ч. НДС ${vatRateLabel}:` : "в т.ч. НДС:"}</td>
+                <td class="price">${formatCurrency(materialsVat)}</td>
               </tr>
             </tbody>
           </table>
           
           <!-- Final Totals -->
-          <table class="totals-table">
-            <tr>
-              <td style="font-weight: bold;">ИТОГО, по расчету без НДС:</td>
-              <td class="price" style="width: 150px; font-weight: bold;">${formatCurrency(grandTotalWithoutVat)}</td>
-            </tr>
-            <tr>
-              <td>НДС (${vatRateLabel}):</td>
-              <td class="price">${formatCurrency(totalVat)}</td>
-            </tr>
-            <tr class="highlight">
-              <td style="font-weight: bold; font-size: 12pt; text-transform: uppercase;">ВСЕГО по расчету:</td>
-              <td class="price" style="font-weight: bold; font-size: 14pt;">${formatCurrency(customerGrandTotalWithVat)} руб.</td>
-            </tr>
-          </table>
+          <div class="totals-section">
+            <div style="border-top: 1px solid #000; margin-bottom: 4px;"></div>
+            <table>
+              <tr>
+                <td style="text-align: right; font-weight: bold;">ИТОГО, по расчету без НДС:</td>
+                <td style="width: 90px; text-align: right; font-weight: bold;">${formatCurrency(grandTotalWithoutVat)}</td>
+              </tr>
+              <tr>
+                <td style="text-align: right; font-weight: bold;">${vatRateLabel ? `НДС ${vatRateLabel}:` : "НДС:"}</td>
+                <td style="width: 90px; text-align: right; font-weight: bold;">${formatCurrency(totalVat)}</td>
+              </tr>
+            </table>
+            <div style="border-top: 1px solid #000; margin-top: 4px;"></div>
+            <table>
+              <tr>
+                <td style="text-align: right; font-weight: bold; font-size: 10pt;">ВСЕГО по расчету:</td>
+                <td style="width: 90px; text-align: right; font-weight: bold; font-size: 10pt;">${formatCurrency(customerGrandTotalWithVat)}</td>
+              </tr>
+            </table>
+          </div>
           
           <!-- Signature -->
           <table class="signature-table" style="width: 100%;">
             <tr>
-              <td style="width: 40%;">Расчет составил:</td>
+              <td style="width: 40%;">Расчет составил</td>
               <td style="width: 25%; text-align: center; border-bottom: 1px solid #000;">&nbsp;</td>
               <td style="width: 35%; text-align: right;">${getEngineerNameWithInitials()}</td>
-            </tr>
-            <tr>
-              <td class="hint">${engineerEmployee?.position || ""}</td>
-              <td class="hint" style="text-align: center;">(подпись)</td>
-              <td class="hint" style="text-align: right;">(ФИО)</td>
             </tr>
           </table>
         </div>
