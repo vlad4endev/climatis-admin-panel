@@ -341,7 +341,7 @@ export function EstimateForm({
               const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
               return `<tr>
                 <td style="text-align: center;">${index + 1}</td>
-                <td>${block.description || "Работа"} (с учетом накладных, сметной прибыли)</td>
+                <td>${block.description || "Работа"}</td>
                 <td style="text-align: right;">${formatCurrency(blockCustomerPrice)}</td>
               </tr>`;
             }).join("") || '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>'}
