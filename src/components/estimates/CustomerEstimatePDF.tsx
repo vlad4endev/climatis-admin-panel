@@ -132,15 +132,15 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
           <tbody>
             <tr>
               <td style={{ width: "100px", fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Заказчик:</td>
-              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{clientName || "—"}</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top", wordBreak: "break-word", overflowWrap: "break-word" }}>{clientName || "—"}</td>
             </tr>
             <tr>
               <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Объект:</td>
-              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{objectFull || "—"}</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top", wordBreak: "break-word", overflowWrap: "break-word" }}>{objectFull || "—"}</td>
             </tr>
             <tr>
               <td style={{ fontWeight: "bold", padding: "2px 0", verticalAlign: "top" }}>Исполнитель:</td>
-              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top" }}>{executorCompany}</td>
+              <td style={{ padding: "2px 0 2px 10px", verticalAlign: "top", wordBreak: "break-word", overflowWrap: "break-word" }}>{executorCompany}</td>
             </tr>
             {estimateName && (
             <tr>
