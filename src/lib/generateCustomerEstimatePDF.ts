@@ -159,22 +159,33 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // === REQUISITES ===
   yPos += 10;
   const labelX = marginLeft;
-  const valueX = 55; // Positioned closer to center like in example
+  const valueX = 55;
+  const maxValueWidth = pageWidth - marginRight - valueX;
+
+  // Helper to add wrapped text and return new yPos
+  const addWrappedText = (text: string, x: number, y: number, maxWidth: number, options: { fontStyle?: "normal" | "bold" | "italic"; fontSize?: number } = {}): number => {
+    doc.setFont("NotoSerif", options.fontStyle || "normal");
+    doc.setFontSize(options.fontSize || 10);
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.text(lines, x, y);
+    const lineHeight = (options.fontSize || 10) * 0.4;
+    return y + lines.length * lineHeight;
+  };
   
   addText("Заказчик:", labelX, yPos, { fontStyle: "bold", fontSize: 10 });
-  addText(clientName || "—", valueX, yPos, { fontSize: 10 });
+  yPos = addWrappedText(clientName || "—", valueX, yPos, maxValueWidth, { fontSize: 10 });
   
-  yPos += 5;
+  yPos += 2;
   addText("Объект:", labelX, yPos, { fontStyle: "bold", fontSize: 10 });
-  addText(objectFull || "—", valueX, yPos, { fontSize: 10 });
+  yPos = addWrappedText(objectFull || "—", valueX, yPos, maxValueWidth, { fontSize: 10 });
   
-  yPos += 5;
+  yPos += 2;
   addText("Исполнитель:", labelX, yPos, { fontStyle: "bold", fontSize: 10 });
-  addText(executorCompany, valueX, yPos, { fontSize: 10 });
+  yPos = addWrappedText(executorCompany, valueX, yPos, maxValueWidth, { fontSize: 10 });
   
   if (estimateName) {
-    yPos += 5;
-    addText(estimateName, valueX, yPos, { fontSize: 10 });
+    yPos += 2;
+    yPos = addWrappedText(estimateName, valueX, yPos, maxValueWidth, { fontSize: 10 });
   }
 
   // === 1. РАБОТЫ ===

@@ -310,15 +310,15 @@ export function EstimateForm({
         <table style="width: 100%; border: none; margin-top: 4mm; line-height: 1.0;">
           <tr>
             <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Заказчик:</td>
-            <td style="border: none; padding: 0; vertical-align: top;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
+            <td style="border: none; padding: 0; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word;">${estimate?.clientName || selectedRequest?.clientName || "—"}</td>
           </tr>
           <tr>
             <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Объект:</td>
-            <td style="border: none; padding: 0; vertical-align: top;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
+            <td style="border: none; padding: 0; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word;">${estimate?.objectName || selectedRequest?.serviceObjectName || "—"}${(estimate?.objectAddress || selectedRequest?.serviceObjectAddress) ? `, ${estimate?.objectAddress || selectedRequest?.serviceObjectAddress}` : ""}</td>
           </tr>
           <tr>
             <td style="width: 28mm; font-weight: bold; border: none; padding: 0; vertical-align: top;">Исполнитель:</td>
-            <td style="border: none; padding: 0; vertical-align: top;">${getExecutorName()}</td>
+            <td style="border: none; padding: 0; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word;">${getExecutorName()}</td>
           </tr>
           <tr>
             <td style="width: 28mm; border: none; padding: 0;"></td>
