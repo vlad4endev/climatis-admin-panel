@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import { useCreateAssignment, useUpdateAssignment } from "@/hooks/useAssignments
 
 interface AssignmentFormProps {
   assignment?: Assignment;
-  onSubmit: (data: Partial<Assignment>) => void;
+  onSubmit: (data: Partial<Assignment>) => void | Promise<void>;
   onCancel: () => void;
   teams: Array<{ id: string; teamName: string }>;
   readOnly?: boolean;
@@ -31,6 +31,7 @@ export function AssignmentForm({
   teams,
   readOnly = false,
 }: AssignmentFormProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       assignmentNumber: assignment?.assignmentNumber || "",
@@ -87,12 +88,18 @@ export function AssignmentForm({
     }
   }, [assignment?.id, setCurrentId]);
 
-  const handleFormSubmit = (data: any) => {
-    const team = teams.find(t => t.id === data.teamId);
-    onSubmit({
-      ...data,
-      teamName: team?.teamName || "",
-    });
+  const handleFormSubmit = async (data: any) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const team = teams.find(t => t.id === data.teamId);
+      await onSubmit({
+        ...data,
+        teamName: team?.teamName || "",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const worksTotal = assignment?.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
@@ -236,8 +243,8 @@ export function AssignmentForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit">
-            {assignment ? "Сохранить" : "Создать"}
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? "Сохранение..." : (assignment ? "Сохранить" : "Создать")}
           </Button>
         </div>
       )}
