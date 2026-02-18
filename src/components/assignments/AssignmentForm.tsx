@@ -108,6 +108,7 @@ export function AssignmentForm({
             <Input
               id="assignmentNumber"
               {...register("assignmentNumber")}
+              placeholder="Авто (Н-ГГГГ-НННН)"
               readOnly={readOnly}
               tabIndex={readOnly ? -1 : undefined}
               className={readOnly ? "bg-input-readonly" : ""}
