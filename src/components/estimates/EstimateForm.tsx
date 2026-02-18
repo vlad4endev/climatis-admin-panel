@@ -44,7 +44,7 @@ import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
 
 interface EstimateFormProps {
   estimate?: Estimate;
-  onSubmit: (data: Partial<Estimate>) => void;
+  onSubmit: (data: Partial<Estimate>) => void | Promise<void>;
   onCancel: () => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
   employees: Array<{ id: string; fullName: string; position?: string }>;
@@ -61,6 +61,7 @@ export function EstimateForm({
   availableMaterials = [],
   readOnly = false,
 }: EstimateFormProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       name: estimate?.name || "",
@@ -185,15 +186,21 @@ export function EstimateForm({
   const totalVat = worksVat + materialsVat;
   const customerGrandTotalWithVat = calculateGrandTotalWithVat(customerGrandTotal, worksVat, customerCalc.vatRate);
 
-  const handleFormSubmit = (data: any) => {
-    const employee = employees.find((e) => e.id === data.createdById);
-    onSubmit({
-      ...data,
-      createdByName: employee?.fullName || "",
-      workBlocks,
-      materials,
-      customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
-    });
+  const handleFormSubmit = async (data: any) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const employee = employees.find((e) => e.id === data.createdById);
+      await onSubmit({
+        ...data,
+        createdByName: employee?.fullName || "",
+        workBlocks,
+        materials,
+        customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getExecutorName = () => {
@@ -987,7 +994,9 @@ export function EstimateForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit">{estimate ? "Сохранить" : "Создать"}</Button>
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? "Сохранение..." : (estimate ? "Сохранить" : "Создать")}
+          </Button>
         </div>
       )}
     </form>
