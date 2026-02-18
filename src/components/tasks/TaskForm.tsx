@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ interface TaskFormProps {
   task?: Task;
   employees: Employee[];
   requests: Request[];
-  onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => void;
+  onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => void | Promise<void>;
   onCancel: () => void;
   readOnly?: boolean;
   /** Режим исполнителя: можно только отмечать пункты и комментировать */
@@ -43,6 +43,7 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const dragOverItemId = useRef<string | null>(null);
 
   const selectedEmployee = employees.find(e => e.id === assigneeId);
@@ -135,21 +136,27 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
     setNewComment("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      title,
-      description,
-      assigneeId,
-      assigneeName: getEmployeeName(selectedEmployee),
-      requestId: requestId || undefined,
-      requestNumber: selectedRequest?.requestNumber,
-      proposedDeadline,
-      agreedDeadline,
-      status,
-      checklist,
-      comments
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      await onSubmit({
+        title,
+        description,
+        assigneeId,
+        assigneeName: getEmployeeName(selectedEmployee),
+        requestId: requestId || undefined,
+        requestNumber: selectedRequest?.requestNumber,
+        proposedDeadline,
+        agreedDeadline,
+        status,
+        checklist,
+        comments
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -452,8 +459,8 @@ export function TaskForm({ task, employees, requests, onSubmit, onCancel, readOn
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit">
-            {task ? "Сохранить" : "Создать"}
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? "Сохранение..." : (task ? "Сохранить" : "Создать")}
           </Button>
         </div>
       )}

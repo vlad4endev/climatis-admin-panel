@@ -171,21 +171,15 @@ export default function Tasks() {
     } : undefined,
   };
 
-  const handleSubmit = (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
+  const handleSubmit = async (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
     if (editingTask) {
-      updateMutation.mutate({ id: editingTask.id, ...taskData }, {
-        onSuccess: () => {
-          setIsDialogOpen(false);
-          setEditingTask(undefined);
-        }
-      });
+      await updateMutation.mutateAsync({ id: editingTask.id, ...taskData });
+      setIsDialogOpen(false);
+      setEditingTask(undefined);
     } else {
-      createMutation.mutate(taskData, {
-        onSuccess: () => {
-          setIsDialogOpen(false);
-          setEditingTask(undefined);
-        }
-      });
+      await createMutation.mutateAsync(taskData);
+      setIsDialogOpen(false);
+      setEditingTask(undefined);
     }
   };
 
