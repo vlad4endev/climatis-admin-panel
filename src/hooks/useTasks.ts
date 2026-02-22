@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Task } from "@/types/task";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useTasks() {
   return useQuery({
@@ -78,7 +79,6 @@ export function useCreateTask() {
 
       if (taskError) throw taskError;
 
-      // Create checklist items
       if (task.checklist && task.checklist.length > 0) {
         const itemsToInsert = task.checklist.map((item, index) => ({
           task_id: taskData.id,
@@ -90,7 +90,6 @@ export function useCreateTask() {
         await supabase.from("task_checklist_items").insert(itemsToInsert);
       }
 
-      // Log activity
       await logActivity({
         section: 'tasks',
         elementId: taskData.id,
@@ -104,7 +103,7 @@ export function useCreateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Задача создана");
     },
-    onError: () => toast.error("Ошибка при создании задачи"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании задачи")),
   });
 }
 
@@ -128,7 +127,6 @@ export function useUpdateTask() {
 
       if (error) throw error;
 
-      // Update checklist - delete old and insert new
       if (task.checklist) {
         await supabase.from("task_checklist_items").delete().eq("task_id", id);
 
@@ -144,7 +142,6 @@ export function useUpdateTask() {
         }
       }
 
-      // Log activity
       await logActivity({
         section: 'tasks',
         elementId: id,
@@ -157,7 +154,7 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Задача обновлена");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении задачи")),
   });
 }
 
@@ -166,7 +163,6 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Get name for logging
       const { data: task } = await supabase
         .from("tasks")
         .select("title")
@@ -179,7 +175,6 @@ export function useDeleteTask() {
         .eq("id", id);
       if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'tasks',
         elementId: id,
@@ -192,6 +187,6 @@ export function useDeleteTask() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Задача перемещена в корзину");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении задачи")),
   });
 }

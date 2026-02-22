@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Document } from "@/types/document";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useDocuments() {
   return useQuery({
@@ -75,7 +76,7 @@ export function useCreateDocument() {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.success("Договор создан");
     },
-    onError: () => toast.error("Ошибка при создании договора"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании договора")),
   });
 }
 
@@ -113,7 +114,7 @@ export function useUpdateDocument() {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.success("Договор обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении договора")),
   });
 }
 
@@ -148,6 +149,6 @@ export function useDeleteDocument() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Договор перемещён в корзину");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении договора")),
   });
 }

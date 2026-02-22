@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ServiceObject } from "@/types/serviceObject";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useServiceObjects() {
   return useQuery({
@@ -85,7 +86,7 @@ export function useCreateServiceObject() {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });
       toast.success("Объект создан");
     },
-    onError: () => toast.error("Ошибка при создании объекта"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании объекта")),
   });
 }
 
@@ -135,7 +136,7 @@ export function useUpdateServiceObject() {
       queryClient.invalidateQueries({ queryKey: ["service_objects"] });
       toast.success("Объект обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении объекта")),
   });
 }
 
@@ -170,6 +171,6 @@ export function useDeleteServiceObject() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Объект перемещён в корзину");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении объекта")),
   });
 }

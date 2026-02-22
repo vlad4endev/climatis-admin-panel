@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/types/invoice";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useInvoices() {
   return useQuery({
@@ -72,7 +73,7 @@ export function useCreateInvoice() {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       toast.success("Счёт создан");
     },
-    onError: () => toast.error("Ошибка при создании счёта"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании счёта")),
   });
 }
 
@@ -115,7 +116,7 @@ export function useUpdateInvoice() {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       toast.success("Счёт обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении счёта")),
   });
 }
 
@@ -146,6 +147,6 @@ export function useDeleteInvoice() {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       toast.success("Счёт удалён");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении счёта")),
   });
 }

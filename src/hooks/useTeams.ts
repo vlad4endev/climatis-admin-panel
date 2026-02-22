@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Team } from "@/types/team";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useTeams() {
   return useQuery({
@@ -79,7 +80,7 @@ export function useCreateTeam() {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Бригада создана");
     },
-    onError: () => toast.error("Ошибка при создании бригады"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании бригады")),
   });
 }
 
@@ -126,7 +127,7 @@ export function useUpdateTeam() {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Бригада обновлена");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении бригады")),
   });
 }
 
@@ -158,6 +159,6 @@ export function useDeleteTeam() {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Бригада удалена");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении бригады")),
   });
 }

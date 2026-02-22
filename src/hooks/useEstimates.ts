@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Estimate, WorkBlock, Material, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useEstimates() {
   return useQuery({
@@ -100,7 +101,6 @@ export function useCreateEstimate() {
 
       if (estimateError) throw estimateError;
 
-      // Create work blocks
       if (estimate.workBlocks && estimate.workBlocks.length > 0) {
         for (let i = 0; i < estimate.workBlocks.length; i++) {
           const wb = estimate.workBlocks[i];
@@ -130,7 +130,6 @@ export function useCreateEstimate() {
         }
       }
 
-      // Create materials
       if (estimate.materials && estimate.materials.length > 0) {
         const materialsToInsert = estimate.materials.map((m, i) => ({
           estimate_id: estimateData.id,
@@ -144,7 +143,6 @@ export function useCreateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
-      // Log activity
       await logActivity({
         section: 'estimates',
         elementId: estimateData.id,
@@ -158,7 +156,7 @@ export function useCreateEstimate() {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
       toast.success("Расчёт создан");
     },
-    onError: () => toast.error("Ошибка при создании расчёта"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании расчёта")),
   });
 }
 
@@ -183,7 +181,6 @@ export function useUpdateEstimate() {
 
       if (error) throw error;
 
-      // Delete old work blocks and materials
       const { data: oldBlocks } = await supabase
         .from("work_blocks")
         .select("id")
@@ -197,7 +194,6 @@ export function useUpdateEstimate() {
       await supabase.from("work_blocks").delete().eq("estimate_id", id);
       await supabase.from("estimate_materials").delete().eq("estimate_id", id);
 
-      // Create new work blocks
       if (estimate.workBlocks && estimate.workBlocks.length > 0) {
         for (let i = 0; i < estimate.workBlocks.length; i++) {
           const wb = estimate.workBlocks[i];
@@ -225,7 +221,6 @@ export function useUpdateEstimate() {
         }
       }
 
-      // Create new materials
       if (estimate.materials && estimate.materials.length > 0) {
         const materialsToInsert = estimate.materials.map((m, i) => ({
           estimate_id: id,
@@ -239,7 +234,6 @@ export function useUpdateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
-      // Log activity
       await logActivity({
         section: 'estimates',
         elementId: id,
@@ -252,7 +246,7 @@ export function useUpdateEstimate() {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
       toast.success("Расчёт обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении расчёта")),
   });
 }
 
@@ -261,7 +255,6 @@ export function useDeleteEstimate() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Get name for logging
       const { data: est } = await supabase
         .from("estimates")
         .select("name, estimate_number")
@@ -274,7 +267,6 @@ export function useDeleteEstimate() {
         .eq("id", id);
       if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'estimates',
         elementId: id,
@@ -287,7 +279,7 @@ export function useDeleteEstimate() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Расчёт перемещён в корзину");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении расчёта")),
   });
 }
 
@@ -296,7 +288,6 @@ export function useCopyEstimate() {
 
   return useMutation({
     mutationFn: async (estimate: Estimate) => {
-      // Create new estimate with "Копия" prefix
       const { data: estimateData, error: estimateError } = await supabase
         .from("estimates")
         .insert({
@@ -315,7 +306,6 @@ export function useCopyEstimate() {
 
       if (estimateError) throw estimateError;
 
-      // Copy work blocks
       if (estimate.workBlocks && estimate.workBlocks.length > 0) {
         for (let i = 0; i < estimate.workBlocks.length; i++) {
           const wb = estimate.workBlocks[i];
@@ -345,7 +335,6 @@ export function useCopyEstimate() {
         }
       }
 
-      // Copy materials
       if (estimate.materials && estimate.materials.length > 0) {
         const materialsToInsert = estimate.materials.map((m, i) => ({
           estimate_id: estimateData.id,
@@ -359,7 +348,6 @@ export function useCopyEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
-      // Log activity
       await logActivity({
         section: 'estimates',
         elementId: estimateData.id,
@@ -374,6 +362,6 @@ export function useCopyEstimate() {
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
       toast.success("Расчёт скопирован");
     },
-    onError: () => toast.error("Ошибка при копировании расчёта"),
+    onError: (error) => toast.error(getErrorMessage(error, "копировании расчёта")),
   });
 }

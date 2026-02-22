@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/contact";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 interface ContactRow {
   id: string;
@@ -106,10 +107,7 @@ export function useCreateContact() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast.success("Контактное лицо создано");
     },
-    onError: (error) => {
-      console.error("Create contact error:", error);
-      toast.error("Ошибка при создании контактного лица");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "создании контактного лица")),
   });
 }
 
@@ -155,10 +153,7 @@ export function useUpdateContact() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast.success("Контактное лицо обновлено");
     },
-    onError: (error) => {
-      console.error("Update contact error:", error);
-      toast.error("Ошибка при обновлении контактного лица");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении контактного лица")),
   });
 }
 
@@ -217,10 +212,7 @@ export function useUpdateContactField() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast.success("Данные обновлены");
     },
-    onError: (error) => {
-      console.error("Update field error:", error);
-      toast.error("Ошибка при обновлении");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении данных контакта")),
   });
 }
 
@@ -259,9 +251,6 @@ export function useDeleteContact() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Контактное лицо перемещено в корзину");
     },
-    onError: (error) => {
-      console.error("Delete contact error:", error);
-      toast.error("Ошибка при удалении контактного лица");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "удалении контактного лица")),
   });
 }

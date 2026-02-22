@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "@/types/employee";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useEmployees() {
   return useQuery({
@@ -57,7 +58,7 @@ export function useCreateEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Сотрудник создан");
     },
-    onError: () => toast.error("Ошибка при создании сотрудника"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании сотрудника")),
   });
 }
 
@@ -90,7 +91,7 @@ export function useUpdateEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Сотрудник обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении сотрудника")),
   });
 }
 
@@ -122,6 +123,6 @@ export function useDeleteEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Сотрудник удалён");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении сотрудника")),
   });
 }
