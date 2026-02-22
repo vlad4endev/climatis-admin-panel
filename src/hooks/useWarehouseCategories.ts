@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { WarehouseCategory } from "@/types/warehouseCategory";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useWarehouseCategories() {
   return useQuery({
@@ -54,7 +55,7 @@ export function useCreateWarehouseCategory() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Категория создана");
     },
-    onError: () => toast.error("Ошибка при создании категории"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании категории")),
   });
 }
 
@@ -74,7 +75,7 @@ export function useUpdateWarehouseCategory() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Категория обновлена");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении категории")),
   });
 }
 
@@ -90,6 +91,6 @@ export function useDeleteWarehouseCategory() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Категория удалена");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении категории")),
   });
 }

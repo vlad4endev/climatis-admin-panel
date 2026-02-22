@@ -4,11 +4,11 @@ import { Client } from "@/types/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 type ClientInsert = Database["public"]["Tables"]["clients"]["Insert"];
 
-// Transform database row to frontend Client type
 const transformToClient = (row: ClientRow): Client => ({
   id: row.id,
   companyName: row.company_name,
@@ -19,14 +19,12 @@ const transformToClient = (row: ClientRow): Client => ({
   createdAt: new Date(row.created_at),
 });
 
-// Transform frontend Client to database insert format
 const transformToInsert = (
   client: Omit<Client, "id" | "createdAt">
 ): Omit<ClientInsert, "id" | "created_at" | "updated_at"> => ({
   company_name: client.companyName,
   type: client.type,
   division: client.division || "",
-  // These fields are now managed in contacts table, but still required by DB
   main_contact_name: "-",
   phone: "-",
   email: "",
@@ -45,11 +43,7 @@ export function useClients() {
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching clients:", error);
-        throw error;
-      }
-
+      if (error) throw error;
       return data.map(transformToClient);
     },
   });
@@ -61,19 +55,14 @@ export function useCreateClient() {
   return useMutation({
     mutationFn: async (client: Omit<Client, "id" | "createdAt">) => {
       const insertData = transformToInsert(client);
-      
       const { data, error } = await supabase
         .from("clients")
         .insert(insertData as any)
         .select()
         .single();
 
-      if (error) {
-        console.error("Error creating client:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'clients',
         elementId: data.id,
@@ -87,10 +76,7 @@ export function useCreateClient() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Организация успешно создана");
     },
-    onError: (error) => {
-      console.error("Create client error:", error);
-      toast.error("Ошибка при создании организации");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "создании организации")),
   });
 }
 
@@ -103,7 +89,6 @@ export function useUpdateClient() {
       ...client
     }: Omit<Client, "createdAt"> & { id: string }) => {
       const updateData = transformToInsert(client);
-
       const { data, error } = await supabase
         .from("clients")
         .update(updateData as any)
@@ -111,12 +96,8 @@ export function useUpdateClient() {
         .select()
         .single();
 
-      if (error) {
-        console.error("Error updating client:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'clients',
         elementId: id,
@@ -131,10 +112,7 @@ export function useUpdateClient() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Организация обновлена");
     },
-    onError: (error) => {
-      console.error("Update client error:", error);
-      toast.error("Ошибка при обновлении организации");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении организации")),
   });
 }
 
@@ -151,7 +129,6 @@ export function useUpdateClientField() {
       field: string;
       value: unknown;
     }) => {
-      // Map frontend field names to database column names
       const fieldMap: Record<string, string> = {
         companyName: "company_name",
         type: "type",
@@ -162,7 +139,6 @@ export function useUpdateClientField() {
 
       const dbField = fieldMap[field] || field;
 
-      // Get current name for logging
       const { data: current } = await supabase
         .from("clients")
         .select("company_name")
@@ -174,12 +150,8 @@ export function useUpdateClientField() {
         .update({ [dbField]: value })
         .eq("id", id);
 
-      if (error) {
-        console.error("Error updating client field:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'clients',
         elementId: id,
@@ -192,10 +164,7 @@ export function useUpdateClientField() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Данные обновлены");
     },
-    onError: (error) => {
-      console.error("Update field error:", error);
-      toast.error("Ошибка при обновлении");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении данных организации")),
   });
 }
 
@@ -204,7 +173,6 @@ export function useDeleteClient() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Get name for logging before delete
       const { data: client } = await supabase
         .from("clients")
         .select("company_name")
@@ -216,12 +184,8 @@ export function useDeleteClient() {
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
 
-      if (error) {
-        console.error("Error deleting client:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Log activity
       await logActivity({
         section: 'clients',
         elementId: id,
@@ -234,9 +198,6 @@ export function useDeleteClient() {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Организация перемещена в корзину");
     },
-    onError: (error) => {
-      console.error("Delete client error:", error);
-      toast.error("Ошибка при удалении организации");
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "удалении организации")),
   });
 }

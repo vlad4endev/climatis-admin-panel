@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StockMovement, StockMovementMaterial } from "@/types/stockMovement";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useStockMovements() {
   return useQuery({
@@ -97,7 +98,7 @@ export function useCreateStockMovement() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция создана");
     },
-    onError: () => toast.error("Ошибка при создании операции"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании складской операции")),
   });
 }
 
@@ -156,7 +157,7 @@ export function useUpdateStockMovement() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция обновлена");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении складской операции")),
   });
 }
 
@@ -200,6 +201,6 @@ export function useDeleteStockMovement() {
       queryClient.invalidateQueries({ queryKey: ["warehouse_categories"] });
       toast.success("Операция удалена");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении складской операции")),
   });
 }

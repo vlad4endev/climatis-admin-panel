@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SparePart } from "@/types/sparePart";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export function useSpareParts() {
   return useQuery({
@@ -73,7 +74,7 @@ export function useCreateSparePart() {
       queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
       toast.success("Материал создан");
     },
-    onError: () => toast.error("Ошибка при создании материала"),
+    onError: (error) => toast.error(getErrorMessage(error, "создании материала")),
   });
 }
 
@@ -112,7 +113,7 @@ export function useUpdateSparePart() {
       queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
       toast.success("Материал обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении материала")),
   });
 }
 
@@ -143,6 +144,6 @@ export function useDeleteSparePart() {
       queryClient.invalidateQueries({ queryKey: ["spare_parts"] });
       toast.success("Материал удалён");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "удалении материала")),
   });
 }

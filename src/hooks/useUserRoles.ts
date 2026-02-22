@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export type AppRole = "admin" | "user";
 export type PermissionLevel = "none" | "view" | "edit";
@@ -205,7 +206,7 @@ export function useSetUserRole() {
       queryClient.invalidateQueries({ queryKey: ["is_admin"] });
       toast.success("Роль обновлена");
     },
-    onError: () => toast.error("Ошибка при обновлении роли"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении роли")),
   });
 }
 
@@ -240,6 +241,6 @@ export function useSetSectionPermission() {
       queryClient.invalidateQueries({ queryKey: ["my_permissions"] });
       toast.success("Доступ обновлён");
     },
-    onError: () => toast.error("Ошибка при обновлении доступа"),
+    onError: (error) => toast.error(getErrorMessage(error, "обновлении доступа")),
   });
 }

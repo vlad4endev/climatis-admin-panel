@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessages";
 
 export type TrashItemType = 
   | "requests" 
@@ -170,7 +171,7 @@ export function useRestoreItem() {
       queryClient.invalidateQueries({ queryKey: [type] });
       toast.success("Элемент восстановлен");
     },
-    onError: () => toast.error("Ошибка при восстановлении"),
+    onError: (error) => toast.error(getErrorMessage(error, "восстановлении элемента")),
   });
 }
 
@@ -191,6 +192,6 @@ export function usePermanentDelete() {
       queryClient.invalidateQueries({ queryKey: [type] });
       toast.success("Элемент удалён навсегда");
     },
-    onError: () => toast.error("Ошибка при удалении"),
+    onError: (error) => toast.error(getErrorMessage(error, "окончательном удалении")),
   });
 }
