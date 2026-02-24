@@ -9,7 +9,7 @@ import { Loader2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest, useCopyRequest } from "@/hooks/useRequests";
+import { useRequests, usePaginatedRequests, useCreateRequest, useUpdateRequest, useDeleteRequest, useCopyRequest } from "@/hooks/useRequests";
 import { useClients } from "@/hooks/useClients";
 import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -18,7 +18,10 @@ import { useTeams } from "@/hooks/useTeams";
 import { useCanEdit } from "@/hooks/useUserRoles";
 
 export default function Requests() {
-  const { data: requests = [], isLoading: requestsLoading } = useRequests();
+  const [currentPage, setCurrentPage] = useState(0);
+  const { data: requestsResult, isLoading: requestsLoading } = usePaginatedRequests(currentPage);
+  const requests = requestsResult?.items || [];
+  const totalCount = requestsResult?.totalCount || 0;
   const { data: clients = [] } = useClients();
   const { data: serviceObjects = [] } = useServiceObjects();
   const { data: documents = [] } = useDocuments();
@@ -192,6 +195,12 @@ export default function Requests() {
         emptyMessage="Нет заявок"
         kanbanGroupField="status"
         kanbanColumns={REQUEST_STATUSES}
+        pagination={{
+          page: currentPage,
+          totalCount,
+          pageSize: 50,
+          onPageChange: setCurrentPage,
+        }}
       />
 
       <Dialog open={isFormOpen} onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingRequest(undefined); }}>

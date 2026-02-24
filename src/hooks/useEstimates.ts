@@ -6,6 +6,71 @@ import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
 
+const PAGE_SIZE = 50;
+
+const ESTIMATE_SELECT = `
+  *,
+  request:requests(
+    id, 
+    request_number,
+    client:clients(id, company_name),
+    object:service_objects(id, object_name, address)
+  ),
+  creator:employees(id, full_name),
+  materials:estimate_materials(
+    id,
+    material_name,
+    quantity,
+    price_per_unit,
+    spare_part_id,
+    sort_order
+  ),
+  work_blocks(
+    id,
+    description,
+    sort_order,
+    rows:work_rows(*)
+  )
+`;
+
+function mapEstimateRow(row: any): Estimate {
+  return {
+    id: row.id,
+    name: row.name,
+    requestId: row.request_id || undefined,
+    requestName: row.request?.request_number || undefined,
+    clientName: row.request?.client?.company_name || undefined,
+    objectName: row.request?.object?.object_name || undefined,
+    objectAddress: row.request?.object?.address || undefined,
+    estimateNumber: row.estimate_number,
+    estimateDate: row.estimate_date,
+    status: row.status,
+    type: row.type,
+    createdById: row.created_by_id || "",
+    createdByName: row.creator?.full_name || "",
+    engineerComment: row.engineer_comment || undefined,
+    customerCalculation: (row.customer_calculation as unknown as CustomerCalculation) || DEFAULT_CUSTOMER_CALCULATION,
+    workBlocks: row.work_blocks?.map((wb: any): WorkBlock => ({
+      id: wb.id,
+      description: wb.description || "",
+      rows: wb.rows?.map((r: any) => ({
+        category: r.category,
+        planHours: Number(r.plan_hours) || 0,
+        quantity: Number(r.quantity) || 0,
+        rate: Number(r.rate) || 0,
+      })) || [],
+    })) || [],
+    materials: row.materials?.map((m: any): Material => ({
+      id: m.id,
+      materialId: m.spare_part_id || undefined,
+      materialName: m.material_name,
+      quantity: Number(m.quantity) || 0,
+      pricePerUnit: Number(m.price_per_unit) || 0,
+    })) || [],
+  };
+}
+
+/** Returns all estimates (no pagination) - used by other pages for lookups */
 export function useEstimates() {
   return useQuery({
     queryKey: ["estimates"],
@@ -13,69 +78,34 @@ export function useEstimates() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("estimates")
-        .select(`
-          *,
-          request:requests(
-            id, 
-            request_number,
-            client:clients(id, company_name),
-            object:service_objects(id, object_name, address)
-          ),
-          creator:employees(id, full_name),
-          materials:estimate_materials(
-            id,
-            material_name,
-            quantity,
-            price_per_unit,
-            spare_part_id,
-            sort_order
-          ),
-          work_blocks(
-            id,
-            description,
-            sort_order,
-            rows:work_rows(*)
-          )
-        `)
+        .select(ESTIMATE_SELECT)
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      return data.map(mapEstimateRow);
+    },
+  });
+}
 
-      return data.map((row): Estimate => ({
-        id: row.id,
-        name: row.name,
-        requestId: row.request_id || undefined,
-        requestName: row.request?.request_number || undefined,
-        clientName: row.request?.client?.company_name || undefined,
-        objectName: row.request?.object?.object_name || undefined,
-        objectAddress: row.request?.object?.address || undefined,
-        estimateNumber: row.estimate_number,
-        estimateDate: row.estimate_date,
-        status: row.status,
-        type: row.type,
-        createdById: row.created_by_id || "",
-        createdByName: row.creator?.full_name || "",
-        engineerComment: row.engineer_comment || undefined,
-        customerCalculation: (row.customer_calculation as unknown as CustomerCalculation) || DEFAULT_CUSTOMER_CALCULATION,
-        workBlocks: row.work_blocks?.map((wb: any): WorkBlock => ({
-          id: wb.id,
-          description: wb.description || "",
-          rows: wb.rows?.map((r: any) => ({
-            category: r.category,
-            planHours: Number(r.plan_hours) || 0,
-            quantity: Number(r.quantity) || 0,
-            rate: Number(r.rate) || 0,
-          })) || [],
-        })) || [],
-        materials: row.materials?.map((m: any): Material => ({
-          id: m.id,
-          materialId: m.spare_part_id || undefined,
-          materialName: m.material_name,
-          quantity: Number(m.quantity) || 0,
-          pricePerUnit: Number(m.price_per_unit) || 0,
-        })) || [],
-      }));
+/** Returns paginated estimates with total count */
+export function usePaginatedEstimates(page: number) {
+  return useQuery({
+    queryKey: ["estimates", "page", page],
+    ...listQueryOptions,
+    queryFn: async () => {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error, count } = await supabase
+        .from("estimates")
+        .select(ESTIMATE_SELECT, { count: 'exact' })
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      return { items: data.map(mapEstimateRow), totalCount: count || 0 };
     },
   });
 }

@@ -6,6 +6,50 @@ import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
 
+const PAGE_SIZE = 50;
+
+function mapRequestRow(row: any): Request {
+  return {
+    id: row.id,
+    requestNumber: row.request_number,
+    createdAt: new Date(row.created_at),
+    status: row.status,
+    type: row.type,
+    priority: row.priority,
+    clientId: row.client_id,
+    clientName: row.client?.company_name || "",
+    objectId: row.object_id,
+    objectName: row.object?.object_name || "",
+    contractId: row.contract_id || undefined,
+    contractNumber: row.contract?.contract_number || undefined,
+    contractConditions: row.contract?.response_conditions || row.contract_conditions || undefined,
+    problemDescription: row.problem_description || "",
+    comments: row.comments || "",
+    desiredDate: row.desired_date || undefined,
+    responsibleManagerId: row.responsible_manager_id || undefined,
+    responsibleManagerName: row.responsible_manager?.full_name || undefined,
+    assignedTeamId: row.assigned_team_id || undefined,
+    assignedTeamName: row.assigned_team?.name || undefined,
+    assignedEngineerId: row.assigned_engineer_id || undefined,
+    assignedEngineerName: row.assigned_engineer?.full_name || undefined,
+    plannedVisitDate: row.planned_visit_date || undefined,
+    actualStartTime: row.actual_start_time || undefined,
+    actualEndTime: row.actual_end_time || undefined,
+    hoursSpent: row.hours_spent ? Number(row.hours_spent) : undefined,
+  };
+}
+
+const REQUEST_SELECT = `
+  *,
+  client:clients(id, company_name),
+  object:service_objects(id, object_name),
+  contract:documents(id, contract_number, response_conditions),
+  responsible_manager:employees!requests_responsible_manager_id_fkey(id, full_name),
+  assigned_team:teams(id, name),
+  assigned_engineer:employees!requests_assigned_engineer_id_fkey(id, full_name)
+`;
+
+/** Returns all requests (no pagination) - used by other pages for lookups */
 export function useRequests() {
   return useQuery({
     queryKey: ["requests"],
@@ -13,48 +57,34 @@ export function useRequests() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("requests")
-        .select(`
-          *,
-          client:clients(id, company_name),
-          object:service_objects(id, object_name),
-          contract:documents(id, contract_number, response_conditions),
-          responsible_manager:employees!requests_responsible_manager_id_fkey(id, full_name),
-          assigned_team:teams(id, name),
-          assigned_engineer:employees!requests_assigned_engineer_id_fkey(id, full_name)
-        `)
+        .select(REQUEST_SELECT)
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      return data.map(mapRequestRow);
+    },
+  });
+}
 
-      return data.map((row): Request => ({
-        id: row.id,
-        requestNumber: row.request_number,
-        createdAt: new Date(row.created_at),
-        status: row.status,
-        type: row.type,
-        priority: row.priority,
-        clientId: row.client_id,
-        clientName: row.client?.company_name || "",
-        objectId: row.object_id,
-        objectName: row.object?.object_name || "",
-        contractId: row.contract_id || undefined,
-        contractNumber: row.contract?.contract_number || undefined,
-        contractConditions: row.contract?.response_conditions || row.contract_conditions || undefined,
-        problemDescription: row.problem_description || "",
-        comments: row.comments || "",
-        desiredDate: row.desired_date || undefined,
-        responsibleManagerId: row.responsible_manager_id || undefined,
-        responsibleManagerName: row.responsible_manager?.full_name || undefined,
-        assignedTeamId: row.assigned_team_id || undefined,
-        assignedTeamName: row.assigned_team?.name || undefined,
-        assignedEngineerId: row.assigned_engineer_id || undefined,
-        assignedEngineerName: row.assigned_engineer?.full_name || undefined,
-        plannedVisitDate: row.planned_visit_date || undefined,
-        actualStartTime: row.actual_start_time || undefined,
-        actualEndTime: row.actual_end_time || undefined,
-        hoursSpent: row.hours_spent ? Number(row.hours_spent) : undefined,
-      }));
+/** Returns paginated requests with total count */
+export function usePaginatedRequests(page: number) {
+  return useQuery({
+    queryKey: ["requests", "page", page],
+    ...listQueryOptions,
+    queryFn: async () => {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error, count } = await supabase
+        .from("requests")
+        .select(REQUEST_SELECT, { count: 'exact' })
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      return { items: data.map(mapRequestRow), totalCount: count || 0 };
     },
   });
 }
