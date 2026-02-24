@@ -3,11 +3,11 @@
  * in multi-user environments.
  */
 
-/** Default staleTime for list queries (30 seconds) */
-export const LIST_STALE_TIME = 30 * 1000;
+/** Default staleTime for list queries (5 minutes - Realtime handles updates) */
+export const LIST_STALE_TIME = 5 * 60 * 1000;
 
-/** Longer staleTime for reference data that rarely changes (2 minutes) */
-export const REF_STALE_TIME = 2 * 60 * 1000;
+/** Longer staleTime for reference data that rarely changes (10 minutes - Realtime handles updates) */
+export const REF_STALE_TIME = 10 * 60 * 1000;
 
 /** Default query options for list queries */
 export const listQueryOptions = {

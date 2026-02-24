@@ -1,6 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscription";
 import siberianForestBg from "@/assets/siberian-forest-bg.jpg";
 
 interface AppLayoutProps {
@@ -8,6 +9,8 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  useRealtimeSubscriptions();
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
