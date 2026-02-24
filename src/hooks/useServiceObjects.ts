@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { ServiceObject } from "@/types/serviceObject";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -8,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useServiceObjects() {
   return useQuery({
     queryKey: ["service_objects"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_objects")

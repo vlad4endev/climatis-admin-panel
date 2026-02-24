@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { listQueryOptions } from "@/lib/queryConfig";
 import { Invoice } from "@/types/invoice";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -8,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useInvoices() {
   return useQuery({
     queryKey: ["invoices"],
+    ...listQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("invoices")

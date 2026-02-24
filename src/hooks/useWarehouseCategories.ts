@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { WarehouseCategory } from "@/types/warehouseCategory";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errorMessages";
@@ -7,6 +8,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useWarehouseCategories() {
   return useQuery({
     queryKey: ["warehouse_categories"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("warehouse_categories")

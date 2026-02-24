@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { SparePart } from "@/types/sparePart";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -8,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useSpareParts() {
   return useQuery({
     queryKey: ["spare_parts"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("spare_parts")
