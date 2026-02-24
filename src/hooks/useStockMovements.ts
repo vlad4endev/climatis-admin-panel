@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { listQueryOptions } from "@/lib/queryConfig";
 import { StockMovement, StockMovementMaterial } from "@/types/stockMovement";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -8,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useStockMovements() {
   return useQuery({
     queryKey: ["stock_movements"],
+    ...listQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stock_movements")

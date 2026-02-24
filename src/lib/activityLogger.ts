@@ -29,15 +29,23 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 const FIELD_LABELS: Record<string, string> = {
-  // Common fields
+  clientName: 'Контрагент',
+  assignmentNumber: 'Номер задания',
+  estimateName: 'Название расчёта',
+  invoiceNumber: 'Номер счёта',
+  taskName: 'Название задачи',
+  employeeName: 'ФИО сотрудника',
+  teamName: 'Название бригады',
+  sparePartName: 'Название комплектующего',
+  categoryName: 'Название категории',
+  stockMovementName: 'Название перемещения',
+  userName: 'Имя пользователя',
   name: 'Название',
   title: 'Заголовок',
   status: 'Статус',
   notes: 'Примечания',
   comments: 'Комментарии',
   description: 'Описание',
-  
-  // Documents
   contractNumber: 'Номер договора',
   contract_number: 'Номер договора',
   startDate: 'Дата начала',
@@ -50,8 +58,6 @@ const FIELD_LABELS: Record<string, string> = {
   response_conditions: 'Условия реагирования',
   addedFile: 'Добавлен файл',
   removedFile: 'Удалён файл',
-  
-  // Clients
   companyName: 'Название компании',
   company_name: 'Название компании',
   mainContactName: 'Контактное лицо',
@@ -60,8 +66,6 @@ const FIELD_LABELS: Record<string, string> = {
   email: 'Email',
   division: 'Подразделение',
   requisites: 'Реквизиты',
-  
-  // Requests
   requestNumber: 'Номер заявки',
   request_number: 'Номер заявки',
   priority: 'Приоритет',
@@ -72,36 +76,26 @@ const FIELD_LABELS: Record<string, string> = {
   desired_date: 'Желаемая дата',
   plannedVisitDate: 'Планируемая дата визита',
   planned_visit_date: 'Планируемая дата визита',
-  
-  // Estimates
   estimateNumber: 'Номер расчёта',
   estimate_number: 'Номер расчёта',
   estimateDate: 'Дата расчёта',
   estimate_date: 'Дата расчёта',
   engineerComment: 'Комментарий инженера',
   engineer_comment: 'Комментарий инженера',
-  
-  // Tasks
   assigneeName: 'Исполнитель',
   assignee_name: 'Исполнитель',
   proposedDeadline: 'Предложенный срок',
   proposed_deadline: 'Предложенный срок',
   agreedDeadline: 'Согласованный срок',
   agreed_deadline: 'Согласованный срок',
-  
-  // Service Objects
   objectName: 'Название объекта',
   object_name: 'Название объекта',
   address: 'Адрес',
   accessDescription: 'Описание доступа',
   access_description: 'Описание доступа',
-  
-  // Employees
   fullName: 'ФИО',
   full_name: 'ФИО',
   position: 'Должность',
-  
-  // Spare Parts
   internalArticle: 'Внутренний артикул',
   internal_article: 'Внутренний артикул',
   currentStock: 'Текущий остаток',
@@ -151,7 +145,6 @@ export function getHumanReadableChanges(changes: Record<string, any> | null): st
   for (const [key, value] of Object.entries(changes)) {
     const fieldLabel = FIELD_LABELS[key] || key;
     
-    // Special cases
     if (key === 'addedFile') {
       descriptions.push(`Добавлен файл: ${value}`);
       continue;
@@ -161,34 +154,72 @@ export function getHumanReadableChanges(changes: Record<string, any> | null): st
       continue;
     }
     
-    // Regular field change
     descriptions.push(`${fieldLabel}: ${formatValue(value)}`);
   }
 
   return descriptions;
 }
 
+// Cached user info to avoid repeated auth + profile queries
+let cachedUserId: string | null = null;
+let cachedUserName: string | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+async function getCachedUser(): Promise<{ userId: string; userName: string } | null> {
+  const now = Date.now();
+  
+  // Return cached if fresh
+  if (cachedUserId && cachedUserName && (now - cacheTimestamp) < CACHE_TTL_MS) {
+    return { userId: cachedUserId, userName: cachedUserName };
+  }
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return null;
+
+    const userId = session.user.id;
+
+    // Get user name from profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userId)
+      .single();
+
+    cachedUserId = userId;
+    cachedUserName = profile?.full_name || session.user.email || 'Неизвестный';
+    cacheTimestamp = now;
+
+    return { userId: cachedUserId, userName: cachedUserName };
+  } catch {
+    return null;
+  }
+}
+
+// Listen for auth state changes to invalidate cache
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') {
+    cachedUserId = null;
+    cachedUserName = null;
+    cacheTimestamp = 0;
+  }
+});
+
 export async function logActivity(params: LogParams): Promise<void> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCachedUser();
     
     if (!user) {
       console.warn('Cannot log activity: no authenticated user');
       return;
     }
 
-    // Get user name from profiles
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', user.id)
-      .single();
-
     const { error } = await supabase
       .from('activity_logs')
       .insert({
-        user_id: user.id,
-        user_name: profile?.full_name || user.email || 'Неизвестный',
+        user_id: user.userId,
+        user_name: user.userName,
         section: params.section,
         element_id: params.elementId,
         element_name: params.elementName,

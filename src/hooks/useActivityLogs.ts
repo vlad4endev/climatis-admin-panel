@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { listQueryOptions } from "@/lib/queryConfig";
 
 export interface ActivityLog {
   id: string;
@@ -16,6 +17,7 @@ export interface ActivityLog {
 export function useActivityLogs(limit: number = 100) {
   return useQuery({
     queryKey: ["activity-logs", limit],
+    ...listQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("activity_logs")

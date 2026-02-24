@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { Contact } from "@/types/contact";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -48,6 +49,7 @@ const transformToInsert = (
 export function useContacts() {
   return useQuery({
     queryKey: ["contacts"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contacts")

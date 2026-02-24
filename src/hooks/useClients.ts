@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { Client } from "@/types/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
@@ -36,6 +37,7 @@ const transformToInsert = (
 export function useClients() {
   return useQuery({
     queryKey: ["clients"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")

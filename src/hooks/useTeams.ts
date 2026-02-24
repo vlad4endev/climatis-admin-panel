@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { refQueryOptions } from "@/lib/queryConfig";
 import { Team } from "@/types/team";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
@@ -8,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessages";
 export function useTeams() {
   return useQuery({
     queryKey: ["teams"],
+    ...refQueryOptions,
     queryFn: async () => {
       const { data: teamsData, error: teamsError } = await supabase
         .from("teams")
