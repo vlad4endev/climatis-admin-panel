@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutGrid, Table2, Kanban } from "lucide-react";
+import { Search, LayoutGrid, Table2, Kanban, ChevronLeft, ChevronRight } from "lucide-react";
 import { EntityTableView } from "./EntityTableView";
 import { EntityCardView } from "./EntityCardView";
 import { EntityKanbanView } from "./EntityKanbanView";
 import { EntityFilters, ActiveFilters } from "./EntityFilters";
-import { EntityListConfig, ViewMode, FilterValue } from "./types";
+import { EntityListConfig, ViewMode, FilterValue, PaginationConfig } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EntityListProps<T> {
@@ -17,9 +17,10 @@ interface EntityListProps<T> {
   kanbanColumns?: { value: string; label: string }[];
   defaultViewMode?: ViewMode;
   initialFilters?: FilterValue[];
+  pagination?: PaginationConfig;
 }
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [] }: EntityListProps<T>) {
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination }: EntityListProps<T>) {
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,6 +193,35 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           items={filteredItems}
           config={config}
         />
+      )}
+
+      {/* Пагинация */}
+      {pagination && pagination.totalCount > pagination.pageSize && (
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-sm text-muted-foreground">
+            {pagination.page * pagination.pageSize + 1}–{Math.min((pagination.page + 1) * pagination.pageSize, pagination.totalCount)} из {pagination.totalCount}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => pagination.onPageChange(pagination.page - 1)}
+              disabled={pagination.page === 0}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Назад
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => pagination.onPageChange(pagination.page + 1)}
+              disabled={(pagination.page + 1) * pagination.pageSize >= pagination.totalCount}
+            >
+              Вперёд
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

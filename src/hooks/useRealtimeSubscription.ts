@@ -29,6 +29,8 @@ const TABLE_QUERY_KEY_MAP: Record<RealtimeTable, string[][]> = {
   stock_movements: [["stock_movements"]],
 };
 
+// Invalidate all query keys that START WITH these prefixes (covers paginated queries too)
+
 const ALL_TABLES: RealtimeTable[] = Object.keys(TABLE_QUERY_KEY_MAP) as RealtimeTable[];
 
 /**

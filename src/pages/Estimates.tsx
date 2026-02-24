@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate, useCopyEstimate } from "@/hooks/useEstimates";
+import { useEstimates, usePaginatedEstimates, useCreateEstimate, useUpdateEstimate, useDeleteEstimate, useCopyEstimate } from "@/hooks/useEstimates";
 import { useRequests } from "@/hooks/useRequests";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useSpareParts } from "@/hooks/useSpareParts";
@@ -28,7 +28,10 @@ export default function Estimates() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const { data: estimates = [], isLoading } = useEstimates();
+  const [currentPage, setCurrentPage] = useState(0);
+  const { data: estimatesResult, isLoading } = usePaginatedEstimates(currentPage);
+  const estimates = estimatesResult?.items || [];
+  const totalCount = estimatesResult?.totalCount || 0;
   const { data: requestsData = [] } = useRequests();
   const { data: employeesData = [] } = useEmployees();
   const { data: sparePartsData = [] } = useSpareParts();
@@ -237,7 +240,17 @@ export default function Estimates() {
         }}
       />
 
-      <EntityList items={estimates} config={config} defaultViewMode="table" />
+      <EntityList
+        items={estimates}
+        config={config}
+        defaultViewMode="table"
+        pagination={{
+          page: currentPage,
+          totalCount,
+          pageSize: 50,
+          onPageChange: setCurrentPage,
+        }}
+      />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

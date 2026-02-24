@@ -40,3 +40,10 @@ export interface FilterValue {
   field: string;
   value: string;
 }
+
+export interface PaginationConfig {
+  page: number;
+  totalCount: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}
