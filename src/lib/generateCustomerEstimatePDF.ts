@@ -95,9 +95,10 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // Grand totals
   const worksWithVat = worksCustomerTotal + worksVat;
-  const grandTotalWithoutVat = worksCustomerTotal + materialsCustomerTotal;
+  const materialsWithoutVat = materialsCustomerTotal - materialsVat;
+  const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
   const grandTotalVat = worksVat + materialsVat;
-  const grandTotalWithVat = grandTotalWithoutVat + worksVat;
+  const grandTotalWithVat = grandTotalWithoutVat + grandTotalVat;
 
   const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
   const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;

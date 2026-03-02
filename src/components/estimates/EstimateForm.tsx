@@ -240,7 +240,8 @@ export function EstimateForm({
     
     const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
     const worksWithVat = worksCustomerTotal + worksVat;
-    const grandTotalWithoutVat = worksCustomerTotal + materialsCustomerTotal;
+    const materialsWithoutVat = materialsCustomerTotal - materialsVat;
+    const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -425,7 +426,7 @@ export function EstimateForm({
         <table style="width: 100%; border: none;">
           <tr>
             <td style="text-align: right; font-weight: bold; font-style: italic; font-size: 10pt; border: none; padding: 0.5mm 0;">ВСЕГО по расчету:</td>
-            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(customerGrandTotalWithVat)}</td>
+            <td style="width: 28mm; text-align: right; font-weight: bold; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(grandTotalWithoutVat + totalVat)}</td>
           </tr>
         </table>
 
