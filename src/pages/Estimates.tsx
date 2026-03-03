@@ -6,7 +6,7 @@ import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
 import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
-import { ClipboardCheck, Printer, Copy } from "lucide-react";
+import { ClipboardCheck, Printer, Copy, Minimize2, Maximize2, X, Calculator } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -44,13 +44,13 @@ export default function Estimates() {
   const copyMutation = useCopyEstimate();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
   const [viewingEstimate, setViewingEstimate] = useState<Estimate | undefined>();
   const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
   const printRef = useRef<HTMLDivElement>(null);
 
   const requests = requestsData.map(r => {
-    // Find the service object to get the address
     const serviceObject = serviceObjectsData.find(obj => obj.id === r.objectId);
     return {
       id: r.id,
@@ -96,6 +96,28 @@ export default function Estimates() {
       title: "Переход к созданию задания",
       description: `На основе расчёта "${estimate.name}"`,
     });
+  };
+
+  const handleMinimize = () => {
+    setIsMinimized(true);
+    setIsFormOpen(false);
+  };
+
+  const handleRestore = () => {
+    setIsMinimized(false);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseMinimized = () => {
+    setIsMinimized(false);
+    setEditingEstimate(undefined);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open && !isMinimized) {
+      setIsFormOpen(false);
+      setEditingEstimate(undefined);
+    }
   };
 
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
@@ -163,6 +185,7 @@ export default function Estimates() {
     onDelete: (id) => { logButtonClick("estimates", "Удалить расчёт"); deleteMutation.mutate(id); },
     onEdit: (estimate) => {
       setEditingEstimate(estimate);
+      setIsMinimized(false);
       setIsFormOpen(true);
     },
     cardActions,
@@ -216,6 +239,7 @@ export default function Estimates() {
         await createMutation.mutateAsync(data);
       }
       setIsFormOpen(false);
+      setIsMinimized(false);
       setEditingEstimate(undefined);
     } catch (error) {
       // Error is handled by mutation's onError
@@ -231,6 +255,10 @@ export default function Estimates() {
     );
   }
 
+  const minimizedTitle = editingEstimate
+    ? `Редактирование: ${editingEstimate.name || editingEstimate.estimateNumber}`
+    : 'Новый расчёт';
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -238,6 +266,7 @@ export default function Estimates() {
         buttonLabel="Создать расчёт"
         onButtonClick={() => {
           setEditingEstimate(undefined);
+          setIsMinimized(false);
           setIsFormOpen(true);
         }}
       />
@@ -254,12 +283,22 @@ export default function Estimates() {
         }}
       />
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between pr-8">
             <DialogTitle>
               {editingEstimate ? "Редактировать расчёт" : "Создать расчёт"}
             </DialogTitle>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              onClick={handleMinimize}
+              title="Свернуть"
+            >
+              <Minimize2 className="h-4 w-4" />
+            </Button>
           </DialogHeader>
           <EstimateForm
             estimate={editingEstimate}
@@ -274,6 +313,36 @@ export default function Estimates() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Свёрнутая плашка расчёта */}
+      {isMinimized && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-lg animate-in slide-in-from-bottom-4 duration-300">
+          <Calculator className="h-4 w-4 text-primary shrink-0" />
+          <span className="text-sm font-medium truncate max-w-[240px]">
+            {minimizedTitle}
+          </span>
+          <div className="flex items-center gap-1 ml-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleRestore}
+              title="Развернуть"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              onClick={handleCloseMinimized}
+              title="Закрыть"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={!!viewingEstimate} onOpenChange={(open) => !open && setViewingEstimate(undefined)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
