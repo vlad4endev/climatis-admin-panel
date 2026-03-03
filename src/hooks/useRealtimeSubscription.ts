@@ -36,11 +36,6 @@ const TABLE_QUERY_KEY_MAP: Record<RealtimeTable, string[][]> = {
   warehouse_categories: [["warehouse_categories"]],
 };
 
-/**
- * Маппинг роутов → таблицы, на которые нужно подписаться.
- * Включает как основную таблицу страницы, так и справочные таблицы,
- * которые используются на этой странице (для выпадающих списков и т.д.)
- */
 const ROUTE_TABLE_MAP: Record<string, RealtimeTable[]> = {
   "/clients": ["clients"],
   "/contacts": ["contacts", "clients"],
@@ -57,40 +52,32 @@ const ROUTE_TABLE_MAP: Record<string, RealtimeTable[]> = {
   "/tasks": ["tasks", "employees", "requests"],
   "/invoices": ["invoices", "clients", "requests", "estimates"],
   "/trash": ["requests", "estimates", "tasks", "assignments", "documents", "clients", "service_objects", "contacts"],
-  "/users": [],
-  "/activity-logs": [],
 };
 
-/**
- * Подписывается на Realtime изменения только для таблиц,
- * релевантных текущему роуту. При смене роута переподписывается.
- */
 export function useRealtimeSubscriptions() {
   const queryClient = useQueryClient();
   const location = useLocation();
-  const prevTablesRef = useRef<string>("");
+  const prevPathRef = useRef<string>("");
 
   useEffect(() => {
     const path = location.pathname;
     const tables = ROUTE_TABLE_MAP[path];
 
-    // Если роут неизвестен — не подписываемся ни на что
+    // No tables for this route — skip subscription but don't break hooks
     if (!tables || tables.length === 0) {
-      prevTablesRef.current = "";
+      prevPathRef.current = path;
       return;
     }
 
-    // Стабильный ключ для сравнения — не пересоздаём канал если таблицы те же
-    const tablesKey = tables.sort().join(",");
-    if (tablesKey === prevTablesRef.current) {
+    // Same path — no need to recreate channel
+    if (path === prevPathRef.current) {
       return;
     }
-    prevTablesRef.current = tablesKey;
+    prevPathRef.current = path;
 
     const channelName = `rt-${path.replace("/", "")}`;
     const channel = supabase.channel(channelName);
 
-    // Подписка на каждую таблицу отдельным фильтром
     tables.forEach((table) => {
       channel.on(
         "postgres_changes",
@@ -110,7 +97,7 @@ export function useRealtimeSubscriptions() {
     channel.subscribe();
 
     return () => {
-      prevTablesRef.current = "";
+      prevPathRef.current = "";
       supabase.removeChannel(channel);
     };
   }, [location.pathname, queryClient]);
