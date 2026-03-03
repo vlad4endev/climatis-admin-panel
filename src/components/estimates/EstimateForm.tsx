@@ -487,7 +487,9 @@ export function EstimateForm({
               <Label htmlFor="name">Расчёт (смета)</Label>
               <Input
                 id="name"
-                {...register("name")}
+                {...register("name", {
+                  onChange: (e) => handleFieldChange("name", e.target.value),
+                })}
                 placeholder="Название расчёта"
                 readOnly={readOnly}
                 tabIndex={readOnly ? -1 : undefined}
