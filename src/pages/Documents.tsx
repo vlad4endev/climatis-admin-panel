@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig } from "@/components/entity/types";
 import { Document, CONTRACT_TYPES, DOCUMENT_STATUSES } from "@/types/document";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { DocumentViewDialog } from "@/components/documents/DocumentViewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,7 +14,8 @@ import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useCanEdit } from "@/hooks/useUserRoles";
 import { useDocumentAttachmentCounts } from "@/hooks/useDocumentAttachmentCounts";
 import { DocumentAttachmentsCompact } from "@/components/documents/DocumentAttachmentsCompact";
-import { Loader2, Paperclip, Maximize2, X, FileText } from "lucide-react";
+import { useMinimizedForms } from "@/hooks/useMinimizedForms";
+import { Loader2, Paperclip } from "lucide-react";
 
 export default function Documents() {
   const { data: documents = [], isLoading: documentsLoading } = useDocuments();
@@ -24,14 +25,30 @@ export default function Documents() {
   const createDocument = useCreateDocument();
   const updateDocument = useUpdateDocument();
   const deleteDocument = useDeleteDocument();
+  const { minimize, restore, forms } = useMinimizedForms();
+  const location = useLocation();
 
   const documentIds = documents.map(d => d.id);
   const { data: attachmentCounts = {} } = useDocumentAttachmentCounts(documentIds);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
+
+  // Restore form from global context when navigating back
+  useEffect(() => {
+    const state = location.state as { restoreForm?: { type: string; entityId?: string } } | null;
+    if (state?.restoreForm?.type === "document") {
+      const entityId = state.restoreForm.entityId;
+      if (entityId) {
+        const doc = documents.find(d => d.id === entityId);
+        if (doc) setEditingDocument(doc);
+      }
+      setIsDialogOpen(true);
+      // Clear state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, documents]);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -44,22 +61,21 @@ export default function Documents() {
   };
 
   const handleMinimize = () => {
-    setIsMinimized(true);
+    const title = editingDocument
+      ? `Редактирование: ${editingDocument.contractNumber}`
+      : 'Новый документ';
+    minimize({
+      id: `document-${editingDocument?.id || 'new'}`,
+      type: "document",
+      title,
+      entityId: editingDocument?.id,
+      route: "/documents",
+    });
     setIsDialogOpen(false);
   };
 
-  const handleRestore = () => {
-    setIsMinimized(false);
-    setIsDialogOpen(true);
-  };
-
-  const handleCloseMinimized = () => {
-    setIsMinimized(false);
-    setEditingDocument(null);
-  };
-
   const handleDialogOpenChange = (open: boolean) => {
-    if (!open && !isMinimized) {
+    if (!open) {
       setIsDialogOpen(false);
       setEditingDocument(null);
     }
@@ -126,7 +142,7 @@ export default function Documents() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingDocument(item),
-    onEdit: canEdit ? (item) => { setEditingDocument(item); setIsMinimized(false); setIsDialogOpen(true); } : undefined,
+    onEdit: canEdit ? (item) => { setEditingDocument(item); setIsDialogOpen(true); } : undefined,
     onDelete: canEdit ? (id) => deleteDocument.mutate(id) : undefined,
     cardFooter: (item) => <DocumentAttachmentsCompact documentId={item.id} />,
   };
@@ -138,7 +154,6 @@ export default function Documents() {
       await createDocument.mutateAsync(data);
     }
     setIsDialogOpen(false);
-    setIsMinimized(false);
     setEditingDocument(null);
   };
 
@@ -150,10 +165,6 @@ export default function Documents() {
     );
   }
 
-  const minimizedTitle = editingDocument
-    ? `Редактирование: ${editingDocument.contractNumber}`
-    : 'Новый документ';
-
   return (
     <>
       <div className="space-y-6">
@@ -161,7 +172,7 @@ export default function Documents() {
           title="Документы"
           description="Управление договорами и документами"
           buttonLabel={canEdit ? "Добавить документ" : undefined}
-          onButtonClick={canEdit ? () => { setIsMinimized(false); setIsDialogOpen(true); } : undefined}
+          onButtonClick={canEdit ? () => setIsDialogOpen(true) : undefined}
         />
 
         <EntityList items={documents} config={config} emptyMessage="Нет документов. Добавьте первый документ." />
@@ -181,36 +192,6 @@ export default function Documents() {
           />
         </DialogContent>
       </Dialog>
-
-      {/* Свёрнутая плашка */}
-      {isMinimized && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-lg animate-in slide-in-from-bottom-4 duration-300">
-          <FileText className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium truncate max-w-[240px]">
-            {minimizedTitle}
-          </span>
-          <div className="flex items-center gap-1 ml-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleRestore}
-              title="Развернуть"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={handleCloseMinimized}
-              title="Закрыть"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
 
       <DocumentViewDialog
         document={viewingDocument}

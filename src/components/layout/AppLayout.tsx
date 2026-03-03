@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { OfflineBanner } from "./OfflineBanner";
+import { MinimizedFormsBars } from "./MinimizedFormsBars";
 import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscription";
 import siberianForestBg from "@/assets/siberian-forest-bg.jpg";
 
@@ -39,6 +40,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Mobile bottom navigation */}
         <MobileBottomNav />
       </div>
+
+      {/* Global minimized forms bars */}
+      <MinimizedFormsBars />
     </SidebarProvider>
   );
 }
