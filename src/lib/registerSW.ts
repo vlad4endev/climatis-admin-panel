@@ -8,7 +8,11 @@ export function registerServiceWorker(): void {
         console.log('[SW] Registered, scope:', reg.scope);
 
         // Auto-update check every 30 min
-        setInterval(() => reg.update(), 30 * 60 * 1000);
+        setInterval(() => {
+          reg.update().catch(() => {
+            // Ignore "newestWorker is null" and other SW update errors
+          });
+        }, 30 * 60 * 1000);
       })
       .catch((err) => {
         console.warn('[SW] Registration failed:', err);
