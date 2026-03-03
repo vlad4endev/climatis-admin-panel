@@ -550,6 +550,42 @@ export type Database = {
           },
         ]
       }
+      monitoring_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          element: string | null
+          event_type: string
+          id: string
+          message: string | null
+          page: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          element?: string | null
+          event_type: string
+          id?: string
+          message?: string | null
+          page?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          element?: string | null
+          event_type?: string
+          id?: string
+          message?: string | null
+          page?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
