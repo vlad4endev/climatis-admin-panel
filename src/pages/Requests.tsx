@@ -48,9 +48,13 @@ export default function Requests() {
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
 
-  // Restore form from global context when navigating back
+  // Restore form from global context or open request by ID from navigation state
   useEffect(() => {
-    const state = location.state as { restoreForm?: { type: string; entityId?: string } } | null;
+    const state = location.state as { 
+      restoreForm?: { type: string; entityId?: string };
+      openRequestId?: string;
+    } | null;
+    
     if (state?.restoreForm?.type === "request") {
       const entityId = state.restoreForm.entityId;
       if (entityId) {
@@ -59,6 +63,13 @@ export default function Requests() {
       }
       setIsFormOpen(true);
       window.history.replaceState({}, document.title);
+    } else if (state?.openRequestId) {
+      const req = requests.find(r => r.id === state.openRequestId);
+      if (req) {
+        setEditingRequest(req);
+        setIsFormOpen(true);
+        window.history.replaceState({}, document.title);
+      }
     }
   }, [location.state, requests]);
 

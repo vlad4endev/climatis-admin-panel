@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useCreateEstimate, useUpdateEstimate } from "@/hooks/useEstimates";
-import { FileDown, FileText } from "lucide-react";
+import { FileDown, FileText, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,6 +47,7 @@ interface EstimateFormProps {
   estimate?: Estimate;
   onSubmit: (data: Partial<Estimate>) => void | Promise<void>;
   onCancel: () => void;
+  onGoToRequest?: (requestId: string) => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
   employees: Array<{ id: string; fullName: string; position?: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
@@ -57,6 +58,7 @@ export function EstimateForm({
   estimate,
   onSubmit,
   onCancel,
+  onGoToRequest,
   requests,
   employees,
   availableMaterials = [],
@@ -994,13 +996,30 @@ export function EstimateForm({
       </Tabs>
 
       {!readOnly && (
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Отмена
-          </Button>
-          <Button type="submit" disabled={isSaving} onClick={() => logButtonClick("estimates", estimate ? "Сохранить расчёт" : "Создать расчёт")}>
-            {isSaving ? "Сохранение..." : (estimate ? "Сохранить" : "Создать")}
-          </Button>
+        <div className="flex justify-between gap-2 pt-4 border-t">
+          <div>
+            {onGoToRequest && watch("requestId") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  logButtonClick("estimates", "Перейти к заявке");
+                  onGoToRequest(watch("requestId"));
+                }}
+              >
+                <ClipboardList className="h-4 w-4 mr-2" />
+                Перейти к заявке
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Отмена
+            </Button>
+            <Button type="submit" disabled={isSaving} onClick={() => logButtonClick("estimates", estimate ? "Сохранить расчёт" : "Создать расчёт")}>
+              {isSaving ? "Сохранение..." : (estimate ? "Сохранить" : "Создать")}
+            </Button>
+          </div>
         </div>
       )}
     </form>

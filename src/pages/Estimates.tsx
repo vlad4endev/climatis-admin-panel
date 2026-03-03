@@ -338,6 +338,11 @@ export default function Estimates() {
               setIsFormOpen(false);
               setEditingEstimate(undefined);
             }}
+            onGoToRequest={(requestId) => {
+              setIsFormOpen(false);
+              setEditingEstimate(undefined);
+              navigate("/requests", { state: { openRequestId: requestId } });
+            }}
             requests={requests}
             employees={employees}
             availableMaterials={availableMaterials}
