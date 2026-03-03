@@ -179,11 +179,28 @@ export function useUpdateRequest() {
         changes: { status: request.status, priority: request.priority, type: request.type },
       });
     },
+    onMutate: async ({ id, ...request }) => {
+      await queryClient.cancelQueries({ queryKey: ["requests"] });
+      const previous = queryClient.getQueryData<Request[]>(["requests"]);
+      if (previous) {
+        queryClient.setQueryData<Request[]>(["requests"], old =>
+          old?.map(r => r.id === id ? { ...r, ...request } : r) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["requests"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении заявки"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["requests"] });
       toast.success("Заявка обновлена");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении заявки")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+    },
   });
 }
 
@@ -211,12 +228,29 @@ export function useDeleteRequest() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["requests"] });
+      const previous = queryClient.getQueryData<Request[]>(["requests"]);
+      if (previous) {
+        queryClient.setQueryData<Request[]>(["requests"], old =>
+          old?.filter(r => r.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["requests"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении заявки"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["requests"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Заявка перемещена в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении заявки")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }
 

@@ -110,11 +110,28 @@ export function useUpdateClient() {
 
       return transformToClient(data);
     },
+    onMutate: async ({ id, ...client }) => {
+      await queryClient.cancelQueries({ queryKey: ["clients"] });
+      const previous = queryClient.getQueryData<Client[]>(["clients"]);
+      if (previous) {
+        queryClient.setQueryData<Client[]>(["clients"], old =>
+          old?.map(c => c.id === id ? { ...c, ...client } : c) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["clients"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении организации"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Организация обновлена");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении организации")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    },
   });
 }
 
@@ -195,11 +212,28 @@ export function useDeleteClient() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["clients"] });
+      const previous = queryClient.getQueryData<Client[]>(["clients"]);
+      if (previous) {
+        queryClient.setQueryData<Client[]>(["clients"], old =>
+          old?.filter(c => c.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["clients"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении организации"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Организация перемещена в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении организации")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }

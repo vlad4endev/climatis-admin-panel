@@ -55,6 +55,27 @@ const ROUTE_TABLE_MAP: Record<string, RealtimeTable[]> = {
   "/monitoring": [],
 };
 
+// Debounce invalidation per query key to prevent cascade re-fetches
+const pendingInvalidations = new Map<string, ReturnType<typeof setTimeout>>();
+const INVALIDATION_DEBOUNCE_MS = 1500;
+
+function debouncedInvalidate(
+  queryClient: ReturnType<typeof useQueryClient>,
+  queryKey: string[]
+) {
+  const keyStr = queryKey.join(".");
+
+  const existing = pendingInvalidations.get(keyStr);
+  if (existing) clearTimeout(existing);
+
+  const timer = setTimeout(() => {
+    pendingInvalidations.delete(keyStr);
+    queryClient.invalidateQueries({ queryKey });
+  }, INVALIDATION_DEBOUNCE_MS);
+
+  pendingInvalidations.set(keyStr, timer);
+}
+
 export function useRealtimeSubscriptions() {
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -88,7 +109,7 @@ export function useRealtimeSubscriptions() {
           const queryKeys = TABLE_QUERY_KEY_MAP[changedTable];
           if (queryKeys) {
             queryKeys.forEach((key) => {
-              queryClient.invalidateQueries({ queryKey: key });
+              debouncedInvalidate(queryClient, key);
             });
           }
         }
@@ -100,6 +121,12 @@ export function useRealtimeSubscriptions() {
     return () => {
       prevPathRef.current = "";
       supabase.removeChannel(channel);
+
+      // Clear pending invalidations for this route
+      pendingInvalidations.forEach((timer, key) => {
+        clearTimeout(timer);
+        pendingInvalidations.delete(key);
+      });
     };
   }, [location.pathname, queryClient]);
 }
