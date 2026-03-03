@@ -14,7 +14,7 @@ import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { useCanEdit } from "@/hooks/useUserRoles";
 import { useDocumentAttachmentCounts } from "@/hooks/useDocumentAttachmentCounts";
 import { DocumentAttachmentsCompact } from "@/components/documents/DocumentAttachmentsCompact";
-import { Loader2, Paperclip, Minimize2, Maximize2, X, FileText } from "lucide-react";
+import { Loader2, Paperclip, Maximize2, X, FileText } from "lucide-react";
 
 export default function Documents() {
   const { data: documents = [], isLoading: documentsLoading } = useDocuments();
@@ -168,19 +168,9 @@ export default function Documents() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+          <DialogHeader>
             <DialogTitle>{editingDocument ? 'Редактировать документ' : 'Новый документ'}</DialogTitle>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={handleMinimize}
-              title="Свернуть"
-            >
-              <Minimize2 className="h-4 w-4" />
-            </Button>
           </DialogHeader>
           <DocumentForm
             initialData={editingDocument || undefined}

@@ -6,7 +6,7 @@ import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Estimate, ESTIMATE_STATUSES, ESTIMATE_TYPES } from "@/types/estimate";
 import { EstimateForm } from "@/components/estimates/EstimateForm";
 import { EstimatePrintView } from "@/components/estimates/EstimatePrintView";
-import { ClipboardCheck, Printer, Copy, Minimize2, Maximize2, X, Calculator } from "lucide-react";
+import { ClipboardCheck, Printer, Copy, Maximize2, X, Calculator } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -284,21 +284,11 @@ export default function Estimates() {
       />
 
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+          <DialogHeader>
             <DialogTitle>
               {editingEstimate ? "Редактировать расчёт" : "Создать расчёт"}
             </DialogTitle>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={handleMinimize}
-              title="Свернуть"
-            >
-              <Minimize2 className="h-4 w-4" />
-            </Button>
           </DialogHeader>
           <EstimateForm
             estimate={editingEstimate}

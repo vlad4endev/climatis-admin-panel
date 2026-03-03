@@ -5,7 +5,7 @@ import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
-import { Loader2, Copy, Minimize2, Maximize2, X, FileText } from "lucide-react";
+import { Loader2, Copy, Maximize2, X, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -233,19 +233,9 @@ export default function Requests() {
       />
 
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+          <DialogHeader>
             <DialogTitle>{editingRequest ? "Редактировать заявку" : "Создать заявку"}</DialogTitle>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={handleMinimize}
-              title="Свернуть"
-            >
-              <Minimize2 className="h-4 w-4" />
-            </Button>
           </DialogHeader>
           <RequestForm
             initialData={editingRequest}
