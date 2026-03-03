@@ -104,7 +104,6 @@ export function useUpdateDocument() {
 
       if (error) throw error;
       
-      // Log activity
       await logActivity({
         section: 'documents',
         elementId: id,
@@ -112,11 +111,28 @@ export function useUpdateDocument() {
         action: 'update',
       });
     },
+    onMutate: async ({ id, ...doc }) => {
+      await queryClient.cancelQueries({ queryKey: ["documents"] });
+      const previous = queryClient.getQueryData<Document[]>(["documents"]);
+      if (previous) {
+        queryClient.setQueryData<Document[]>(["documents"], old =>
+          old?.map(d => d.id === id ? { ...d, ...doc } : d) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["documents"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении договора"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.success("Договор обновлён");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении договора")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
   });
 }
 
@@ -125,7 +141,6 @@ export function useDeleteDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Get document name first
       const { data: doc } = await supabase
         .from("documents")
         .select("contract_number")
@@ -138,7 +153,6 @@ export function useDeleteDocument() {
         .eq("id", id);
       if (error) throw error;
       
-      // Log activity
       await logActivity({
         section: 'documents',
         elementId: id,
@@ -146,11 +160,28 @@ export function useDeleteDocument() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["documents"] });
+      const previous = queryClient.getQueryData<Document[]>(["documents"]);
+      if (previous) {
+        queryClient.setQueryData<Document[]>(["documents"], old =>
+          old?.filter(d => d.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["documents"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении договора"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Договор перемещён в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении договора")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }

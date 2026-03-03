@@ -143,11 +143,28 @@ export function useUpdateAssignment() {
         changes: { status: assignment.status },
       });
     },
+    onMutate: async ({ id, ...assignment }) => {
+      await queryClient.cancelQueries({ queryKey: ["assignments"] });
+      const previous = queryClient.getQueryData<Assignment[]>(["assignments"]);
+      if (previous) {
+        queryClient.setQueryData<Assignment[]>(["assignments"], old =>
+          old?.map(a => a.id === id ? { ...a, ...assignment } : a) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["assignments"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении задания"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assignments"] });
       toast.success("Задание обновлено");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении задания")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+    },
   });
 }
 
@@ -175,11 +192,28 @@ export function useDeleteAssignment() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["assignments"] });
+      const previous = queryClient.getQueryData<Assignment[]>(["assignments"]);
+      if (previous) {
+        queryClient.setQueryData<Assignment[]>(["assignments"], old =>
+          old?.filter(a => a.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["assignments"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении задания"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assignments"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Задание перемещено в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении задания")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }
