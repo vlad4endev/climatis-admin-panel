@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
@@ -25,7 +25,7 @@ export default function Documents() {
   const createDocument = useCreateDocument();
   const updateDocument = useUpdateDocument();
   const deleteDocument = useDeleteDocument();
-  const { minimize, restore, forms } = useMinimizedForms();
+  const { minimize, restore, registerRestoreHandler, unregisterRestoreHandler } = useMinimizedForms();
   const location = useLocation();
 
   const documentIds = documents.map(d => d.id);
@@ -34,6 +34,7 @@ export default function Documents() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
+  const isMinimizingRef = React.useRef(false);
 
   // Restore form from global context when navigating back
   useEffect(() => {
@@ -71,15 +72,37 @@ export default function Documents() {
       entityId: editingDocument?.id,
       route: "/documents",
     });
+    isMinimizingRef.current = true;
     setIsDialogOpen(false);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
     if (!open) {
       setIsDialogOpen(false);
-      setEditingDocument(null);
+      if (isMinimizingRef.current) {
+        isMinimizingRef.current = false;
+      } else {
+        setEditingDocument(null);
+      }
     }
   };
+
+  // Handle restore when already on the same page
+  const handleRestore = useCallback((formId: string) => {
+    const form = restore(formId);
+    if (form && form.type === "document") {
+      if (form.entityId) {
+        const doc = documents.find(d => d.id === form.entityId);
+        if (doc) setEditingDocument(doc);
+      }
+      setIsDialogOpen(true);
+    }
+  }, [restore, documents]);
+
+  useEffect(() => {
+    registerRestoreHandler("document", handleRestore);
+    return () => unregisterRestoreHandler("document");
+  }, [handleRestore, registerRestoreHandler, unregisterRestoreHandler]);
 
   const config: EntityListConfig<Document> = {
     fields: [

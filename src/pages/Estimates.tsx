@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { EntityList } from "@/components/entity/EntityList";
@@ -30,7 +30,8 @@ export default function Estimates() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { minimize } = useMinimizedForms();
+  const { minimize, restore, registerRestoreHandler, unregisterRestoreHandler } = useMinimizedForms();
+  const isMinimizingRef = React.useRef(false);
   
   const [currentPage, setCurrentPage] = useState(0);
   const { data: estimatesResult, isLoading } = usePaginatedEstimates(currentPage);
@@ -125,15 +126,36 @@ export default function Estimates() {
       entityId: editingEstimate?.id,
       route: "/estimates",
     });
+    isMinimizingRef.current = true;
     setIsFormOpen(false);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
     if (!open) {
       setIsFormOpen(false);
-      setEditingEstimate(undefined);
+      if (isMinimizingRef.current) {
+        isMinimizingRef.current = false;
+      } else {
+        setEditingEstimate(undefined);
+      }
     }
   };
+
+  const handleRestore = useCallback((formId: string) => {
+    const form = restore(formId);
+    if (form && form.type === "estimate") {
+      if (form.entityId) {
+        const est = estimates.find(e => e.id === form.entityId);
+        if (est) setEditingEstimate(est);
+      }
+      setIsFormOpen(true);
+    }
+  }, [restore, estimates]);
+
+  useEffect(() => {
+    registerRestoreHandler("estimate", handleRestore);
+    return () => unregisterRestoreHandler("estimate");
+  }, [handleRestore, registerRestoreHandler, unregisterRestoreHandler]);
 
   const getStatusBadgeVariant = (status: string): "draft" | "ready" | "approved" | "default" => {
     switch (status) {

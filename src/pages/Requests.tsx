@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
@@ -22,7 +22,8 @@ import { useMinimizedForms } from "@/hooks/useMinimizedForms";
 
 export default function Requests() {
   const location = useLocation();
-  const { minimize } = useMinimizedForms();
+  const { minimize, restore, registerRestoreHandler, unregisterRestoreHandler } = useMinimizedForms();
+  const isMinimizingRef = React.useRef(false);
 
   const [currentPage, setCurrentPage] = useState(0);
   const { data: requestsResult, isLoading: requestsLoading } = usePaginatedRequests(currentPage);
@@ -69,15 +70,36 @@ export default function Requests() {
       entityId: editingRequest?.id,
       route: "/requests",
     });
+    isMinimizingRef.current = true;
     setIsFormOpen(false);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
     if (!open) {
       setIsFormOpen(false);
-      setEditingRequest(undefined);
+      if (isMinimizingRef.current) {
+        isMinimizingRef.current = false;
+      } else {
+        setEditingRequest(undefined);
+      }
     }
   };
+
+  const handleRestore = useCallback((formId: string) => {
+    const form = restore(formId);
+    if (form && form.type === "request") {
+      if (form.entityId) {
+        const req = requests.find(r => r.id === form.entityId);
+        if (req) setEditingRequest(req);
+      }
+      setIsFormOpen(true);
+    }
+  }, [restore, requests]);
+
+  useEffect(() => {
+    registerRestoreHandler("request", handleRestore);
+    return () => unregisterRestoreHandler("request");
+  }, [handleRestore, registerRestoreHandler, unregisterRestoreHandler]);
 
   const cardActions: CardAction<Request>[] = canEdit ? [
     {
