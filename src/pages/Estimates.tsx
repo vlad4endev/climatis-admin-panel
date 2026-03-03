@@ -23,6 +23,7 @@ import { useSpareParts } from "@/hooks/useSpareParts";
 import { useServiceObjects } from "@/hooks/useServiceObjects";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 export default function Estimates() {
   const navigate = useNavigate();
@@ -110,13 +111,14 @@ export default function Estimates() {
     {
       icon: Copy,
       label: "Копировать",
-      onClick: (item) => copyMutation.mutate(item),
+      onClick: (item) => { logButtonClick("estimates", "Копировать расчёт"); copyMutation.mutate(item); },
       disabled: copyMutation.isPending,
     },
     {
       icon: Printer,
       label: "Печать",
       onClick: (item) => {
+        logButtonClick("estimates", "Печать расчёта");
         setPrintingEstimate(item);
         setTimeout(() => handlePrint(), 100);
       },
@@ -124,7 +126,7 @@ export default function Estimates() {
     {
       icon: ClipboardCheck,
       label: "Создать задание",
-      onClick: (item) => handleCreateAssignment(item),
+      onClick: (item) => { logButtonClick("estimates", "Создать задание из расчёта"); handleCreateAssignment(item); },
       disabled: (item) => item.status === "черновик",
     },
   ];
@@ -158,7 +160,7 @@ export default function Estimates() {
       { key: "requestName", label: "Заявка", type: "text", searchable: true },
     ],
     onRowClick: (estimate) => setViewingEstimate(estimate),
-    onDelete: (id) => deleteMutation.mutate(id),
+    onDelete: (id) => { logButtonClick("estimates", "Удалить расчёт"); deleteMutation.mutate(id); },
     onEdit: (estimate) => {
       setEditingEstimate(estimate);
       setIsFormOpen(true);

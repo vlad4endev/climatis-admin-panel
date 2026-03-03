@@ -16,6 +16,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useTeams } from "@/hooks/useTeams";
 import { useCanEdit } from "@/hooks/useUserRoles";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 export default function Requests() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -42,7 +43,7 @@ export default function Requests() {
     {
       icon: Copy,
       label: "Копировать",
-      onClick: (item) => copyRequest.mutate(item),
+      onClick: (item) => { logButtonClick("requests", "Копировать заявку"); copyRequest.mutate(item); },
       disabled: copyRequest.isPending,
     },
   ] : [];
@@ -143,7 +144,7 @@ export default function Requests() {
     ],
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingRequest(item),
-    onDelete: canEdit ? (id) => deleteRequest.mutate(id) : undefined,
+    onDelete: canEdit ? (id) => { logButtonClick("requests", "Удалить заявку"); deleteRequest.mutate(id); } : undefined,
     onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
     cardActions,
     customActions: canEdit ? (item) => (

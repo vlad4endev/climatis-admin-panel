@@ -9,6 +9,7 @@ import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 interface RequestFormProps {
   initialData?: Request;
@@ -500,6 +501,7 @@ export function RequestForm({
         <Button
           type="button"
           onClick={async () => {
+            logButtonClick("requests", "Сохранить заявку");
             const formValues = getValues();
             if (!formValues.clientId || !formValues.objectId) {
               return;
