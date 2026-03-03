@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useAssignments, useCreateAssignment, useUpdateAssignment, useDeleteAssignment } from "@/hooks/useAssignments";
 import { useTeams } from "@/hooks/useTeams";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 export default function Assignments() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,7 +97,7 @@ export default function Assignments() {
     {
       icon: Printer,
       label: "Печать",
-      onClick: (item) => triggerPrint(item),
+      onClick: (item) => { logButtonClick("assignments", "Печать задания"); triggerPrint(item); },
     },
   ];
 
@@ -140,7 +141,7 @@ export default function Assignments() {
         updateMutation.mutate({ id, ...assignment, [field]: value });
       }
     },
-    onDelete: (id) => deleteMutation.mutate(id),
+    onDelete: (id) => { logButtonClick("assignments", "Удалить задание"); deleteMutation.mutate(id); },
     onEdit: (assignment) => {
       setNewAssignmentData(null);
       setEditingAssignment(assignment);

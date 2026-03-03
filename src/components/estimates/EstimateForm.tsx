@@ -41,6 +41,7 @@ import { MaterialListEditor } from "./MaterialListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
 import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -976,11 +977,11 @@ export function EstimateForm({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={generateCustomerPDF} className="gap-2 cursor-pointer">
+                <DropdownMenuItem onClick={() => { logButtonClick("estimates", "Скачать PDF"); generateCustomerPDF(); }} className="gap-2 cursor-pointer">
                   <FileDown className="h-4 w-4" />
                   Скачать PDF
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={generateCustomerDOCX} className="gap-2 cursor-pointer">
+                <DropdownMenuItem onClick={() => { logButtonClick("estimates", "Скачать DOC"); generateCustomerDOCX(); }} className="gap-2 cursor-pointer">
                   <FileText className="h-4 w-4" />
                   Скачать DOC (Word)
                 </DropdownMenuItem>
@@ -995,7 +996,7 @@ export function EstimateForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} onClick={() => logButtonClick("estimates", estimate ? "Сохранить расчёт" : "Создать расчёт")}>
             {isSaving ? "Сохранение..." : (estimate ? "Сохранить" : "Создать")}
           </Button>
         </div>

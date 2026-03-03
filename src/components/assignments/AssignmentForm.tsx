@@ -15,6 +15,7 @@ import { Assignment, ASSIGNMENT_STATUSES } from "@/types/assignment";
 import { calculateWorkBlockTotal, calculateAllBlocksTotal } from "@/types/estimate";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useCreateAssignment, useUpdateAssignment } from "@/hooks/useAssignments";
+import { logButtonClick } from "@/lib/monitoringLogger";
 
 interface AssignmentFormProps {
   assignment?: Assignment;
@@ -243,7 +244,7 @@ export function AssignmentForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Отмена
           </Button>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} onClick={() => logButtonClick("assignments", assignment ? "Сохранить задание" : "Создать задание")}>
             {isSaving ? "Сохранение..." : (assignment ? "Сохранить" : "Создать")}
           </Button>
         </div>
