@@ -2,6 +2,9 @@ import { useCallback, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+const MAX_RETRIES = 5;
+const BASE_RETRY_DELAY = 2000;
+
 interface AutoSaveOptions<T> {
   /** Ключ запроса для инвалидации */
   queryKey: string[];
@@ -42,7 +45,10 @@ export function useAutoSave<T extends Record<string, any>>({
   const formDataRef = useRef<Partial<T>>({});
   const isSavingRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingUpdateRef = useRef<Partial<T> | null>(null);
+  const retryCountRef = useRef(0);
+  const unmountedRef = useRef(false);
 
   const setCurrentId = useCallback((id: string | null) => {
     currentIdRef.current = id;
@@ -53,11 +59,25 @@ export function useAutoSave<T extends Record<string, any>>({
   }, []);
 
   const performSave = useCallback(async () => {
-    if (isSavingRef.current) {
+    if (isSavingRef.current || unmountedRef.current) {
+      return;
+    }
+
+    // Проверяем наличие сети перед отправкой
+    if (!navigator.onLine) {
+      // Откладываем повторную попытку до восстановления сети
+      const onOnline = () => {
+        window.removeEventListener("online", onOnline);
+        if (!unmountedRef.current) {
+          performSave();
+        }
+      };
+      window.addEventListener("online", onOnline);
       return;
     }
 
     const dataToSave = { ...formDataRef.current, ...pendingUpdateRef.current };
+    const savedPending = { ...pendingUpdateRef.current };
     pendingUpdateRef.current = null;
 
     if (Object.keys(dataToSave).length === 0) return;
@@ -66,65 +86,91 @@ export function useAutoSave<T extends Record<string, any>>({
 
     try {
       if (currentIdRef.current) {
-        // Обновляем существующую запись
         await updateFn(currentIdRef.current, dataToSave);
       } else {
-        // Создаём новую запись
         const result = await createFn(dataToSave as T);
         if (result?.id) {
           currentIdRef.current = result.id;
         }
       }
 
+      // Успех — сбрасываем счётчик повторов
+      retryCountRef.current = 0;
       queryClient.invalidateQueries({ queryKey });
-      
+
       if (showToast) {
         toast.success("Сохранено", { duration: 1500 });
       }
     } catch (error) {
       console.error("Auto-save error:", error);
-      toast.error("Ошибка автосохранения");
+
+      // Возвращаем данные в очередь чтобы не потерять
+      pendingUpdateRef.current = {
+        ...savedPending,
+        ...pendingUpdateRef.current,
+      };
+
+      retryCountRef.current += 1;
+
+      if (retryCountRef.current <= MAX_RETRIES) {
+        const delay = Math.min(BASE_RETRY_DELAY * 2 ** (retryCountRef.current - 1), 30000);
+        toast.error(`Ошибка сохранения. Повтор через ${Math.round(delay / 1000)} сек...`, {
+          duration: delay,
+        });
+
+        retryTimerRef.current = setTimeout(() => {
+          if (!unmountedRef.current) {
+            performSave();
+          }
+        }, delay);
+      } else {
+        toast.error("Не удалось сохранить данные. Проверьте подключение к интернету.", {
+          duration: 10000,
+        });
+      }
     } finally {
       isSavingRef.current = false;
-      
-      // Если есть отложенные изменения, сохраняем их
-      if (pendingUpdateRef.current) {
+
+      // Если есть новые отложенные изменения (пользователь продолжал вводить), сохраняем
+      if (pendingUpdateRef.current && retryCountRef.current === 0) {
         performSave();
       }
     }
   }, [createFn, updateFn, queryClient, queryKey, showToast]);
 
   const handleFieldChange = useCallback((field: keyof T, value: any) => {
-    // Обновляем локальные данные
     formDataRef.current = {
       ...formDataRef.current,
       [field]: value,
     };
 
-    // Добавляем в очередь на сохранение
     pendingUpdateRef.current = {
       ...pendingUpdateRef.current,
       [field]: value,
     };
 
-    // Отменяем предыдущий таймер
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Устанавливаем новый таймер
     debounceTimerRef.current = setTimeout(performSave, debounceMs);
   }, [performSave, debounceMs]);
 
-  // Очистка таймера при размонтировании
+  // Очистка при размонтировании
   useEffect(() => {
+    unmountedRef.current = false;
+
     return () => {
+      unmountedRef.current = true;
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
-        // Сохраняем перед размонтированием если есть несохранённые изменения
-        if (pendingUpdateRef.current && currentIdRef.current) {
-          performSave();
-        }
+      }
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+      }
+      // Последняя попытка сохранить при уходе со страницы
+      if (pendingUpdateRef.current && currentIdRef.current && navigator.onLine) {
+        performSave();
       }
     };
   }, [performSave]);

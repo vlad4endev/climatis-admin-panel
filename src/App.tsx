@@ -28,7 +28,18 @@ import ActivityLogs from "./pages/ActivityLogs";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 15000),
+    },
+    mutations: {
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    },
+  },
+});
 
 // Component to redirect to first accessible section
 function RedirectToFirstAccessible() {

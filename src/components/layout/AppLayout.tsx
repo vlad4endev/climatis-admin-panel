@@ -1,6 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { OfflineBanner } from "./OfflineBanner";
 import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscription";
 import siberianForestBg from "@/assets/siberian-forest-bg.jpg";
 
@@ -13,6 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
+      <OfflineBanner />
       <div className="min-h-screen flex w-full bg-background">
         {/* Desktop sidebar - hidden on mobile */}
         <div className="hidden md:block">
