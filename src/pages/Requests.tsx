@@ -142,7 +142,7 @@ export default function Requests() {
             estimate_date: new Date().toISOString().split('T')[0],
             status: "черновик",
             type: "простой ремонт",
-            customer_calculation: JSON.stringify({ overheadPercent: 95, transportPercent: 6, warehousePercent: 3, estimatedProfitPercent: 58 }),
+            customer_calculation: { overheadPercent: 95, transportPercent: 6, warehousePercent: 3, estimatedProfitPercent: 58 },
           })
           .select("id")
           .single();
