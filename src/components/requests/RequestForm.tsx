@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calculator } from "lucide-react";
 import { logButtonClick } from "@/lib/monitoringLogger";
 
 interface RequestFormProps {
   initialData?: Request;
   onSubmit: (data: Partial<Request>) => void;
   onCancel: () => void;
+  onGoToEstimate?: (requestId: string) => void;
   clients: { id: string; companyName: string }[];
   serviceObjects: { id: string; objectName: string; clientId?: string }[];
   documents: { id: string; contractNumber: string; clientId?: string; responseConditions?: string }[];
@@ -26,6 +27,7 @@ export function RequestForm({
   initialData, 
   onSubmit, 
   onCancel,
+  onGoToEstimate,
   clients,
   serviceObjects,
   documents,
@@ -494,26 +496,43 @@ export function RequestForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button
-          type="button"
-          onClick={async () => {
-            logButtonClick("requests", "Сохранить заявку");
-            const formValues = getValues();
-            if (!formValues.clientId || !formValues.objectId) {
-              return;
-            }
-            await autoSave();
-            onCancel();
-          }}
-          disabled={isSaving}
-        >
-          {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Сохранить
-        </Button>
+      <div className="flex justify-between gap-2 pt-4 border-t">
+        <div>
+          {onGoToEstimate && currentId && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                logButtonClick("requests", "Перейти к расчёту");
+                onGoToEstimate(currentId);
+              }}
+            >
+              <Calculator className="h-4 w-4 mr-2" />
+              Перейти к расчёту
+            </Button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button
+            type="button"
+            onClick={async () => {
+              logButtonClick("requests", "Сохранить заявку");
+              const formValues = getValues();
+              if (!formValues.clientId || !formValues.objectId) {
+                return;
+              }
+              await autoSave();
+              onCancel();
+            }}
+            disabled={isSaving}
+          >
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Сохранить
+          </Button>
+        </div>
       </div>
     </form>
   );
