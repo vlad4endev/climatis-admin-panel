@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
-import { Loader2, Copy, Maximize2, X, FileText } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -17,8 +18,12 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useTeams } from "@/hooks/useTeams";
 import { useCanEdit } from "@/hooks/useUserRoles";
 import { logButtonClick } from "@/lib/monitoringLogger";
+import { useMinimizedForms } from "@/hooks/useMinimizedForms";
 
 export default function Requests() {
+  const location = useLocation();
+  const { minimize } = useMinimizedForms();
+
   const [currentPage, setCurrentPage] = useState(0);
   const { data: requestsResult, isLoading: requestsLoading } = usePaginatedRequests(currentPage);
   const requests = requestsResult?.items || [];
@@ -36,27 +41,39 @@ export default function Requests() {
   const copyRequest = useCopyRequest();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
 
+  // Restore form from global context when navigating back
+  useEffect(() => {
+    const state = location.state as { restoreForm?: { type: string; entityId?: string } } | null;
+    if (state?.restoreForm?.type === "request") {
+      const entityId = state.restoreForm.entityId;
+      if (entityId) {
+        const req = requests.find(r => r.id === entityId);
+        if (req) setEditingRequest(req);
+      }
+      setIsFormOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, requests]);
+
   const handleMinimize = () => {
-    setIsMinimized(true);
+    const title = editingRequest
+      ? `Редактирование: ${editingRequest.requestNumber}`
+      : 'Новая заявка';
+    minimize({
+      id: `request-${editingRequest?.id || 'new'}`,
+      type: "request",
+      title,
+      entityId: editingRequest?.id,
+      route: "/requests",
+    });
     setIsFormOpen(false);
   };
 
-  const handleRestore = () => {
-    setIsMinimized(false);
-    setIsFormOpen(true);
-  };
-
-  const handleCloseMinimized = () => {
-    setIsMinimized(false);
-    setEditingRequest(undefined);
-  };
-
   const handleDialogOpenChange = (open: boolean) => {
-    if (!open && !isMinimized) {
+    if (!open) {
       setIsFormOpen(false);
       setEditingRequest(undefined);
     }
@@ -168,7 +185,7 @@ export default function Requests() {
     getItemId: (item) => item.id,
     onRowClick: (item) => setViewingRequest(item),
     onDelete: canEdit ? (id) => { logButtonClick("requests", "Удалить заявку"); deleteRequest.mutate(id); } : undefined,
-    onEdit: canEdit ? (item) => { setEditingRequest(item); setIsMinimized(false); setIsFormOpen(true); } : undefined,
+    onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
     cardActions,
     customActions: canEdit ? (item) => (
       <Button
@@ -193,7 +210,6 @@ export default function Requests() {
       await createRequest.mutateAsync(data);
     }
     setIsFormOpen(false);
-    setIsMinimized(false);
     setEditingRequest(undefined);
   };
 
@@ -205,17 +221,13 @@ export default function Requests() {
     );
   }
 
-  const minimizedTitle = editingRequest
-    ? `Редактирование: ${editingRequest.requestNumber}`
-    : 'Новая заявка';
-
   return (
     <div className="space-y-6">
       <PageHeader
         title="Заявки"
         description="Управление заявками на обслуживание"
         buttonLabel={canEdit ? "Создать заявку" : undefined}
-        onButtonClick={canEdit ? () => { setIsMinimized(false); setIsFormOpen(true); } : undefined}
+        onButtonClick={canEdit ? () => setIsFormOpen(true) : undefined}
       />
 
       <EntityList
@@ -249,36 +261,6 @@ export default function Requests() {
           />
         </DialogContent>
       </Dialog>
-
-      {/* Свёрнутая плашка заявки */}
-      {isMinimized && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-lg animate-in slide-in-from-bottom-4 duration-300">
-          <FileText className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium truncate max-w-[240px]">
-            {minimizedTitle}
-          </span>
-          <div className="flex items-center gap-1 ml-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleRestore}
-              title="Развернуть"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={handleCloseMinimized}
-              title="Закрыть"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
 
       <RequestViewDialog
         request={viewingRequest}
