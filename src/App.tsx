@@ -1,13 +1,14 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useMyPermissions, useIsAdmin, SECTIONS } from "@/hooks/useUserRoles";
 import { Loader2 } from "lucide-react";
+import { logMutationError, logQueryError } from "@/lib/monitoringLogger";
 import Auth from "./pages/Auth";
 import Clients from "./pages/Clients";
 import Contacts from "./pages/Contacts";
@@ -25,10 +26,29 @@ import Tasks from "./pages/Tasks";
 import Trash from "./pages/Trash";
 import Users from "./pages/Users";
 import ActivityLogs from "./pages/ActivityLogs";
+import Monitoring from "./pages/Monitoring";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      logQueryError(
+        window.location.pathname,
+        Array.isArray(query.queryKey) ? query.queryKey.join('.') : String(query.queryKey),
+        error
+      );
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) => {
+      logMutationError(
+        window.location.pathname,
+        mutation.options.mutationKey ? String(mutation.options.mutationKey) : 'unknown',
+        error
+      );
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: 3,
@@ -100,6 +120,7 @@ const App = () => (
             <Route path="/trash" element={<ProtectedRoute><AppLayout><Trash /></AppLayout></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><AppLayout><Users /></AppLayout></ProtectedRoute>} />
             <Route path="/activity-logs" element={<ProtectedRoute><AppLayout><ActivityLogs /></AppLayout></ProtectedRoute>} />
+            <Route path="/monitoring" element={<ProtectedRoute><AppLayout><Monitoring /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

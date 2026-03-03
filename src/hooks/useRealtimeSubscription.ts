@@ -52,6 +52,7 @@ const ROUTE_TABLE_MAP: Record<string, RealtimeTable[]> = {
   "/tasks": ["tasks", "employees", "requests"],
   "/invoices": ["invoices", "clients", "requests", "estimates"],
   "/trash": ["requests", "estimates", "tasks", "assignments", "documents", "clients", "service_objects", "contacts"],
+  "/monitoring": [],
 };
 
 export function useRealtimeSubscriptions() {

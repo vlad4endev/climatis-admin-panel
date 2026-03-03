@@ -1,4 +1,4 @@
-import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut, Contact, Trash2, History } from "lucide-react";
+import { Users, MapPin, ScrollText, UserCircle, UsersRound, Inbox, Coins, ClipboardCheck, Package, ArrowLeftRight, FolderTree, ListTodo, ChevronsLeft, ChevronsRight, Shield, LogOut, Contact, Trash2, History, Activity } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -293,6 +293,10 @@ export function AppSidebar() {
                   />
                   <MenuItemComponent 
                     item={{ title: "Логи", url: "/activity-logs", icon: History }} 
+                    open={open} 
+                  />
+                  <MenuItemComponent 
+                    item={{ title: "Мониторинг", url: "/monitoring", icon: Activity }} 
                     open={open} 
                   />
                   <MenuItemComponent 
