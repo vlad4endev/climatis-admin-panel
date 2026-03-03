@@ -274,11 +274,28 @@ export function useUpdateEstimate() {
         changes: { name: estimate.name, status: estimate.status, type: estimate.type },
       });
     },
+    onMutate: async ({ id, ...estimate }) => {
+      await queryClient.cancelQueries({ queryKey: ["estimates"] });
+      const previous = queryClient.getQueryData<Estimate[]>(["estimates"]);
+      if (previous) {
+        queryClient.setQueryData<Estimate[]>(["estimates"], old =>
+          old?.map(e => e.id === id ? { ...e, ...estimate } : e) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["estimates"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении расчёта"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["estimates"] });
       toast.success("Расчёт обновлён");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении расчёта")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+    },
   });
 }
 
@@ -306,12 +323,29 @@ export function useDeleteEstimate() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["estimates"] });
+      const previous = queryClient.getQueryData<Estimate[]>(["estimates"]);
+      if (previous) {
+        queryClient.setQueryData<Estimate[]>(["estimates"], old =>
+          old?.filter(e => e.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["estimates"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении расчёта"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["estimates"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Расчёт перемещён в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении расчёта")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }
 

@@ -152,11 +152,28 @@ export function useUpdateTask() {
         changes: { title: task.title, status: task.status },
       });
     },
+    onMutate: async ({ id, ...task }) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const previous = queryClient.getQueryData<Task[]>(["tasks"]);
+      if (previous) {
+        queryClient.setQueryData<Task[]>(["tasks"], old =>
+          old?.map(t => t.id === id ? { ...t, ...task } : t) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["tasks"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "обновлении задачи"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Задача обновлена");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "обновлении задачи")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
   });
 }
 
@@ -184,11 +201,28 @@ export function useDeleteTask() {
         action: 'delete',
       });
     },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const previous = queryClient.getQueryData<Task[]>(["tasks"]);
+      if (previous) {
+        queryClient.setQueryData<Task[]>(["tasks"], old =>
+          old?.filter(t => t.id !== id) ?? []
+        );
+      }
+      return { previous };
+    },
+    onError: (error, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["tasks"], context.previous);
+      }
+      toast.error(getErrorMessage(error, "удалении задачи"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
       toast.success("Задача перемещена в корзину");
     },
-    onError: (error) => toast.error(getErrorMessage(error, "удалении задачи")),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["trash"] });
+    },
   });
 }
