@@ -10,7 +10,7 @@ const ICONS: Record<string, React.ElementType> = {
 };
 
 export function MinimizedFormsBars() {
-  const { forms, restore, close } = useMinimizedForms();
+  const { forms, close, handleRestore } = useMinimizedForms();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,8 +37,9 @@ export function MinimizedFormsBars() {
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => {
-                  restore(form.id);
-                  if (!isOnPage) {
+                  if (isOnPage) {
+                    handleRestore(form);
+                  } else {
                     navigate(form.route, { state: { restoreForm: form } });
                   }
                 }}
