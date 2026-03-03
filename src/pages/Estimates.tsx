@@ -53,9 +53,13 @@ export default function Estimates() {
   const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Restore form from global context when navigating back
+  // Restore form from global context or open estimate by ID from navigation state
   useEffect(() => {
-    const state = location.state as { restoreForm?: { type: string; entityId?: string } } | null;
+    const state = location.state as { 
+      restoreForm?: { type: string; entityId?: string };
+      openEstimateId?: string;
+    } | null;
+    
     if (state?.restoreForm?.type === "estimate") {
       const entityId = state.restoreForm.entityId;
       if (entityId) {
@@ -64,6 +68,13 @@ export default function Estimates() {
       }
       setIsFormOpen(true);
       window.history.replaceState({}, document.title);
+    } else if (state?.openEstimateId) {
+      const est = estimates.find(e => e.id === state.openEstimateId);
+      if (est) {
+        setEditingEstimate(est);
+        setIsFormOpen(true);
+        window.history.replaceState({}, document.title);
+      }
     }
   }, [location.state, estimates]);
 

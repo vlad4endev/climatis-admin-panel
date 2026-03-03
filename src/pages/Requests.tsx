@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig, CardAction } from "@/components/entity/types";
@@ -19,9 +19,12 @@ import { useTeams } from "@/hooks/useTeams";
 import { useCanEdit } from "@/hooks/useUserRoles";
 import { logButtonClick } from "@/lib/monitoringLogger";
 import { useMinimizedForms } from "@/hooks/useMinimizedForms";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Requests() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { minimize, restore, registerRestoreHandler, unregisterRestoreHandler } = useMinimizedForms();
   const isMinimizingRef = React.useRef(false);
 
@@ -100,6 +103,51 @@ export default function Requests() {
     registerRestoreHandler("request", handleRestore);
     return () => unregisterRestoreHandler("request");
   }, [handleRestore, registerRestoreHandler, unregisterRestoreHandler]);
+
+  const handleGoToEstimate = useCallback(async (requestId: string) => {
+    try {
+      // Check if estimate already exists for this request
+      const { data: existingEstimates } = await supabase
+        .from("estimates")
+        .select("id")
+        .eq("request_id", requestId)
+        .is("deleted_at", null)
+        .limit(1);
+
+      if (existingEstimates && existingEstimates.length > 0) {
+        // Navigate to estimates page and open existing estimate
+        setIsFormOpen(false);
+        setEditingRequest(undefined);
+        navigate("/estimates", { state: { openEstimateId: existingEstimates[0].id } });
+      } else {
+        // Create new estimate linked to this request
+        const request = requests.find(r => r.id === requestId);
+        const { data: newEstimate, error } = await supabase
+          .from("estimates")
+          .insert({
+            estimate_number: "",
+            name: request ? `Расчёт по заявке ${request.requestNumber}` : "Новый расчёт",
+            request_id: requestId,
+            estimate_date: new Date().toISOString().split('T')[0],
+            status: "черновик",
+            type: "простой ремонт",
+            customer_calculation: JSON.stringify({ overheadPercent: 95, transportPercent: 6, warehousePercent: 3, estimatedProfitPercent: 58 }),
+          })
+          .select("id")
+          .single();
+
+        if (error) throw error;
+
+        setIsFormOpen(false);
+        setEditingRequest(undefined);
+        toast.success("Расчёт создан");
+        navigate("/estimates", { state: { openEstimateId: newEstimate.id } });
+      }
+    } catch (error) {
+      console.error("Error navigating to estimate:", error);
+      toast.error("Ошибка при переходе к расчёту");
+    }
+  }, [requests, navigate]);
 
   const cardActions: CardAction<Request>[] = canEdit ? [
     {
@@ -275,6 +323,7 @@ export default function Requests() {
             initialData={editingRequest}
             onSubmit={handleSubmit}
             onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); }}
+            onGoToEstimate={canEdit ? handleGoToEstimate : undefined}
             clients={clients.map(c => ({ id: c.id, companyName: c.companyName }))}
             serviceObjects={serviceObjects.map(o => ({ id: o.id, objectName: o.objectName, clientId: o.clientId }))}
             documents={documents.map(d => ({ id: d.id, contractNumber: d.contractNumber, clientId: d.clientId, responseConditions: d.responseConditions }))}
