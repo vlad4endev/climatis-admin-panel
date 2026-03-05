@@ -311,7 +311,7 @@ export function RequestForm({
                     setValue("clientName", client.companyName);
                     setClientSearch(client.companyName);
                     setShowClientDropdown(false);
-                    debouncedSave({ clientId: client.id, clientName: client.companyName });
+                    startAutoSaveTimer();
                   }}
                 >
                   {client.companyName}
