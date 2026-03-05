@@ -17,6 +17,7 @@ interface RequestFormProps {
   onSubmit: (data: Partial<Request>) => void;
   onCancel: () => void;
   onGoToEstimate?: (requestId: string) => void;
+  onMinimize?: (formData: any) => void;
   clients: { id: string; companyName: string }[];
   serviceObjects: { id: string; objectName: string; clientId?: string }[];
   documents: { id: string; contractNumber: string; clientId?: string; responseConditions?: string }[];
@@ -29,6 +30,7 @@ export function RequestForm({
   onSubmit, 
   onCancel,
   onGoToEstimate,
+  onMinimize,
   clients,
   serviceObjects,
   documents,
