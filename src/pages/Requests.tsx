@@ -47,6 +47,8 @@ export default function Requests() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
+  const [restoredFormData, setRestoredFormData] = useState<any>(null);
+  const minimizeFormDataRef = React.useRef<any>(null);
 
   // Restore form from global context or open request by ID from navigation state
   useEffect(() => {
