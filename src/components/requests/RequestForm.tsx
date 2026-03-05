@@ -166,7 +166,7 @@ export function RequestForm({
     }, 2 * 60 * 1000); // 2 minutes
   }, [autoSave, currentId, initialData?.id]);
 
-  // Handle select change with auto-save
+  // Handle select change - track dirty state
   const handleSelectChange = useCallback((field: string, value: string, additionalFields?: Record<string, any>) => {
     setValue(field as any, value);
     if (additionalFields) {
@@ -174,14 +174,14 @@ export function RequestForm({
         setValue(key as any, val);
       });
     }
-    debouncedSave({ [field]: value, ...additionalFields });
-  }, [setValue, debouncedSave]);
+    startAutoSaveTimer();
+  }, [setValue, startAutoSaveTimer]);
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
       }
     };
   }, []);
