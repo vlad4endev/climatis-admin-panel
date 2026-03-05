@@ -522,6 +522,10 @@ export function RequestForm({
             type="button"
             onClick={async () => {
               logButtonClick("requests", "Сохранить заявку");
+              manualSavedRef.current = true;
+              if (autoSaveTimerRef.current) {
+                clearTimeout(autoSaveTimerRef.current);
+              }
               const formValues = getValues();
               if (!formValues.clientId || !formValues.objectId) {
                 return;
