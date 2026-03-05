@@ -291,13 +291,15 @@ export default function Requests() {
   };
 
   const handleSubmit = async (data: Partial<Request>) => {
-    if (editingRequest) {
-      await updateRequest.mutateAsync({ id: editingRequest.id, ...data });
+    const id = editingRequest?.id || (data as any).id;
+    if (id) {
+      await updateRequest.mutateAsync({ id, ...data });
     } else {
       await createRequest.mutateAsync(data);
     }
     setIsFormOpen(false);
     setEditingRequest(undefined);
+    setRestoredFormData(null);
   };
 
   if (requestsLoading) {
