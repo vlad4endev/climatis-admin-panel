@@ -57,7 +57,14 @@ export function RequestForm({
     },
   });
 
-  const selectedClientId = watch("clientId");
+  // Continuously sync form data for minimize capture
+  const allValues = watch();
+  useEffect(() => {
+    if (onMinimize) {
+      onMinimize(allValues);
+    }
+  });
+
   const selectedObjectId = watch("objectId");
   const selectedContractId = watch("contractId");
   const selectedStatus = watch("status");
