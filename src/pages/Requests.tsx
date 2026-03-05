@@ -98,6 +98,7 @@ export default function Requests() {
         isMinimizingRef.current = false;
       } else {
         setEditingRequest(undefined);
+        setRestoredFormData(null);
       }
     }
   };
