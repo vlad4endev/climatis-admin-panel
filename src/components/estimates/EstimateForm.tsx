@@ -138,7 +138,7 @@ export function EstimateForm({
               engineerComment: formValues.engineerComment,
               workBlocks,
               materials,
-              customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
+              customerCalculation: { ...customerCalc, executorCompany: selectedCompany } as any,
             }, {
               onSuccess: (result: any) => {
                 if (result?.id) currentIdRef.current = result.id;
