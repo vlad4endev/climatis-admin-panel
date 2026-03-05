@@ -1317,7 +1317,11 @@ export type Database = {
       contract_type: "maintenance" | "general" | "one-time"
       document_status: "draft" | "active" | "completed" | "cancelled"
       estimate_status: "черновик" | "готов" | "согласован"
-      estimate_type: "простой ремонт" | "сложный ремонт" | "по договору ТО"
+      estimate_type:
+        | "простой ремонт"
+        | "сложный ремонт"
+        | "по договору ТО"
+        | "изготовление (производство)"
       invoice_status: "подготовлен" | "выставлен" | "оплачен" | "отменён"
       operation_type: "приход" | "расход" | "возврат"
       permission_level: "none" | "view" | "edit"
@@ -1331,7 +1335,7 @@ export type Database = {
         | "partially_completed"
         | "completed"
         | "closed"
-      request_type: "repair" | "maintenance" | "installation"
+      request_type: "repair" | "maintenance" | "installation" | "manufacturing"
       task_status: "новая" | "в работе" | "частично выполнена" | "выполнена"
       unit_type:
         | "шт"
@@ -1484,7 +1488,12 @@ export const Constants = {
       contract_type: ["maintenance", "general", "one-time"],
       document_status: ["draft", "active", "completed", "cancelled"],
       estimate_status: ["черновик", "готов", "согласован"],
-      estimate_type: ["простой ремонт", "сложный ремонт", "по договору ТО"],
+      estimate_type: [
+        "простой ремонт",
+        "сложный ремонт",
+        "по договору ТО",
+        "изготовление (производство)",
+      ],
       invoice_status: ["подготовлен", "выставлен", "оплачен", "отменён"],
       operation_type: ["приход", "расход", "возврат"],
       permission_level: ["none", "view", "edit"],
@@ -1499,7 +1508,7 @@ export const Constants = {
         "completed",
         "closed",
       ],
-      request_type: ["repair", "maintenance", "installation"],
+      request_type: ["repair", "maintenance", "installation", "manufacturing"],
       task_status: ["новая", "в работе", "частично выполнена", "выполнена"],
       unit_type: [
         "шт",
