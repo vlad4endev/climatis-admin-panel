@@ -8,7 +8,7 @@ export type RequestStatus =
   | "completed"
   | "closed";
 
-export type RequestType = "repair" | "maintenance" | "installation";
+export type RequestType = "repair" | "maintenance" | "installation" | "manufacturing";
 export type RequestPriority = "urgent" | "normal";
 
 export const REQUEST_STATUSES: { value: RequestStatus; label: string }[] = [
@@ -26,6 +26,7 @@ export const REQUEST_TYPES: { value: RequestType; label: string }[] = [
   { value: "repair", label: "Ремонт" },
   { value: "maintenance", label: "ТО" },
   { value: "installation", label: "Монтаж" },
+  { value: "manufacturing", label: "Изготовление (производство)" },
 ];
 
 export const REQUEST_PRIORITIES: { value: RequestPriority; label: string }[] = [

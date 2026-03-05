@@ -80,7 +80,7 @@ export interface Estimate {
   estimateNumber: string;
   estimateDate: string;
   status: "черновик" | "готов" | "согласован";
-  type: "простой ремонт" | "сложный ремонт" | "по договору ТО";
+  type: "простой ремонт" | "сложный ремонт" | "по договору ТО" | "изготовление (производство)";
   createdById: string;
   createdByName: string;
   engineerComment?: string;
@@ -99,6 +99,7 @@ export const ESTIMATE_TYPES = [
   { value: "простой ремонт", label: "Простой ремонт" },
   { value: "сложный ремонт", label: "Сложный ремонт" },
   { value: "по договору ТО", label: "По договору ТО" },
+  { value: "изготовление (производство)", label: "Изготовление (производство)" },
 ];
 
 export function createEmptyWorkBlock(): WorkBlock {
