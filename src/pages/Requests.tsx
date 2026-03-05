@@ -331,15 +331,16 @@ export default function Requests() {
       />
 
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onMinimize={() => handleMinimize(minimizeFormDataRef.current)}>
           <DialogHeader>
             <DialogTitle>{editingRequest ? "Редактировать заявку" : "Создать заявку"}</DialogTitle>
           </DialogHeader>
           <RequestForm
-            initialData={editingRequest}
+            initialData={editingRequest || restoredFormData}
             onSubmit={handleSubmit}
-            onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); }}
+            onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); setRestoredFormData(null); }}
             onGoToEstimate={canEdit ? handleGoToEstimate : undefined}
+            onMinimize={(formData) => { minimizeFormDataRef.current = formData; }}
             clients={clients.map(c => ({ id: c.id, companyName: c.companyName }))}
             serviceObjects={serviceObjects.map(o => ({ id: o.id, objectName: o.objectName, clientId: o.clientId }))}
             documents={documents.map(d => ({ id: d.id, contractNumber: d.contractNumber, clientId: d.clientId, responseConditions: d.responseConditions }))}
