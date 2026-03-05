@@ -498,7 +498,7 @@ export function EstimateForm({
               <Input
                 id="name"
                 {...register("name", {
-                  onChange: (e) => handleFieldChange("name", e.target.value),
+                  onChange: () => startAutoSaveTimer(),
                 })}
                 placeholder="Название расчёта"
                 readOnly={readOnly}
@@ -691,7 +691,7 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="attachments" className="space-y-4 mt-4">
-          <EstimateAttachments estimateId={currentId || estimate?.id} readOnly={readOnly} />
+          <EstimateAttachments estimateId={currentIdRef.current || estimate?.id} readOnly={readOnly} />
         </TabsContent>
 
         <TabsContent value="customer" className="space-y-4 mt-4">
