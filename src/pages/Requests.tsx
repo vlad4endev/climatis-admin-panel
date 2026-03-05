@@ -47,6 +47,8 @@ export default function Requests() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
+  const [restoredFormData, setRestoredFormData] = useState<any>(null);
+  const minimizeFormDataRef = React.useRef<any>(null);
 
   // Restore form from global context or open request by ID from navigation state
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function Requests() {
     }
   }, [location.state, requests]);
 
-  const handleMinimize = () => {
+  const handleMinimize = (formData?: any) => {
     const title = editingRequest
       ? `Редактирование: ${editingRequest.requestNumber}`
       : 'Новая заявка';
@@ -83,6 +85,7 @@ export default function Requests() {
       title,
       entityId: editingRequest?.id,
       route: "/requests",
+      formData: formData || null,
     });
     isMinimizingRef.current = true;
     setIsFormOpen(false);
@@ -95,6 +98,7 @@ export default function Requests() {
         isMinimizingRef.current = false;
       } else {
         setEditingRequest(undefined);
+        setRestoredFormData(null);
       }
     }
   };
@@ -105,6 +109,8 @@ export default function Requests() {
       if (form.entityId) {
         const req = requests.find(r => r.id === form.entityId);
         if (req) setEditingRequest(req);
+      } else if (form.formData) {
+        setRestoredFormData(form.formData);
       }
       setIsFormOpen(true);
     }
@@ -326,15 +332,16 @@ export default function Requests() {
       />
 
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" onMinimize={() => handleMinimize(minimizeFormDataRef.current)}>
           <DialogHeader>
             <DialogTitle>{editingRequest ? "Редактировать заявку" : "Создать заявку"}</DialogTitle>
           </DialogHeader>
           <RequestForm
-            initialData={editingRequest}
+            initialData={editingRequest || restoredFormData}
             onSubmit={handleSubmit}
-            onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); }}
+            onCancel={() => { setIsFormOpen(false); setEditingRequest(undefined); setRestoredFormData(null); }}
             onGoToEstimate={canEdit ? handleGoToEstimate : undefined}
+            onMinimize={(formData) => { minimizeFormDataRef.current = formData; }}
             clients={clients.map(c => ({ id: c.id, companyName: c.companyName }))}
             serviceObjects={serviceObjects.map(o => ({ id: o.id, objectName: o.objectName, clientId: o.clientId }))}
             documents={documents.map(d => ({ id: d.id, contractNumber: d.contractNumber, clientId: d.clientId, responseConditions: d.responseConditions }))}

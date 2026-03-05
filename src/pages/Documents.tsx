@@ -34,6 +34,8 @@ export default function Documents() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
+  const [restoredFormData, setRestoredFormData] = useState<any>(null);
+  const minimizeFormDataRef = React.useRef<any>(null);
   const isMinimizingRef = React.useRef(false);
 
   // Restore form from global context when navigating back
@@ -61,7 +63,7 @@ export default function Documents() {
     }
   };
 
-  const handleMinimize = () => {
+  const handleMinimize = (formData?: any) => {
     const title = editingDocument
       ? `Редактирование: ${editingDocument.contractNumber}`
       : 'Новый документ';
@@ -71,6 +73,7 @@ export default function Documents() {
       title,
       entityId: editingDocument?.id,
       route: "/documents",
+      formData: formData || null,
     });
     isMinimizingRef.current = true;
     setIsDialogOpen(false);
@@ -83,6 +86,7 @@ export default function Documents() {
         isMinimizingRef.current = false;
       } else {
         setEditingDocument(null);
+        setRestoredFormData(null);
       }
     }
   };
@@ -94,6 +98,8 @@ export default function Documents() {
       if (form.entityId) {
         const doc = documents.find(d => d.id === form.entityId);
         if (doc) setEditingDocument(doc);
+      } else if (form.formData) {
+        setRestoredFormData(form.formData);
       }
       setIsDialogOpen(true);
     }
@@ -202,14 +208,15 @@ export default function Documents() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={() => handleMinimize(minimizeFormDataRef.current)}>
           <DialogHeader>
             <DialogTitle>{editingDocument ? 'Редактировать документ' : 'Новый документ'}</DialogTitle>
           </DialogHeader>
           <DocumentForm
-            initialData={editingDocument || undefined}
+            initialData={editingDocument || restoredFormData || undefined}
             onSubmit={handleSubmit}
-            onCancel={() => { setIsDialogOpen(false); setEditingDocument(null); }}
+            onCancel={() => { setIsDialogOpen(false); setEditingDocument(null); setRestoredFormData(null); }}
+            onMinimize={(formData) => { minimizeFormDataRef.current = formData; }}
             clients={clients}
             serviceObjects={serviceObjects}
           />

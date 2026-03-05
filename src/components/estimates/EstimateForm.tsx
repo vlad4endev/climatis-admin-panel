@@ -48,6 +48,7 @@ interface EstimateFormProps {
   onSubmit: (data: Partial<Estimate>) => void | Promise<void>;
   onCancel: () => void;
   onGoToRequest?: (requestId: string) => void;
+  onMinimize?: (formData: any) => void;
   requests: Array<{ id: string; name: string; createdAt: string; clientName?: string; serviceObjectName?: string; serviceObjectAddress?: string }>;
   employees: Array<{ id: string; fullName: string; position?: string }>;
   availableMaterials?: Array<{ id: string; name: string; price?: number }>;
@@ -59,6 +60,7 @@ export function EstimateForm({
   onSubmit,
   onCancel,
   onGoToRequest,
+  onMinimize,
   requests,
   employees,
   availableMaterials = [],
@@ -77,6 +79,14 @@ export function EstimateForm({
       createdById: estimate?.createdById || "",
       engineerComment: estimate?.engineerComment || "",
     },
+  });
+
+  // Continuously sync form data for minimize capture
+  const allFormValues = watch();
+  useEffect(() => {
+    if (onMinimize) {
+      onMinimize({ ...allFormValues, workBlocks, materials, customerCalculation: customerCalc, selectedCompany });
+    }
   });
 
   const [workBlocks, setWorkBlocks] = useState<WorkBlock[]>(
