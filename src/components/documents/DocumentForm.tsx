@@ -24,12 +24,13 @@ interface DocumentFormProps {
   initialData?: Partial<Document>;
   onSubmit: (data: Omit<Document, 'id'>) => void;
   onCancel: () => void;
+  onMinimize?: (formData: any) => void;
   clients: Client[];
   serviceObjects: ServiceObject[];
   readOnly?: boolean;
 }
 
-export function DocumentForm({ initialData, onSubmit, onCancel, clients, serviceObjects, readOnly = false }: DocumentFormProps) {
+export function DocumentForm({ initialData, onSubmit, onCancel, onMinimize, clients, serviceObjects, readOnly = false }: DocumentFormProps) {
   const queryClient = useQueryClient();
   const [currentId, setCurrentId] = useState<string | null>(initialData?.id || null);
   const [isSaving, setIsSaving] = useState(false);
