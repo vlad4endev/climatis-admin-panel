@@ -14,7 +14,7 @@ import { logButtonClick } from "@/lib/monitoringLogger";
 
 interface RequestFormProps {
   initialData?: Request;
-  onSubmit: (data: Partial<Request>) => void;
+  onSubmit: (data: Partial<Request>) => Promise<void>;
   onCancel: () => void;
   onGoToEstimate?: (requestId: string) => void;
   onMinimize?: (formData: any) => void;
@@ -538,15 +538,27 @@ export function RequestForm({
               }
               const formValues = getValues();
               if (!formValues.clientId || !formValues.objectId) {
+                toast.error("Заполните обязательные поля: Контрагент и Объект");
                 return;
               }
-              await autoSave();
-              onCancel();
+              setIsSaving(true);
+              try {
+                // If auto-save already created a draft, treat as update
+                const dataToSubmit: Partial<Request> = {
+                  ...formValues,
+                  ...(currentId ? { id: currentId } : {}),
+                };
+                await onSubmit(dataToSubmit);
+              } catch (error) {
+                console.error("Save error:", error);
+              } finally {
+                setIsSaving(false);
+              }
             }}
             disabled={isSaving}
           >
             {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Сохранить
+            {isSaving ? "Сохранение..." : "Сохранить"}
           </Button>
         </div>
       </div>
