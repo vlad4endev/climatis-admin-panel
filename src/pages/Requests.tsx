@@ -75,7 +75,7 @@ export default function Requests() {
     }
   }, [location.state, requests]);
 
-  const handleMinimize = () => {
+  const handleMinimize = (formData?: any) => {
     const title = editingRequest
       ? `Редактирование: ${editingRequest.requestNumber}`
       : 'Новая заявка';
@@ -85,6 +85,7 @@ export default function Requests() {
       title,
       entityId: editingRequest?.id,
       route: "/requests",
+      formData: formData || null,
     });
     isMinimizingRef.current = true;
     setIsFormOpen(false);
@@ -107,6 +108,8 @@ export default function Requests() {
       if (form.entityId) {
         const req = requests.find(r => r.id === form.entityId);
         if (req) setEditingRequest(req);
+      } else if (form.formData) {
+        setRestoredFormData(form.formData);
       }
       setIsFormOpen(true);
     }
