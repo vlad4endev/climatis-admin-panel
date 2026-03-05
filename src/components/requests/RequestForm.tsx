@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Loader2, Calculator } from "lucide-react";
 import { logButtonClick } from "@/lib/monitoringLogger";
 
@@ -41,8 +42,10 @@ export function RequestForm({
   const [isSaving, setIsSaving] = useState(false);
   const clientInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isCreatingRef = useRef(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const manualSavedRef = useRef(false);
+  const isDirtyRef = useRef(false);
 
   const { register, handleSubmit, setValue, watch, getValues } = useForm({
     defaultValues: initialData || {
@@ -151,20 +154,19 @@ export function RequestForm({
     }
   }, [currentId, getValues, queryClient]);
 
-  // Debounced save
-  const debouncedSave = useCallback((fieldData?: Partial<Request>) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(() => autoSave(fieldData), 500);
-  }, [autoSave]);
+  // Start 2-minute auto-save timer on first field change (new records only)
+  const startAutoSaveTimer = useCallback(() => {
+    if (isDirtyRef.current || initialData?.id) return; // Already started or editing existing
+    isDirtyRef.current = true;
+    autoSaveTimerRef.current = setTimeout(() => {
+      if (!manualSavedRef.current && !currentId) {
+        autoSave();
+        toast.info("Заявка автоматически сохранена как черновик", { duration: 3000 });
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+  }, [autoSave, currentId, initialData?.id]);
 
-  // Handle blur for input fields
-  const handleBlur = useCallback(() => {
-    debouncedSave();
-  }, [debouncedSave]);
-
-  // Handle select change with auto-save
+  // Handle select change - track dirty state
   const handleSelectChange = useCallback((field: string, value: string, additionalFields?: Record<string, any>) => {
     setValue(field as any, value);
     if (additionalFields) {
@@ -172,14 +174,14 @@ export function RequestForm({
         setValue(key as any, val);
       });
     }
-    debouncedSave({ [field]: value, ...additionalFields });
-  }, [setValue, debouncedSave]);
+    startAutoSaveTimer();
+  }, [setValue, startAutoSaveTimer]);
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
       }
     };
   }, []);
@@ -309,7 +311,7 @@ export function RequestForm({
                     setValue("clientName", client.companyName);
                     setClientSearch(client.companyName);
                     setShowClientDropdown(false);
-                    debouncedSave({ clientId: client.id, clientName: client.companyName });
+                    startAutoSaveTimer();
                   }}
                 >
                   {client.companyName}
@@ -399,7 +401,7 @@ export function RequestForm({
           id="problemDescription" 
           {...register("problemDescription", { required: true })} 
           rows={3} 
-          onBlur={handleBlur}
+          onBlur={() => startAutoSaveTimer()}
         />
       </div>
 
@@ -409,18 +411,18 @@ export function RequestForm({
           id="comments" 
           {...register("comments")} 
           rows={2} 
-          onBlur={handleBlur}
+          onBlur={() => startAutoSaveTimer()}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="desiredDate">Желаемая дата выполнения</Label>
-          <Input type="date" id="desiredDate" {...register("desiredDate")} onBlur={handleBlur} />
+          <Input type="date" id="desiredDate" {...register("desiredDate")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="plannedVisitDate">Плановая дата выезда</Label>
-          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} onBlur={() => startAutoSaveTimer()} />
         </div>
       </div>
 
@@ -484,15 +486,15 @@ export function RequestForm({
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="actualStartTime">Фактическое начало работ</Label>
-          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="actualEndTime">Фактическое окончание работ</Label>
-          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="hoursSpent">Количество часов</Label>
-          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} onBlur={handleBlur} />
+          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} onBlur={() => startAutoSaveTimer()} />
         </div>
       </div>
 
@@ -520,6 +522,10 @@ export function RequestForm({
             type="button"
             onClick={async () => {
               logButtonClick("requests", "Сохранить заявку");
+              manualSavedRef.current = true;
+              if (autoSaveTimerRef.current) {
+                clearTimeout(autoSaveTimerRef.current);
+              }
               const formValues = getValues();
               if (!formValues.clientId || !formValues.objectId) {
                 return;
