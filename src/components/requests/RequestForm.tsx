@@ -401,7 +401,7 @@ export function RequestForm({
           id="problemDescription" 
           {...register("problemDescription", { required: true })} 
           rows={3} 
-          onBlur={handleBlur}
+          onBlur={() => startAutoSaveTimer()}
         />
       </div>
 
@@ -411,18 +411,18 @@ export function RequestForm({
           id="comments" 
           {...register("comments")} 
           rows={2} 
-          onBlur={handleBlur}
+          onBlur={() => startAutoSaveTimer()}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="desiredDate">Желаемая дата выполнения</Label>
-          <Input type="date" id="desiredDate" {...register("desiredDate")} onBlur={handleBlur} />
+          <Input type="date" id="desiredDate" {...register("desiredDate")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="plannedVisitDate">Плановая дата выезда</Label>
-          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="plannedVisitDate" {...register("plannedVisitDate")} onBlur={() => startAutoSaveTimer()} />
         </div>
       </div>
 
@@ -486,15 +486,15 @@ export function RequestForm({
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="actualStartTime">Фактическое начало работ</Label>
-          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="actualStartTime" {...register("actualStartTime")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="actualEndTime">Фактическое окончание работ</Label>
-          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} onBlur={handleBlur} />
+          <Input type="datetime-local" id="actualEndTime" {...register("actualEndTime")} onBlur={() => startAutoSaveTimer()} />
         </div>
         <div>
           <Label htmlFor="hoursSpent">Количество часов</Label>
-          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} onBlur={handleBlur} />
+          <Input type="number" step="0.5" id="hoursSpent" {...register("hoursSpent")} onBlur={() => startAutoSaveTimer()} />
         </div>
       </div>
 
