@@ -199,8 +199,11 @@ export function EstimateForm({
 
   const handleFormSubmit = async (data: any) => {
     if (isSaving) return;
+    manualSavedRef.current = true;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
     setIsSaving(true);
-    try {
       const employee = employees.find((e) => e.id === data.createdById);
       await onSubmit({
         ...data,
