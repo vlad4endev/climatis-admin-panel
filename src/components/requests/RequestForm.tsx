@@ -65,6 +65,7 @@ export function RequestForm({
     }
   });
 
+  const selectedClientId = watch("clientId");
   const selectedObjectId = watch("objectId");
   const selectedContractId = watch("contractId");
   const selectedStatus = watch("status");
