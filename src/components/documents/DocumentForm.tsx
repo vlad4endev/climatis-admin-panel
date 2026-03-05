@@ -51,6 +51,14 @@ export function DocumentForm({ initialData, onSubmit, onCancel, onMinimize, clie
     },
   });
 
+  // Continuously sync form data for minimize capture
+  const allValues = watch();
+  useEffect(() => {
+    if (onMinimize) {
+      onMinimize(allValues);
+    }
+  });
+
   const selectedClientId = watch('clientId');
   const filteredObjects = serviceObjects.filter(obj => obj.clientId === selectedClientId);
 

@@ -81,6 +81,14 @@ export function EstimateForm({
     },
   });
 
+  // Continuously sync form data for minimize capture
+  const allFormValues = watch();
+  useEffect(() => {
+    if (onMinimize) {
+      onMinimize({ ...allFormValues, workBlocks, materials, customerCalculation: customerCalc, selectedCompany });
+    }
+  });
+
   const [workBlocks, setWorkBlocks] = useState<WorkBlock[]>(
     estimate?.workBlocks || []
   );
