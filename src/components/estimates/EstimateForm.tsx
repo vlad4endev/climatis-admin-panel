@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { useAutoSave } from "@/hooks/useAutoSave";
 import { useCreateEstimate, useUpdateEstimate } from "@/hooks/useEstimates";
+import { toast } from "sonner";
 import { FileDown, FileText, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,50 +111,58 @@ export function EstimateForm({
   const requestId = watch("requestId");
   const createdById = watch("createdById");
 
-  // Auto-save setup
+  // Auto-save setup - 2 minute timer for new records
   const createMutation = useCreateEstimate();
   const updateMutation = useUpdateEstimate();
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const manualSavedRef = useRef(false);
+  const isDirtyRef = useRef(false);
+  const currentIdRef = useRef<string | null>(estimate?.id || null);
 
-  const { handleFieldChange, setCurrentId, currentId } = useAutoSave<Partial<Estimate>>({
-    queryKey: ["estimates"],
-    createFn: async (data) => {
-      return new Promise((resolve, reject) => {
-        createMutation.mutate({
-          name: data.name || "Новый расчёт",
-          estimateDate: data.estimateDate || new Date().toISOString().split("T")[0],
-          status: (data.status as any) || "черновик",
-          type: (data.type as any) || "простой ремонт",
-          createdById: data.createdById || "",
-          createdByName: employees.find(e => e.id === data.createdById)?.fullName || "",
-          requestId: data.requestId,
-          engineerComment: data.engineerComment,
-        }, {
-          onSuccess: (result: any) => resolve({ id: result?.id || "" }),
-          onError: reject,
-        });
-      });
-    },
-    updateFn: async (id, data) => {
-      return new Promise((resolve, reject) => {
-        updateMutation.mutate({
-          id,
-          ...data,
-          createdByName: data.createdById ? employees.find(e => e.id === data.createdById)?.fullName : undefined,
-        }, {
-          onSuccess: () => resolve(),
-          onError: reject,
-        });
-      });
-    },
-    debounceMs: 800,
-  });
+  const startAutoSaveTimer = useCallback(() => {
+    if (isDirtyRef.current || estimate?.id) return; // Already started or editing existing
+    isDirtyRef.current = true;
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (!manualSavedRef.current && !currentIdRef.current) {
+        const formValues = watch();
+        try {
+          await new Promise<void>((resolve, reject) => {
+            createMutation.mutate({
+              name: formValues.name || "Новый расчёт",
+              estimateDate: formValues.estimateDate || new Date().toISOString().split("T")[0],
+              status: (formValues.status as any) || "черновик",
+              type: (formValues.type as any) || "простой ремонт",
+              createdById: formValues.createdById || "",
+              createdByName: employees.find(e => e.id === formValues.createdById)?.fullName || "",
+              requestId: formValues.requestId,
+              engineerComment: formValues.engineerComment,
+              workBlocks,
+              materials,
+              customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
+            }, {
+              onSuccess: (result: any) => {
+                if (result?.id) currentIdRef.current = result.id;
+                resolve();
+              },
+              onError: reject,
+            });
+          });
+          toast.info("Расчёт автоматически сохранён как черновик", { duration: 3000 });
+        } catch (error) {
+          console.error("Auto-save error:", error);
+        }
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, customerCalc, selectedCompany]);
 
-  // Initialize currentId if editing existing estimate
+  // Cleanup timer on unmount
   useEffect(() => {
-    if (estimate?.id) {
-      setCurrentId(estimate.id);
-    }
-  }, [estimate?.id, setCurrentId]);
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
 
   // Sort requests by creation date (newest first)
   const sortedRequests = [...requests].sort(
