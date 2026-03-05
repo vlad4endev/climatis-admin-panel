@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -21,8 +22,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hadSessionRef = useRef(false);
   const toastShownRef = useRef(false);
 
+  const handleSessionExpired = useCallback(() => {
+    if (!toastShownRef.current && hadSessionRef.current) {
+      setSessionExpired(true);
+      setUser(null);
+      setSession(null);
+      toastShownRef.current = true;
+      toast.error("Сессия истекла. Перенаправление на страницу авторизации...", {
+        duration: 3000,
+      });
+      // Redirect after a short delay so user sees the message
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, 1500);
+    }
+  }, []);
+
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
@@ -35,28 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           toastShownRef.current = false;
         }
 
-        // Detect session expiry: user had a session but it's gone (not manual sign out)
         if (event === 'TOKEN_REFRESHED' && !currentSession && hadSessionRef.current) {
-          setSessionExpired(true);
-          if (!toastShownRef.current) {
-            toastShownRef.current = true;
-            toast.error("Сессия истекла. Пожалуйста, авторизуйтесь заново.", {
-              duration: 10000,
-            });
-          }
+          handleSessionExpired();
         }
 
         if (event === 'SIGNED_OUT') {
           hadSessionRef.current = false;
-          // If session expired caused the sign out, show message
-          if (sessionExpired || (!currentSession && hadSessionRef.current)) {
-            // already handled
-          }
         }
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
       setSession(existingSession);
       setUser(existingSession?.user ?? null);
@@ -66,22 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    // Periodic session health check every 30 minutes (session auto-refreshes via autoRefreshToken)
     const healthCheck = setInterval(async () => {
       if (!hadSessionRef.current) return;
       
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
       
       if (error || !currentSession) {
-        if (hadSessionRef.current && !toastShownRef.current) {
-          setSessionExpired(true);
-          setUser(null);
-          setSession(null);
-          toastShownRef.current = true;
-          toast.error("Сессия истекла. Пожалуйста, авторизуйтесь заново.", {
-            duration: 10000,
-          });
-        }
+        handleSessionExpired();
       }
     }, 30 * 60 * 1000);
 
@@ -89,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
       clearInterval(healthCheck);
     };
-  }, []);
+  }, [handleSessionExpired]);
 
   const signOut = async () => {
     hadSessionRef.current = false;
