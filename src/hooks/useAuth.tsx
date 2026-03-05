@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    // Periodic session health check every 5 minutes
+    // Periodic session health check every 30 minutes (session auto-refreshes via autoRefreshToken)
     const healthCheck = setInterval(async () => {
       if (!hadSessionRef.current) return;
       
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         }
       }
-    }, 5 * 60 * 1000);
+    }, 30 * 60 * 1000);
 
     return () => {
       subscription.unsubscribe();
