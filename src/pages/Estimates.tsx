@@ -51,6 +51,8 @@ export default function Estimates() {
   const [editingEstimate, setEditingEstimate] = useState<Estimate | undefined>();
   const [viewingEstimate, setViewingEstimate] = useState<Estimate | undefined>();
   const [printingEstimate, setPrintingEstimate] = useState<Estimate | undefined>();
+  const [restoredFormData, setRestoredFormData] = useState<any>(null);
+  const minimizeFormDataRef = React.useRef<any>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Restore form from global context or open estimate by ID from navigation state
@@ -126,7 +128,7 @@ export default function Estimates() {
     });
   };
 
-  const handleMinimize = () => {
+  const handleMinimize = (formData?: any) => {
     const title = editingEstimate
       ? `Редактирование: ${editingEstimate.name || editingEstimate.estimateNumber}`
       : 'Новый расчёт';
@@ -136,6 +138,7 @@ export default function Estimates() {
       title,
       entityId: editingEstimate?.id,
       route: "/estimates",
+      formData: formData || null,
     });
     isMinimizingRef.current = true;
     setIsFormOpen(false);
@@ -148,6 +151,7 @@ export default function Estimates() {
         isMinimizingRef.current = false;
       } else {
         setEditingEstimate(undefined);
+        setRestoredFormData(null);
       }
     }
   };
@@ -158,6 +162,8 @@ export default function Estimates() {
       if (form.entityId) {
         const est = estimates.find(e => e.id === form.entityId);
         if (est) setEditingEstimate(est);
+      } else if (form.formData) {
+        setRestoredFormData(form.formData);
       }
       setIsFormOpen(true);
     }
@@ -325,24 +331,26 @@ export default function Estimates() {
       />
 
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={handleMinimize}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onMinimize={() => handleMinimize(minimizeFormDataRef.current)}>
           <DialogHeader>
             <DialogTitle>
               {editingEstimate ? "Редактировать расчёт" : "Создать расчёт"}
             </DialogTitle>
           </DialogHeader>
           <EstimateForm
-            estimate={editingEstimate}
+            estimate={editingEstimate || (restoredFormData ? { ...restoredFormData, id: undefined } as any : undefined)}
             onSubmit={handleSubmit}
             onCancel={() => {
               setIsFormOpen(false);
               setEditingEstimate(undefined);
+              setRestoredFormData(null);
             }}
             onGoToRequest={(requestId) => {
               setIsFormOpen(false);
               setEditingEstimate(undefined);
               navigate("/requests", { state: { openRequestId: requestId } });
             }}
+            onMinimize={(formData) => { minimizeFormDataRef.current = formData; }}
             requests={requests}
             employees={employees}
             availableMaterials={availableMaterials}
