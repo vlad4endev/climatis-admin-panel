@@ -6,6 +6,7 @@ export interface MinimizedForm {
   title: string;
   entityId?: string;
   route: string;
+  formData?: any;
 }
 
 interface MinimizedFormsContextValue {
