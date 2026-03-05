@@ -204,6 +204,7 @@ export function EstimateForm({
       clearTimeout(autoSaveTimerRef.current);
     }
     setIsSaving(true);
+    try {
       const employee = employees.find((e) => e.id === data.createdById);
       await onSubmit({
         ...data,
