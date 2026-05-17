@@ -1303,6 +1303,7 @@ export type Database = {
           sql: string
         }[]
       }
+      _tmp_dump_table: { Args: { tbl: string }; Returns: string[] }
       get_section_permission: {
         Args: { _section: string; _user_id: string }
         Returns: Database["public"]["Enums"]["permission_level"]
