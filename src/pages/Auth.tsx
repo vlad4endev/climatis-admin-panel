@@ -80,7 +80,7 @@ export default function Auth() {
     
     setLoading(true);
     
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${import.meta.env.VITE_APP_URL || window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
