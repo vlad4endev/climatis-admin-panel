@@ -44,8 +44,8 @@ export function useAutoSave<T extends Record<string, any>>({
   const currentIdRef = useRef<string | null>(null);
   const formDataRef = useRef<Partial<T>>({});
   const isSavingRef = useRef(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingUpdateRef = useRef<Partial<T> | null>(null);
   const retryCountRef = useRef(0);
   const unmountedRef = useRef(false);
