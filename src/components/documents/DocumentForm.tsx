@@ -34,7 +34,7 @@ export function DocumentForm({ initialData, onSubmit, onCancel, onMinimize, clie
   const queryClient = useQueryClient();
   const [currentId, setCurrentId] = useState<string | null>(initialData?.id || null);
   const [isSaving, setIsSaving] = useState(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isCreatingRef = useRef(false);
 
   const { register, handleSubmit, watch, setValue, getValues } = useForm({

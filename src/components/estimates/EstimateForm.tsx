@@ -124,7 +124,7 @@ export function EstimateForm({
   // Auto-save setup - 2 minute timer for new records
   const createMutation = useCreateEstimate();
   const updateMutation = useUpdateEstimate();
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const manualSavedRef = useRef(false);
   const isDirtyRef = useRef(false);
   const currentIdRef = useRef<string | null>(estimate?.id || null);

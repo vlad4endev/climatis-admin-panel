@@ -45,7 +45,7 @@ export function RequestForm({
   const clientInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isCreatingRef = useRef(false);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const manualSavedRef = useRef(false);
   const isDirtyRef = useRef(false);
 
