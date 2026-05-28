@@ -57,13 +57,12 @@ export function RequestForm({
     },
   });
 
-  // Continuously sync form data for minimize capture
-  const allValues = watch();
+  // Sync form data for minimize capture via subscription (no re-render storm)
   useEffect(() => {
-    if (onMinimize) {
-      onMinimize(allValues);
-    }
-  });
+    if (!onMinimize) return;
+    const subscription = watch((values) => onMinimize(values));
+    return () => subscription.unsubscribe();
+  }, [watch, onMinimize]);
 
   const selectedClientId = watch("clientId");
   const selectedObjectId = watch("objectId");
