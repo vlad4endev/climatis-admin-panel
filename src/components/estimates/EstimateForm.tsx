@@ -27,21 +27,25 @@ import {
   ESTIMATE_TYPES,
   WorkBlock,
   Material,
+  PriceWork,
   CustomerCalculation,
   DEFAULT_CUSTOMER_CALCULATION,
   VatRate,
   calculateAllBlocksTotal,
   calculateWorkBlockTotal,
+  calculatePriceWorksTotal,
   calculateWorksVat,
   calculateMaterialsVat,
   calculateGrandTotalWithVat,
 } from "@/types/estimate";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
+import { PriceWorkListEditor } from "./PriceWorkListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
 import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
 import { logButtonClick } from "@/lib/monitoringLogger";
+import { useWorkPriceList } from "@/hooks/useWorkPriceList";
 
 interface EstimateFormProps {
   estimate?: Estimate;
