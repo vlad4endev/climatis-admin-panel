@@ -37,6 +37,7 @@ const requestsItems = [
   { title: "Заявки", url: "/requests", icon: Inbox },
   { title: "Документы", url: "/documents", icon: ScrollText },
   { title: "Расчеты", url: "/estimates", icon: Coins },
+  { title: "Прайс работ", url: "/work-price-list", icon: ScrollText },
   { title: "Задания", url: "/assignments", icon: ClipboardCheck },
 ];
 

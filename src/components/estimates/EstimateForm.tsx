@@ -27,21 +27,25 @@ import {
   ESTIMATE_TYPES,
   WorkBlock,
   Material,
+  PriceWork,
   CustomerCalculation,
   DEFAULT_CUSTOMER_CALCULATION,
   VatRate,
   calculateAllBlocksTotal,
   calculateWorkBlockTotal,
+  calculatePriceWorksTotal,
   calculateWorksVat,
   calculateMaterialsVat,
   calculateGrandTotalWithVat,
 } from "@/types/estimate";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
+import { PriceWorkListEditor } from "./PriceWorkListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
 import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
 import { logButtonClick } from "@/lib/monitoringLogger";
+import { useWorkPriceList } from "@/hooks/useWorkPriceList";
 
 interface EstimateFormProps {
   estimate?: Estimate;
@@ -85,7 +89,7 @@ export function EstimateForm({
   const allFormValues = watch();
   useEffect(() => {
     if (onMinimize) {
-      onMinimize({ ...allFormValues, workBlocks, materials, customerCalculation: customerCalc, selectedCompany });
+      onMinimize({ ...allFormValues, workBlocks, materials, priceWorks, customerCalculation: customerCalc, selectedCompany });
     }
   });
 
@@ -95,9 +99,18 @@ export function EstimateForm({
   const [materials, setMaterials] = useState<Material[]>(
     estimate?.materials || []
   );
+  const [priceWorks, setPriceWorks] = useState<PriceWork[]>(
+    estimate?.priceWorks || []
+  );
   const [customerCalc, setCustomerCalc] = useState<CustomerCalculation>(
     estimate?.customerCalculation || DEFAULT_CUSTOMER_CALCULATION
   );
+
+  // Загрузка справочника прайса для автокомплита
+  const { data: priceList = [] } = useWorkPriceList();
+  const availablePriceItems = priceList
+    .filter((p) => p.isActive)
+    .map((p) => ({ id: p.id, name: p.name, price: p.price, unit: p.unit, category: p.category }));
 
   // Company options for executor selection
   const COMPANY_OPTIONS = [
@@ -148,6 +161,7 @@ export function EstimateForm({
               engineerComment: formValues.engineerComment,
               workBlocks,
               materials,
+              priceWorks,
               customerCalculation: { ...customerCalc, executorCompany: selectedCompany } as any,
             }, {
               onSuccess: (result: any) => {
@@ -163,7 +177,7 @@ export function EstimateForm({
         }
       }
     }, 2 * 60 * 1000); // 2 minutes
-  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, customerCalc, selectedCompany]);
+  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, priceWorks, customerCalc, selectedCompany]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -186,7 +200,9 @@ export function EstimateForm({
     0
   );
 
-  const grandTotal = worksTotal + materialsTotal;
+  const priceWorksTotal = calculatePriceWorksTotal(priceWorks);
+
+  const grandTotal = worksTotal + materialsTotal + priceWorksTotal;
 
   // Customer calculation totals
   const worksOverhead = worksTotal * (customerCalc.overheadPercent / 100);
@@ -197,7 +213,7 @@ export function EstimateForm({
   const materialsWarehouse = materialsTotal * (customerCalc.warehousePercent / 100);
   const materialsCustomerTotal = materialsTotal + materialsTransport + materialsWarehouse;
 
-  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal;
+  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal + priceWorksTotal;
   const otherAmount = customerCalc.otherPercent ? customerSubtotal * (customerCalc.otherPercent / 100) : 0;
   const customerGrandTotal = customerSubtotal + otherAmount;
 
@@ -221,6 +237,7 @@ export function EstimateForm({
         createdByName: employee?.fullName || "",
         workBlocks,
         materials,
+        priceWorks,
         customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
       });
     } finally {
@@ -496,9 +513,10 @@ export function EstimateForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">Основное</TabsTrigger>
           <TabsTrigger value="works">Работы</TabsTrigger>
+          <TabsTrigger value="price-works">Прайс-работы</TabsTrigger>
           <TabsTrigger value="materials">Материалы</TabsTrigger>
           <TabsTrigger value="attachments">Документы</TabsTrigger>
           <TabsTrigger value="customer">Для заказчика</TabsTrigger>
@@ -670,6 +688,15 @@ export function EstimateForm({
                 </span>
               </div>
 
+              {priceWorks.length > 0 && (
+                <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
+                  <span className="text-muted-foreground">Итог по прайс-работам:</span>
+                  <span className="font-medium">
+                    {Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center py-3 px-3 border-t-2 border-primary/30 mt-2">
                 <span className="text-lg font-semibold">Общая сумма:</span>
                 <span className="text-xl font-bold text-primary">
@@ -693,6 +720,15 @@ export function EstimateForm({
 
         <TabsContent value="works" className="space-y-4 mt-4">
           <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} readOnly={readOnly} />
+        </TabsContent>
+
+        <TabsContent value="price-works" className="space-y-4 mt-4">
+          <PriceWorkListEditor
+            items={priceWorks}
+            onChange={setPriceWorks}
+            availableItems={availablePriceItems}
+            readOnly={readOnly}
+          />
         </TabsContent>
 
         <TabsContent value="materials" className="space-y-4 mt-4">
@@ -967,6 +1003,12 @@ export function EstimateForm({
                 <span className="text-muted-foreground">Материалы с транспортом и складом:</span>
                 <span className="font-medium">{Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} ₽</span>
               </div>
+              {priceWorks.length > 0 && (
+                <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
+                  <span className="text-muted-foreground">Прайс-работы (фикс. цены):</span>
+                  <span className="font-medium">{Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽</span>
+                </div>
+              )}
               {otherAmount > 0 && (
                 <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
                   <span className="text-muted-foreground">{customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>

@@ -23,6 +23,7 @@ import Assignments from "./pages/Assignments";
 import SpareParts from "./pages/SpareParts";
 import StockMovements from "./pages/StockMovements";
 import WarehouseCategories from "./pages/WarehouseCategories";
+import WorkPriceList from "./pages/WorkPriceList";
 import Tasks from "./pages/Tasks";
 import Trash from "./pages/Trash";
 import Users from "./pages/Users";
@@ -118,6 +119,7 @@ const App = () => (
               <Route path="/teams" element={<ProtectedRoute><AppLayout><Teams /></AppLayout></ProtectedRoute>} />
               <Route path="/requests" element={<ProtectedRoute><AppLayout><Requests /></AppLayout></ProtectedRoute>} />
               <Route path="/estimates" element={<ProtectedRoute><AppLayout><Estimates /></AppLayout></ProtectedRoute>} />
+              <Route path="/work-price-list" element={<ProtectedRoute><AppLayout><WorkPriceList /></AppLayout></ProtectedRoute>} />
               <Route path="/assignments" element={<ProtectedRoute><AppLayout><Assignments /></AppLayout></ProtectedRoute>} />
               <Route path="/spare-parts" element={<ProtectedRoute><AppLayout><SpareParts /></AppLayout></ProtectedRoute>} />
               <Route path="/stock-movements" element={<ProtectedRoute><AppLayout><StockMovements /></AppLayout></ProtectedRoute>} />

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listQueryOptions } from "@/lib/queryConfig";
-import { Estimate, WorkBlock, Material, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
+import { Estimate, WorkBlock, Material, PriceWork, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
@@ -23,6 +23,15 @@ const ESTIMATE_SELECT = `
     quantity,
     price_per_unit,
     spare_part_id,
+    sort_order
+  ),
+  price_works:estimate_price_works(
+    id,
+    price_item_id,
+    name,
+    unit,
+    quantity,
+    price_per_unit,
     sort_order
   ),
   work_blocks(
@@ -67,6 +76,17 @@ function mapEstimateRow(row: any): Estimate {
       quantity: Number(m.quantity) || 0,
       pricePerUnit: Number(m.price_per_unit) || 0,
     })) || [],
+    priceWorks: (row.price_works || [])
+      .slice()
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((p: any): PriceWork => ({
+        id: p.id,
+        priceItemId: p.price_item_id || undefined,
+        name: p.name,
+        unit: p.unit || "шт",
+        quantity: Number(p.quantity) || 0,
+        pricePerUnit: Number(p.price_per_unit) || 0,
+      })),
   };
 }
 
@@ -175,6 +195,20 @@ export function useCreateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
+        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
+          estimate_id: estimateData.id,
+          price_item_id: p.priceItemId || null,
+          name: p.name,
+          unit: p.unit || "шт",
+          quantity: p.quantity,
+          price_per_unit: p.pricePerUnit,
+          sort_order: i,
+        }));
+
+        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
+      }
+
       await logActivity({
         section: 'estimates',
         elementId: estimateData.id,
@@ -225,6 +259,7 @@ export function useUpdateEstimate() {
       }
       await supabase.from("work_blocks").delete().eq("estimate_id", id);
       await supabase.from("estimate_materials").delete().eq("estimate_id", id);
+      await supabase.from("estimate_price_works").delete().eq("estimate_id", id);
 
       if (estimate.workBlocks && estimate.workBlocks.length > 0) {
         for (let i = 0; i < estimate.workBlocks.length; i++) {
@@ -264,6 +299,20 @@ export function useUpdateEstimate() {
         }));
 
         await supabase.from("estimate_materials").insert(materialsToInsert);
+      }
+
+      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
+        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
+          estimate_id: id,
+          price_item_id: p.priceItemId || null,
+          name: p.name,
+          unit: p.unit || "шт",
+          quantity: p.quantity,
+          price_per_unit: p.pricePerUnit,
+          sort_order: i,
+        }));
+
+        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
       }
 
       await logActivity({
@@ -412,6 +461,20 @@ export function useCopyEstimate() {
         }));
 
         await supabase.from("estimate_materials").insert(materialsToInsert);
+      }
+
+      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
+        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
+          estimate_id: estimateData.id,
+          price_item_id: p.priceItemId || null,
+          name: p.name,
+          unit: p.unit || "шт",
+          quantity: p.quantity,
+          price_per_unit: p.pricePerUnit,
+          sort_order: i,
+        }));
+
+        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
       }
 
       await logActivity({
