@@ -38,6 +38,7 @@ const ESTIMATE_SELECT = `
   work_blocks(
     id,
     description,
+    mode,
     sort_order,
     rows:work_rows(*)
   )
@@ -84,6 +85,7 @@ function mapEstimateRow(row: any): Estimate {
     workBlocks: row.work_blocks?.map((wb: any): WorkBlock => ({
       id: wb.id,
       description: wb.description || "",
+      mode: (wb.mode as "manual" | "price") || "manual",
       rows: wb.rows?.map((r: any) => ({
         category: r.category,
         planHours: Number(r.plan_hours) || 0,
@@ -180,6 +182,7 @@ export function useCreateEstimate() {
             .insert({
               estimate_id: estimateData.id,
               description: wb.description,
+              mode: wb.mode || "manual",
               sort_order: i,
             })
             .select()
@@ -303,6 +306,7 @@ export function useUpdateEstimate() {
             .insert({
               estimate_id: id,
               description: wb.description,
+              mode: wb.mode || "manual",
               sort_order: i,
             })
             .select()
@@ -478,6 +482,7 @@ export function useCopyEstimate() {
             .insert({
               estimate_id: estimateData.id,
               description: wb.description,
+              mode: wb.mode || "manual",
               sort_order: i,
             })
             .select()
