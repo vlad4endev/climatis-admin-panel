@@ -278,7 +278,11 @@ export function EstimateForm({
     const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
     const worksWithVat = worksCustomerTotal + worksVat;
     const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-    const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+    const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+    const otherAmountDoc = customerCalc.otherPercent
+      ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
+      : 0;
+    const grandTotalWithoutVat = subtotalWithoutVat + otherAmountDoc;
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
