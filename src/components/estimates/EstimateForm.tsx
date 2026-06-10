@@ -683,7 +683,7 @@ export function EstimateForm({
                 </span>
               </div>
 
-              {priceWorks.length > 0 && (
+              {priceWorksTotal > 0 && (
                 <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
                   <span className="text-muted-foreground">Итог по прайс-работам:</span>
                   <span className="font-medium">
@@ -995,7 +995,7 @@ export function EstimateForm({
                 <span className="text-muted-foreground">Материалы с транспортом и складом:</span>
                 <span className="font-medium">{Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} ₽</span>
               </div>
-              {priceWorks.length > 0 && (
+              {priceWorksTotal > 0 && (
                 <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
                   <span className="text-muted-foreground">Прайс-работы (фикс. цены):</span>
                   <span className="font-medium">{Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽</span>
