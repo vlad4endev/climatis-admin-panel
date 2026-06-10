@@ -32,7 +32,8 @@ const ESTIMATE_SELECT = `
     unit,
     quantity,
     price_per_unit,
-    sort_order
+    sort_order,
+    work_block_id
   ),
   work_blocks(
     id,
@@ -43,6 +44,27 @@ const ESTIMATE_SELECT = `
 `;
 
 function mapEstimateRow(row: any): Estimate {
+  const allPriceWorks: any[] = row.price_works || [];
+  const priceWorksByBlock = new Map<string, any[]>();
+  const orphanPriceWorks: any[] = [];
+  for (const p of allPriceWorks) {
+    if (p.work_block_id) {
+      const arr = priceWorksByBlock.get(p.work_block_id) || [];
+      arr.push(p);
+      priceWorksByBlock.set(p.work_block_id, arr);
+    } else {
+      orphanPriceWorks.push(p);
+    }
+  }
+  const mapPw = (p: any): PriceWork => ({
+    id: p.id,
+    priceItemId: p.price_item_id || undefined,
+    name: p.name,
+    unit: p.unit || "шт",
+    quantity: Number(p.quantity) || 0,
+    pricePerUnit: Number(p.price_per_unit) || 0,
+  });
+
   return {
     id: row.id,
     name: row.name,
@@ -68,6 +90,10 @@ function mapEstimateRow(row: any): Estimate {
         quantity: Number(r.quantity) || 0,
         rate: Number(r.rate) || 0,
       })) || [],
+      priceWorks: (priceWorksByBlock.get(wb.id) || [])
+        .slice()
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map(mapPw),
     })) || [],
     materials: row.materials?.map((m: any): Material => ({
       id: m.id,
@@ -76,17 +102,10 @@ function mapEstimateRow(row: any): Estimate {
       quantity: Number(m.quantity) || 0,
       pricePerUnit: Number(m.price_per_unit) || 0,
     })) || [],
-    priceWorks: (row.price_works || [])
+    priceWorks: orphanPriceWorks
       .slice()
-      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-      .map((p: any): PriceWork => ({
-        id: p.id,
-        priceItemId: p.price_item_id || undefined,
-        name: p.name,
-        unit: p.unit || "шт",
-        quantity: Number(p.quantity) || 0,
-        pricePerUnit: Number(p.price_per_unit) || 0,
-      })),
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(mapPw),
   };
 }
 
@@ -179,6 +198,20 @@ export function useCreateEstimate() {
 
             await supabase.from("work_rows").insert(rowsToInsert);
           }
+
+          if (wb.priceWorks && wb.priceWorks.length > 0) {
+            const pwToInsert = wb.priceWorks.map((p, j) => ({
+              estimate_id: estimateData.id,
+              work_block_id: blockData.id,
+              price_item_id: p.priceItemId || null,
+              name: p.name,
+              unit: p.unit || "шт",
+              quantity: p.quantity,
+              price_per_unit: p.pricePerUnit,
+              sort_order: j,
+            }));
+            await supabase.from("estimate_price_works").insert(pwToInsert);
+          }
         }
       }
 
@@ -195,6 +228,7 @@ export function useCreateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      // Legacy top-level priceWorks (orphans without work_block_id)
       if (estimate.priceWorks && estimate.priceWorks.length > 0) {
         const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
           estimate_id: estimateData.id,
@@ -285,6 +319,20 @@ export function useUpdateEstimate() {
 
             await supabase.from("work_rows").insert(rowsToInsert);
           }
+
+          if (blockData && wb.priceWorks && wb.priceWorks.length > 0) {
+            const pwToInsert = wb.priceWorks.map((p, j) => ({
+              estimate_id: id,
+              work_block_id: blockData.id,
+              price_item_id: p.priceItemId || null,
+              name: p.name,
+              unit: p.unit || "шт",
+              quantity: p.quantity,
+              price_per_unit: p.pricePerUnit,
+              sort_order: j,
+            }));
+            await supabase.from("estimate_price_works").insert(pwToInsert);
+          }
         }
       }
 
@@ -301,6 +349,7 @@ export function useUpdateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      // Legacy top-level priceWorks (orphans)
       if (estimate.priceWorks && estimate.priceWorks.length > 0) {
         const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
           estimate_id: id,
@@ -446,6 +495,20 @@ export function useCopyEstimate() {
             }));
 
             await supabase.from("work_rows").insert(rowsToInsert);
+          }
+
+          if (wb.priceWorks && wb.priceWorks.length > 0) {
+            const pwToInsert = wb.priceWorks.map((p, j) => ({
+              estimate_id: estimateData.id,
+              work_block_id: blockData.id,
+              price_item_id: p.priceItemId || null,
+              name: p.name,
+              unit: p.unit || "шт",
+              quantity: p.quantity,
+              price_per_unit: p.pricePerUnit,
+              sort_order: j,
+            }));
+            await supabase.from("estimate_price_works").insert(pwToInsert);
           }
         }
       }
