@@ -25,6 +25,15 @@ const ESTIMATE_SELECT = `
     spare_part_id,
     sort_order
   ),
+  price_works:estimate_price_works(
+    id,
+    price_item_id,
+    name,
+    unit,
+    quantity,
+    price_per_unit,
+    sort_order
+  ),
   work_blocks(
     id,
     description,
