@@ -195,6 +195,20 @@ export function useCreateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
+        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
+          estimate_id: estimateData.id,
+          price_item_id: p.priceItemId || null,
+          name: p.name,
+          unit: p.unit || "шт",
+          quantity: p.quantity,
+          price_per_unit: p.pricePerUnit,
+          sort_order: i,
+        }));
+
+        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
+      }
+
       await logActivity({
         section: 'estimates',
         elementId: estimateData.id,
