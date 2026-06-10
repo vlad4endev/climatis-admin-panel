@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 import {
   WorkBlock,
   WorkRow,
   PriceWork,
+  WorkBlockMode,
   createEmptyWorkBlock,
   calculateWorkRowTotal,
   calculateWorkBlockTotal,
@@ -35,6 +38,10 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
     onChange(
       blocks.map((b) => (b.id === blockId ? { ...b, description } : b))
     );
+  };
+
+  const updateBlockMode = (blockId: string, mode: WorkBlockMode) => {
+    onChange(blocks.map((b) => (b.id === blockId ? { ...b, mode } : b)));
   };
 
   const updateRow = (
@@ -69,6 +76,7 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
   return (
     <div className="space-y-4">
       {blocks.map((block, blockIndex) => {
+        const mode: WorkBlockMode = block.mode || "manual";
         const rowsTotal = calculateWorkBlockRowsTotal(block);
         const priceWorksTotal = calculateWorkBlockPriceWorksTotal(block);
         const blockTotal = calculateWorkBlockTotal(block);
@@ -78,20 +86,43 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
             className="bg-form-section p-4 rounded-lg space-y-4 border border-border/50"
           >
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <label className="text-sm font-medium text-form-label mb-1 block">
-                  Блок {blockIndex + 1}: Описание работы
-                </label>
-                <Textarea
-                  value={block.description}
-                  onChange={(e) =>
-                    updateBlockDescription(block.id, e.target.value)
-                  }
-                  placeholder="Описание работы..."
-                  rows={2}
-                  readOnly={readOnly}
-                  className={readOnly ? "bg-muted/50" : ""}
-                />
+              <div className="flex-1 space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-form-label mb-1 block">
+                    Блок {blockIndex + 1}: способ расчёта
+                  </label>
+                  <RadioGroup
+                    value={mode}
+                    onValueChange={(v) => !readOnly && updateBlockMode(block.id, v as WorkBlockMode)}
+                    className="flex flex-row gap-4"
+                    disabled={readOnly}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="manual" id={`mode-manual-${block.id}`} />
+                      <Label htmlFor={`mode-manual-${block.id}`} className="cursor-pointer">Вручную</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="price" id={`mode-price-${block.id}`} />
+                      <Label htmlFor={`mode-price-${block.id}`} className="cursor-pointer">По прайсу</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {mode === "manual" && (
+                  <div>
+                    <label className="text-sm font-medium text-form-label mb-1 block">
+                      Описание работы
+                    </label>
+                    <Textarea
+                      value={block.description}
+                      onChange={(e) => updateBlockDescription(block.id, e.target.value)}
+                      placeholder="Описание работы..."
+                      rows={2}
+                      readOnly={readOnly}
+                      className={readOnly ? "bg-muted/50" : ""}
+                    />
+                  </div>
+                )}
               </div>
               {!readOnly && (
                 <Button
@@ -106,115 +137,82 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
               )}
             </div>
 
-            {/* Прайс-работы внутри блока */}
-            <div className="space-y-2">
-              <div className="text-sm font-semibold text-form-label">Работы из прайса</div>
-              <PriceWorkListEditor
-                items={block.priceWorks || []}
-                onChange={(updater) => setBlockPriceWorks(block.id, updater as any)}
-                availableItems={availablePriceItems}
-                readOnly={readOnly}
-              />
-            </div>
-
-            {/* Категории работ */}
-            <div className="overflow-x-auto">
-              <div className="text-sm font-semibold text-form-label mb-2">Расчёт по категориям</div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground min-w-[160px]">
-                      Категория
-                    </th>
-                    <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[100px]">
-                      План, час
-                    </th>
-                    <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[100px]">
-                      Кол-во, чел
-                    </th>
-                    <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[120px]">
-                      Ставка, руб.
-                    </th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground w-[120px]">
-                      Всего, руб.
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {block.rows.map((row, rowIndex) => {
-                    const rowTotal = calculateWorkRowTotal(row);
-                    return (
-                      <tr key={row.category} className="border-b border-border/30">
-                        <td className="py-2 px-2 font-medium">{row.category}</td>
-                        <td className="py-2 px-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.5"
-                            value={row.planHours || ""}
-                            onChange={(e) =>
-                              updateRow(block.id, rowIndex, "planHours", parseFloat(e.target.value) || 0)
-                            }
-                            className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
-                            placeholder="0"
-                            readOnly={readOnly}
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={row.quantity || ""}
-                            onChange={(e) =>
-                              updateRow(block.id, rowIndex, "quantity", parseInt(e.target.value) || 0)
-                            }
-                            className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
-                            placeholder="0"
-                            readOnly={readOnly}
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={row.rate || ""}
-                            onChange={(e) =>
-                              updateRow(block.id, rowIndex, "rate", parseFloat(e.target.value) || 0)
-                            }
-                            className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
-                            placeholder="0"
-                            readOnly={readOnly}
-                          />
-                        </td>
-                        <td className="py-2 px-2 text-right font-medium">
-                          {Math.round(rowTotal).toLocaleString("ru-RU")}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-muted/30">
-                    <td colSpan={4} className="py-2 px-2 text-right font-semibold">
-                      Итого по категориям:
-                    </td>
-                    <td className="py-2 px-2 text-right font-bold text-primary">
-                      {Math.round(rowsTotal).toLocaleString("ru-RU")} ₽
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            {/* Итог по блоку (прайс + категории) */}
-            <div className="flex justify-between items-center bg-muted/40 rounded-md px-3 py-2">
-              <div className="text-sm text-muted-foreground">
-                Прайс: <span className="font-medium text-foreground">{Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽</span>
-                {"  •  "}
-                Категории: <span className="font-medium text-foreground">{Math.round(rowsTotal).toLocaleString("ru-RU")} ₽</span>
+            {mode === "price" ? (
+              <div className="space-y-2">
+                <div className="text-sm font-semibold text-form-label">Работы из прайса</div>
+                <PriceWorkListEditor
+                  items={block.priceWorks || []}
+                  onChange={(updater) => setBlockPriceWorks(block.id, updater as any)}
+                  availableItems={availablePriceItems}
+                  readOnly={readOnly}
+                />
               </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="text-sm font-semibold text-form-label mb-2">Расчёт по категориям</div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="text-left py-2 px-2 font-medium text-muted-foreground min-w-[160px]">Категория</th>
+                      <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[100px]">План, час</th>
+                      <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[100px]">Кол-во, чел</th>
+                      <th className="text-center py-2 px-2 font-medium text-muted-foreground w-[120px]">Ставка, руб.</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground w-[120px]">Всего, руб.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row, rowIndex) => {
+                      const rowTotal = calculateWorkRowTotal(row);
+                      return (
+                        <tr key={row.category} className="border-b border-border/30">
+                          <td className="py-2 px-2 font-medium">{row.category}</td>
+                          <td className="py-2 px-2">
+                            <Input
+                              type="number" min="0" step="0.5"
+                              value={row.planHours || ""}
+                              onChange={(e) => updateRow(block.id, rowIndex, "planHours", parseFloat(e.target.value) || 0)}
+                              className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
+                              placeholder="0" readOnly={readOnly}
+                            />
+                          </td>
+                          <td className="py-2 px-2">
+                            <Input
+                              type="number" min="0" step="1"
+                              value={row.quantity || ""}
+                              onChange={(e) => updateRow(block.id, rowIndex, "quantity", parseInt(e.target.value) || 0)}
+                              className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
+                              placeholder="0" readOnly={readOnly}
+                            />
+                          </td>
+                          <td className="py-2 px-2">
+                            <Input
+                              type="number" min="0" step="1"
+                              value={row.rate || ""}
+                              onChange={(e) => updateRow(block.id, rowIndex, "rate", parseFloat(e.target.value) || 0)}
+                              className={`h-8 text-center ${readOnly ? "bg-muted/50" : ""}`}
+                              placeholder="0" readOnly={readOnly}
+                            />
+                          </td>
+                          <td className="py-2 px-2 text-right font-medium">
+                            {Math.round(rowTotal).toLocaleString("ru-RU")}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-muted/30">
+                      <td colSpan={4} className="py-2 px-2 text-right font-semibold">Итого по категориям:</td>
+                      <td className="py-2 px-2 text-right font-bold text-primary">
+                        {Math.round(rowsTotal).toLocaleString("ru-RU")} ₽
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+
+            <div className="flex justify-end items-center bg-muted/40 rounded-md px-3 py-2">
               <div className="text-base font-bold text-primary">
                 Итого блок: {Math.round(blockTotal).toLocaleString("ru-RU")} ₽
               </div>
@@ -224,12 +222,7 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
       })}
 
       {!readOnly && (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={addBlock}
-          className="w-full"
-        >
+        <Button type="button" variant="outline" onClick={addBlock} className="w-full">
           <Plus className="h-4 w-4 mr-2" />
           Добавить блок работ
         </Button>
@@ -238,9 +231,7 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
       {blocks.length > 0 && (
         <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary/30">
           <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold">
-              Итого стоимость работ по всем блокам:
-            </span>
+            <span className="text-lg font-semibold">Итого стоимость работ по всем блокам:</span>
             <span className="text-xl font-bold text-primary">
               {Math.round(grandTotal).toLocaleString("ru-RU")} ₽
             </span>
