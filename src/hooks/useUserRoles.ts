@@ -31,6 +31,7 @@ export const SECTIONS = [
   { key: "requests", label: "Заявки" },
   { key: "documents", label: "Документы" },
   { key: "estimates", label: "Расчёты" },
+  { key: "work-price-list", label: "Прайс работ" },
   { key: "assignments", label: "Задания" },
   // Сотрудники
   { key: "employees", label: "Сотрудники" },
