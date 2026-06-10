@@ -85,6 +85,7 @@ function mapEstimateRow(row: any): Estimate {
     workBlocks: row.work_blocks?.map((wb: any): WorkBlock => ({
       id: wb.id,
       description: wb.description || "",
+      mode: (wb.mode as "manual" | "price") || "manual",
       rows: wb.rows?.map((r: any) => ({
         category: r.category,
         planHours: Number(r.plan_hours) || 0,
