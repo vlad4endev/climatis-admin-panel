@@ -688,6 +688,15 @@ export function EstimateForm({
                 </span>
               </div>
 
+              {priceWorks.length > 0 && (
+                <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
+                  <span className="text-muted-foreground">Итог по прайс-работам:</span>
+                  <span className="font-medium">
+                    {Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center py-3 px-3 border-t-2 border-primary/30 mt-2">
                 <span className="text-lg font-semibold">Общая сумма:</span>
                 <span className="text-xl font-bold text-primary">
