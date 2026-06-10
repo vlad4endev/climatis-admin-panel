@@ -259,6 +259,7 @@ export function useUpdateEstimate() {
       }
       await supabase.from("work_blocks").delete().eq("estimate_id", id);
       await supabase.from("estimate_materials").delete().eq("estimate_id", id);
+      await supabase.from("estimate_price_works").delete().eq("estimate_id", id);
 
       if (estimate.workBlocks && estimate.workBlocks.length > 0) {
         for (let i = 0; i < estimate.workBlocks.length; i++) {
