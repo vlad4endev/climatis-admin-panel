@@ -172,12 +172,6 @@ export function PriceWorkListEditor({
         </div>
       )}
 
-      {items.length > 0 && (
-        <div className="flex justify-end items-center gap-2 pt-4 border-t">
-          <span className="text-sm font-semibold">Итого по прайс-работам:</span>
-          <span className="text-lg font-bold">{Math.round(total).toLocaleString("ru-RU")} ₽</span>
-        </div>
-      )}
     </div>
   );
 }
