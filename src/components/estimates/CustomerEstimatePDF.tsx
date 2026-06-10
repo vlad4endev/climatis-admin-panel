@@ -164,27 +164,59 @@ export const CustomerEstimatePDF = forwardRef<HTMLDivElement, CustomerEstimatePD
             </tr>
           </thead>
           <tbody>
-            {workBlocks.length > 0 ? (
-              workBlocks.map((block, index) => {
-                const blockBase = calculateWorkBlockTotal(block);
-                const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+            {(() => {
+              const worksMarkup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
+              const rows: JSX.Element[] = [];
+              let rowNum = 0;
+              workBlocks.forEach((block) => {
+                if (block.mode === "price") {
+                  const items = block.priceWorks || [];
+                  if (items.length === 0) {
+                    rowNum += 1;
+                    rows.push(
+                      <tr key={block.id}>
+                        <td style={{ ...cellStyle, textAlign: "center" }}>{rowNum}</td>
+                        <td style={{ ...cellStyle, textAlign: "left" }}>{block.description || "Работа"}</td>
+                        <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(0)}</td>
+                      </tr>
+                    );
+                  } else {
+                    items.forEach((pw) => {
+                      rowNum += 1;
+                      const total = pw.quantity * pw.pricePerUnit * worksMarkup;
+                      rows.push(
+                        <tr key={`${block.id}-${pw.id}`}>
+                          <td style={{ ...cellStyle, textAlign: "center" }}>{rowNum}</td>
+                          <td style={{ ...cellStyle, textAlign: "left" }}>{pw.name || "Работа"}</td>
+                          <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(total)}</td>
+                        </tr>
+                      );
+                    });
+                  }
+                } else {
+                  rowNum += 1;
+                  const blockBase = calculateWorkBlockTotal(block);
+                  const blockCustomerPrice = blockBase * worksMarkup;
+                  rows.push(
+                    <tr key={block.id}>
+                      <td style={{ ...cellStyle, textAlign: "center" }}>{rowNum}</td>
+                      <td style={{ ...cellStyle, textAlign: "left" }}>{block.description || "Работа"}</td>
+                      <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(blockCustomerPrice)}</td>
+                    </tr>
+                  );
+                }
+              });
+              if (rows.length === 0) {
                 return (
-                  <tr key={block.id}>
-                    <td style={{ ...cellStyle, textAlign: "center" }}>{index + 1}</td>
-                    <td style={{ ...cellStyle, textAlign: "left" }}>
-                      {block.description || "Работа"}
+                  <tr>
+                    <td colSpan={3} style={{ ...cellStyle, textAlign: "center", fontStyle: "italic", color: "#666" }}>
+                      Работы не указаны
                     </td>
-                    <td style={{ ...cellStyle, textAlign: "right" }}>{formatCurrency(blockCustomerPrice)}</td>
                   </tr>
                 );
-              })
-            ) : (
-              <tr>
-                <td colSpan={3} style={{ ...cellStyle, textAlign: "center", fontStyle: "italic", color: "#666" }}>
-                  Работы не указаны
-                </td>
-              </tr>
-            )}
+              }
+              return rows;
+            })()}
             {/* ИТОГО row */}
             <tr>
               <td style={cellStyle}></td>

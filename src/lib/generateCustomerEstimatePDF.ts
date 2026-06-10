@@ -202,16 +202,41 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // Works table data
   const worksBodyData: (string | { content: string; styles?: any })[][] = [];
-  
+  const worksMarkup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
+  let workRowNum = 0;
+
   if (workBlocks.length > 0) {
-    workBlocks.forEach((block, index) => {
-      const blockBase = calculateWorkBlockTotal(block);
-      const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-      worksBodyData.push([
-        (index + 1).toString(),
-        `${block.description || "Работа"}`,
-        formatCurrency(blockCustomerPrice),
-      ]);
+    workBlocks.forEach((block) => {
+      if (block.mode === "price") {
+        const items = block.priceWorks || [];
+        if (items.length === 0) {
+          workRowNum += 1;
+          worksBodyData.push([
+            workRowNum.toString(),
+            block.description || "Работа",
+            formatCurrency(0),
+          ]);
+        } else {
+          items.forEach((pw) => {
+            workRowNum += 1;
+            const total = pw.quantity * pw.pricePerUnit * worksMarkup;
+            worksBodyData.push([
+              workRowNum.toString(),
+              pw.name || "Работа",
+              formatCurrency(total),
+            ]);
+          });
+        }
+      } else {
+        workRowNum += 1;
+        const blockBase = calculateWorkBlockTotal(block);
+        const blockCustomerPrice = blockBase * worksMarkup;
+        worksBodyData.push([
+          workRowNum.toString(),
+          block.description || "Работа",
+          formatCurrency(blockCustomerPrice),
+        ]);
+      }
     });
   } else {
     worksBodyData.push(["", "Работы не указаны", ""]);
