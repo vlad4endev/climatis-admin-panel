@@ -803,14 +803,40 @@ export function EstimateForm({
                 />
               </div>
             </div>
-            <div className="bg-background/50 p-3 rounded space-y-1 text-sm">
+            <div className="bg-background/50 p-3 rounded space-y-3 text-sm">
               {workBlocks.map((block, index) => {
                 const blockBase = calculateWorkBlockTotal(block);
-                const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
+                const markup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
+                const blockCustomerPrice = blockBase * markup;
+                const mode = block.mode || "manual";
                 return (
-                  <div key={block.id} className="flex justify-between">
-                    <span>{index + 1}. {block.description || "Работа без названия"}</span>
-                    <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} ₽</span>
+                  <div key={block.id} className="space-y-1">
+                    <div className="flex justify-between font-medium">
+                      <span>{index + 1}. {mode === "price" ? "Работы по прайсу" : (block.description || "Работа без названия")}</span>
+                      <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} ₽</span>
+                    </div>
+                    {mode === "price" ? (
+                      <div className="pl-4 space-y-0.5 text-xs text-muted-foreground">
+                        {(block.priceWorks || []).filter(p => p.name || p.quantity).map((p) => (
+                          <div key={p.id} className="flex justify-between gap-2">
+                            <span className="truncate">— {p.name || "Без названия"} ({p.quantity} {p.unit} × {Math.round(p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽)</span>
+                            <span className="whitespace-nowrap">{Math.round(p.quantity * p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="pl-4 space-y-0.5 text-xs text-muted-foreground">
+                        {block.rows.filter(r => r.planHours && r.quantity && r.rate).map((r) => {
+                          const rowTotal = r.planHours * r.quantity * r.rate * markup;
+                          return (
+                            <div key={r.category} className="flex justify-between gap-2">
+                              <span>— {r.category} ({r.planHours} ч × {r.quantity} чел × {Math.round(r.rate * markup).toLocaleString("ru-RU")} ₽)</span>
+                              <span className="whitespace-nowrap">{Math.round(rowTotal).toLocaleString("ru-RU")} ₽</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}
