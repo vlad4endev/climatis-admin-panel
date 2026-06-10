@@ -213,7 +213,7 @@ export function EstimateForm({
   const materialsWarehouse = materialsTotal * (customerCalc.warehousePercent / 100);
   const materialsCustomerTotal = materialsTotal + materialsTransport + materialsWarehouse;
 
-  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal;
+  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal + priceWorksTotal;
   const otherAmount = customerCalc.otherPercent ? customerSubtotal * (customerCalc.otherPercent / 100) : 0;
   const customerGrandTotal = customerSubtotal + otherAmount;
 
