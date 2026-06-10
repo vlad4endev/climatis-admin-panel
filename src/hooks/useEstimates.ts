@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listQueryOptions } from "@/lib/queryConfig";
-import { Estimate, WorkBlock, Material, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
+import { Estimate, WorkBlock, Material, PriceWork, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
