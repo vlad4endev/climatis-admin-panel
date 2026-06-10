@@ -89,7 +89,7 @@ export function EstimateForm({
   const allFormValues = watch();
   useEffect(() => {
     if (onMinimize) {
-      onMinimize({ ...allFormValues, workBlocks, materials, customerCalculation: customerCalc, selectedCompany });
+      onMinimize({ ...allFormValues, workBlocks, materials, priceWorks, customerCalculation: customerCalc, selectedCompany });
     }
   });
 
@@ -99,9 +99,18 @@ export function EstimateForm({
   const [materials, setMaterials] = useState<Material[]>(
     estimate?.materials || []
   );
+  const [priceWorks, setPriceWorks] = useState<PriceWork[]>(
+    estimate?.priceWorks || []
+  );
   const [customerCalc, setCustomerCalc] = useState<CustomerCalculation>(
     estimate?.customerCalculation || DEFAULT_CUSTOMER_CALCULATION
   );
+
+  // Загрузка справочника прайса для автокомплита
+  const { data: priceList = [] } = useWorkPriceList();
+  const availablePriceItems = priceList
+    .filter((p) => p.isActive)
+    .map((p) => ({ id: p.id, name: p.name, price: p.price, unit: p.unit, category: p.category }));
 
   // Company options for executor selection
   const COMPANY_OPTIONS = [
