@@ -496,6 +496,20 @@ export function useCopyEstimate() {
 
             await supabase.from("work_rows").insert(rowsToInsert);
           }
+
+          if (wb.priceWorks && wb.priceWorks.length > 0) {
+            const pwToInsert = wb.priceWorks.map((p, j) => ({
+              estimate_id: estimateData.id,
+              work_block_id: blockData.id,
+              price_item_id: p.priceItemId || null,
+              name: p.name,
+              unit: p.unit || "шт",
+              quantity: p.quantity,
+              price_per_unit: p.pricePerUnit,
+              sort_order: j,
+            }));
+            await supabase.from("estimate_price_works").insert(pwToInsert);
+          }
         }
       }
 
