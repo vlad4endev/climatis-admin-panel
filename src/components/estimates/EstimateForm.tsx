@@ -200,7 +200,9 @@ export function EstimateForm({
     0
   );
 
-  const grandTotal = worksTotal + materialsTotal;
+  const priceWorksTotal = calculatePriceWorksTotal(priceWorks);
+
+  const grandTotal = worksTotal + materialsTotal + priceWorksTotal;
 
   // Customer calculation totals
   const worksOverhead = worksTotal * (customerCalc.overheadPercent / 100);
