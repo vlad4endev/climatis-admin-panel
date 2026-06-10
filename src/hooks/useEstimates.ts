@@ -38,6 +38,7 @@ const ESTIMATE_SELECT = `
   work_blocks(
     id,
     description,
+    mode,
     sort_order,
     rows:work_rows(*)
   )
