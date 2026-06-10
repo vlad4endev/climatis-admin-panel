@@ -14,11 +14,14 @@ export interface WorkRow {
   rate: number;
 }
 
+export type WorkBlockMode = "manual" | "price";
+
 export interface WorkBlock {
   id: string;
   description: string;
   rows: WorkRow[];
   priceWorks?: PriceWork[];
+  mode?: WorkBlockMode;
 }
 
 export interface Material {
