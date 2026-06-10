@@ -278,7 +278,11 @@ export function EstimateForm({
     const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
     const worksWithVat = worksCustomerTotal + worksVat;
     const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-    const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+    const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+    const otherAmountDoc = customerCalc.otherPercent
+      ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
+      : 0;
+    const grandTotalWithoutVat = subtotalWithoutVat + otherAmountDoc;
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -450,6 +454,11 @@ export function EstimateForm({
         <!-- FINAL TOTALS -->
         <p style="border-bottom: 0.5pt solid #000; margin-top: 4mm;">&nbsp;</p>
         <table style="width: 100%; border: none; margin-top: 1mm;">
+          ${otherAmountDoc > 0 ? `
+          <tr>
+            <td style="text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">${customerCalc.otherName || "Дополнительные расходы"} (${customerCalc.otherPercent}%):</td>
+            <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(otherAmountDoc)}</td>
+          </tr>` : ""}
           <tr>
             <td style="text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">ИТОГО, по расчету без НДС:</td>
             <td style="width: 28mm; text-align: right; font-size: 10pt; border: none; padding: 0.5mm 0;">${formatCurrency(grandTotalWithoutVat)}</td>

@@ -96,7 +96,12 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Grand totals
   const worksWithVat = worksCustomerTotal + worksVat;
   const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-  const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+  const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+  // Дополнительные расходы (процент от подытога без НДС)
+  const otherAmount = customerCalc.otherPercent
+    ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
+    : 0;
+  const grandTotalWithoutVat = subtotalWithoutVat + otherAmount;
   const grandTotalVat = worksVat + materialsVat;
   const grandTotalWithVat = grandTotalWithoutVat + grandTotalVat;
 
@@ -349,6 +354,16 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Align labels to end roughly under "Цена за ед." column (before last 28mm column)
   const totalsLabelX = pageWidth - marginRight - 28 - 1.5;
   
+  // Optional: дополнительные расходы строкой
+  if (otherAmount > 0) {
+    doc.setFont("NotoSerif", "normal");
+    doc.setFontSize(9);
+    const otherLabel = `${customerCalc.otherName || "Дополнительные расходы"} (${customerCalc.otherPercent}%):`;
+    doc.text(otherLabel, totalsLabelX, yPos, { align: "right" });
+    doc.text(formatCurrency(otherAmount), totalsValueX, yPos, { align: "right" });
+    yPos += 5;
+  }
+
   // First line: ИТОГО
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
