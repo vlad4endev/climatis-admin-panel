@@ -237,6 +237,7 @@ export function EstimateForm({
         createdByName: employee?.fullName || "",
         workBlocks,
         materials,
+        priceWorks,
         customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
       });
     } finally {
