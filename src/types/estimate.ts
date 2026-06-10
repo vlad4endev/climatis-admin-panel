@@ -28,6 +28,19 @@ export interface Material {
   pricePerUnit: number;
 }
 
+export interface PriceWork {
+  id: string;
+  priceItemId?: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  pricePerUnit: number;
+}
+
+export function calculatePriceWorksTotal(items: PriceWork[]): number {
+  return items.reduce((sum, i) => sum + i.quantity * i.pricePerUnit, 0);
+}
+
 export type VatRate = 0 | 22;
 
 export interface CustomerCalculation {
