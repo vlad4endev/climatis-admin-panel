@@ -513,14 +513,14 @@ export function EstimateForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general">Основное</TabsTrigger>
           <TabsTrigger value="works">Работы</TabsTrigger>
-          <TabsTrigger value="price-works">Прайс-работы</TabsTrigger>
           <TabsTrigger value="materials">Материалы</TabsTrigger>
           <TabsTrigger value="attachments">Документы</TabsTrigger>
           <TabsTrigger value="customer">Для заказчика</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="general" className="space-y-4 mt-4">
           <div className="bg-form-section p-4 rounded-lg space-y-4">
@@ -719,10 +719,6 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
-          <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} readOnly={readOnly} />
-        </TabsContent>
-
-        <TabsContent value="price-works" className="space-y-4 mt-4">
           <PriceWorkListEditor
             items={priceWorks}
             onChange={setPriceWorks}
@@ -730,6 +726,7 @@ export function EstimateForm({
             readOnly={readOnly}
           />
         </TabsContent>
+
 
         <TabsContent value="materials" className="space-y-4 mt-4">
           <MaterialListEditor
