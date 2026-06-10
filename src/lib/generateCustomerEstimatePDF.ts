@@ -96,7 +96,12 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Grand totals
   const worksWithVat = worksCustomerTotal + worksVat;
   const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-  const grandTotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+  const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
+  // Дополнительные расходы (процент от подытога без НДС)
+  const otherAmount = customerCalc.otherPercent
+    ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
+    : 0;
+  const grandTotalWithoutVat = subtotalWithoutVat + otherAmount;
   const grandTotalVat = worksVat + materialsVat;
   const grandTotalWithVat = grandTotalWithoutVat + grandTotalVat;
 
