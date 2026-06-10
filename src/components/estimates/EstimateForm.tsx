@@ -213,7 +213,8 @@ export function EstimateForm({
   const customerGrandTotal = customerSubtotal + otherAmount;
 
   // VAT calculations (дополнительный слой, не меняющий базовые расчёты)
-  const worksVat = calculateWorksVat(worksCustomerTotal, customerCalc.vatRate);
+  // НДС по работам начисляется и на работы по категориям, и на работы из прайса
+  const worksVat = calculateWorksVat(worksCustomerTotal + priceWorksTotal, customerCalc.vatRate);
   const materialsVat = calculateMaterialsVat(materialsCustomerTotal, customerCalc.vatRate);
   const totalVat = worksVat + materialsVat;
   const customerGrandTotalWithVat = calculateGrandTotalWithVat(customerGrandTotal, worksVat, customerCalc.vatRate);
