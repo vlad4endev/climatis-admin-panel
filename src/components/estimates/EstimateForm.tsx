@@ -484,34 +484,44 @@ export function EstimateForm({
   };
 
   const generateCustomerPDF = async () => {
-    await generateCustomerEstimatePDF({
-      estimateNumber: watch("estimateNumber"),
-      estimateDate: watch("estimateDate"),
-      clientName: estimate?.clientName || selectedRequest?.clientName || "",
-      objectName: estimate?.objectName || selectedRequest?.serviceObjectName || "",
-      objectAddress: estimate?.objectAddress || selectedRequest?.serviceObjectAddress,
-      workBlocks,
-      materials,
-      customerCalc,
-      engineerName: getEngineerNameWithInitials(),
-      executorCompany: getExecutorName(),
-      estimateName: watch("name") || "",
-    });
+    try {
+      await generateCustomerEstimatePDF({
+        estimateNumber: watch("estimateNumber"),
+        estimateDate: watch("estimateDate"),
+        clientName: estimate?.clientName || selectedRequest?.clientName || "",
+        objectName: estimate?.objectName || selectedRequest?.serviceObjectName || "",
+        objectAddress: estimate?.objectAddress || selectedRequest?.serviceObjectAddress,
+        workBlocks,
+        materials,
+        customerCalc,
+        engineerName: getEngineerNameWithInitials(),
+        executorCompany: getExecutorName(),
+        estimateName: watch("name") || "",
+      });
+    } catch (e: any) {
+      console.error("PDF generation failed:", e);
+      toast.error(`Не удалось сформировать PDF: ${e?.message || e}`);
+    }
   };
 
   const generateCustomerDOCX = () => {
-    const content = getDocumentContent();
-    const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    const estimateName = watch("name");
-    const estimateNumber = watch("estimateNumber");
-    link.href = url;
-    link.download = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.doc`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      const content = getDocumentContent();
+      const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const estimateName = watch("name");
+      const estimateNumber = watch("estimateNumber");
+      link.href = url;
+      link.download = `Raschet_${estimateNumber || estimateName || "bez_nomera"}_${new Date().toLocaleDateString("ru-RU").replace(/\./g, "-")}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      console.error("DOCX generation failed:", e);
+      toast.error(`Не удалось сформировать DOC: ${e?.message || e}`);
+    }
   };
 
   return (
