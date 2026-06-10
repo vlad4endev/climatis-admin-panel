@@ -426,6 +426,60 @@ export type Database = {
           },
         ]
       }
+      estimate_price_works: {
+        Row: {
+          created_at: string
+          estimate_id: string
+          id: string
+          name: string
+          price_item_id: string | null
+          price_per_unit: number
+          quantity: number
+          sort_order: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimate_id: string
+          id?: string
+          name: string
+          price_item_id?: string | null
+          price_per_unit?: number
+          quantity?: number
+          sort_order?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimate_id?: string
+          id?: string
+          name?: string
+          price_item_id?: string | null
+          price_per_unit?: number
+          quantity?: number
+          sort_order?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_price_works_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_price_works_price_item_id_fkey"
+            columns: ["price_item_id"]
+            isOneToOne: false
+            referencedRelation: "work_price_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estimates: {
         Row: {
           created_at: string
@@ -1253,6 +1307,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      work_price_list: {
+        Row: {
+          category: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       work_rows: {
         Row: {
