@@ -18,6 +18,7 @@ export interface WorkBlock {
   id: string;
   description: string;
   rows: WorkRow[];
+  priceWorks?: PriceWork[];
 }
 
 export interface Material {
@@ -126,6 +127,7 @@ export function createEmptyWorkBlock(): WorkBlock {
       quantity: 0,
       rate: 0,
     })),
+    priceWorks: [],
   };
 }
 
@@ -133,8 +135,24 @@ export function calculateWorkRowTotal(row: WorkRow): number {
   return row.planHours * row.quantity * row.rate;
 }
 
-export function calculateWorkBlockTotal(block: WorkBlock): number {
+export function calculateWorkBlockRowsTotal(block: WorkBlock): number {
   return block.rows.reduce((sum, row) => sum + calculateWorkRowTotal(row), 0);
+}
+
+export function calculateWorkBlockPriceWorksTotal(block: WorkBlock): number {
+  return (block.priceWorks || []).reduce((sum, p) => sum + p.quantity * p.pricePerUnit, 0);
+}
+
+export function calculateWorkBlockTotal(block: WorkBlock): number {
+  return calculateWorkBlockRowsTotal(block) + calculateWorkBlockPriceWorksTotal(block);
+}
+
+export function calculateAllBlocksRowsTotal(blocks: WorkBlock[]): number {
+  return blocks.reduce((sum, block) => sum + calculateWorkBlockRowsTotal(block), 0);
+}
+
+export function calculateAllBlocksPriceWorksTotal(blocks: WorkBlock[]): number {
+  return blocks.reduce((sum, block) => sum + calculateWorkBlockPriceWorksTotal(block), 0);
 }
 
 export function calculateAllBlocksTotal(blocks: WorkBlock[]): number {
