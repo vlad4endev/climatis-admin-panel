@@ -306,6 +306,7 @@ export function useUpdateEstimate() {
             .insert({
               estimate_id: id,
               description: wb.description,
+              mode: wb.mode || "manual",
               sort_order: i,
             })
             .select()
