@@ -220,6 +220,9 @@ export function AppSidebar() {
           <SidebarGroup className="py-0">
             <SidebarGroupContent>
               <SidebarMenu>
+                {canViewItem(warehousePriceItem.url, permissions) && (
+                  <MenuItemComponent item={warehousePriceItem} open={open} />
+                )}
                 {open ? (
                   <Collapsible defaultOpen={isWarehouseActive} className="group/collapsible">
                     <SidebarMenuItem>
