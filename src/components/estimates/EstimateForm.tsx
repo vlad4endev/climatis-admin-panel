@@ -713,6 +713,15 @@ export function EstimateForm({
           <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} readOnly={readOnly} />
         </TabsContent>
 
+        <TabsContent value="price-works" className="space-y-4 mt-4">
+          <PriceWorkListEditor
+            items={priceWorks}
+            onChange={setPriceWorks}
+            availableItems={availablePriceItems}
+            readOnly={readOnly}
+          />
+        </TabsContent>
+
         <TabsContent value="materials" className="space-y-4 mt-4">
           <MaterialListEditor
             materials={materials}
