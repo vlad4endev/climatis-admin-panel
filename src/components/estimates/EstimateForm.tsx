@@ -32,6 +32,8 @@ import {
   DEFAULT_CUSTOMER_CALCULATION,
   VatRate,
   calculateAllBlocksTotal,
+  calculateAllBlocksRowsTotal,
+  calculateAllBlocksPriceWorksTotal,
   calculateWorkBlockTotal,
   calculatePriceWorksTotal,
   calculateWorksVat,
@@ -40,7 +42,6 @@ import {
 } from "@/types/estimate";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
-import { PriceWorkListEditor } from "./PriceWorkListEditor";
 import { WorkBlockEditor } from "./WorkBlockEditor";
 import { EstimateAttachments } from "./EstimateAttachments";
 import { generateCustomerEstimatePDF } from "@/lib/generateCustomerEstimatePDF";
@@ -89,7 +90,7 @@ export function EstimateForm({
   const allFormValues = watch();
   useEffect(() => {
     if (onMinimize) {
-      onMinimize({ ...allFormValues, workBlocks, materials, priceWorks, customerCalculation: customerCalc, selectedCompany });
+      onMinimize({ ...allFormValues, workBlocks, materials, customerCalculation: customerCalc, selectedCompany });
     }
   });
 
@@ -98,9 +99,6 @@ export function EstimateForm({
   );
   const [materials, setMaterials] = useState<Material[]>(
     estimate?.materials || []
-  );
-  const [priceWorks, setPriceWorks] = useState<PriceWork[]>(
-    estimate?.priceWorks || []
   );
   const [customerCalc, setCustomerCalc] = useState<CustomerCalculation>(
     estimate?.customerCalculation || DEFAULT_CUSTOMER_CALCULATION
@@ -161,7 +159,6 @@ export function EstimateForm({
               engineerComment: formValues.engineerComment,
               workBlocks,
               materials,
-              priceWorks,
               customerCalculation: { ...customerCalc, executorCompany: selectedCompany } as any,
             }, {
               onSuccess: (result: any) => {
@@ -177,7 +174,7 @@ export function EstimateForm({
         }
       }
     }, 2 * 60 * 1000); // 2 minutes
-  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, priceWorks, customerCalc, selectedCompany]);
+  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, customerCalc, selectedCompany]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -193,14 +190,14 @@ export function EstimateForm({
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const worksTotal = calculateAllBlocksTotal(workBlocks);
+  const worksTotal = calculateAllBlocksRowsTotal(workBlocks);
 
   const materialsTotal = materials.reduce(
     (sum, material) => sum + material.quantity * material.pricePerUnit,
     0
   );
 
-  const priceWorksTotal = calculatePriceWorksTotal(priceWorks);
+  const priceWorksTotal = calculateAllBlocksPriceWorksTotal(workBlocks);
 
   const grandTotal = worksTotal + materialsTotal + priceWorksTotal;
 
@@ -237,7 +234,6 @@ export function EstimateForm({
         createdByName: employee?.fullName || "",
         workBlocks,
         materials,
-        priceWorks,
         customerCalculation: { ...customerCalc, executorCompany: selectedCompany },
       });
     } finally {
@@ -516,7 +512,6 @@ export function EstimateForm({
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">Основное</TabsTrigger>
           <TabsTrigger value="works">Работы</TabsTrigger>
-          <TabsTrigger value="price-works">Прайс-работы</TabsTrigger>
           <TabsTrigger value="materials">Материалы</TabsTrigger>
           <TabsTrigger value="attachments">Документы</TabsTrigger>
           <TabsTrigger value="customer">Для заказчика</TabsTrigger>
@@ -719,17 +714,14 @@ export function EstimateForm({
         </TabsContent>
 
         <TabsContent value="works" className="space-y-4 mt-4">
-          <WorkBlockEditor blocks={workBlocks} onChange={setWorkBlocks} readOnly={readOnly} />
-        </TabsContent>
-
-        <TabsContent value="price-works" className="space-y-4 mt-4">
-          <PriceWorkListEditor
-            items={priceWorks}
-            onChange={setPriceWorks}
-            availableItems={availablePriceItems}
+          <WorkBlockEditor
+            blocks={workBlocks}
+            onChange={setWorkBlocks}
             readOnly={readOnly}
+            availablePriceItems={availablePriceItems}
           />
         </TabsContent>
+
 
         <TabsContent value="materials" className="space-y-4 mt-4">
           <MaterialListEditor
