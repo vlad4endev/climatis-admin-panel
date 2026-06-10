@@ -354,6 +354,16 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   // Align labels to end roughly under "Цена за ед." column (before last 28mm column)
   const totalsLabelX = pageWidth - marginRight - 28 - 1.5;
   
+  // Optional: дополнительные расходы строкой
+  if (otherAmount > 0) {
+    doc.setFont("NotoSerif", "normal");
+    doc.setFontSize(9);
+    const otherLabel = `${customerCalc.otherName || "Дополнительные расходы"} (${customerCalc.otherPercent}%):`;
+    doc.text(otherLabel, totalsLabelX, yPos, { align: "right" });
+    doc.text(formatCurrency(otherAmount), totalsValueX, yPos, { align: "right" });
+    yPos += 5;
+  }
+
   // First line: ИТОГО
   doc.setFont("NotoSerif", "bold");
   doc.setFontSize(9);
