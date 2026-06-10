@@ -182,6 +182,7 @@ export function useCreateEstimate() {
             .insert({
               estimate_id: estimateData.id,
               description: wb.description,
+              mode: wb.mode || "manual",
               sort_order: i,
             })
             .select()
