@@ -319,6 +319,20 @@ export function useUpdateEstimate() {
 
             await supabase.from("work_rows").insert(rowsToInsert);
           }
+
+          if (blockData && wb.priceWorks && wb.priceWorks.length > 0) {
+            const pwToInsert = wb.priceWorks.map((p, j) => ({
+              estimate_id: id,
+              work_block_id: blockData.id,
+              price_item_id: p.priceItemId || null,
+              name: p.name,
+              unit: p.unit || "шт",
+              quantity: p.quantity,
+              price_per_unit: p.pricePerUnit,
+              sort_order: j,
+            }));
+            await supabase.from("estimate_price_works").insert(pwToInsert);
+          }
         }
       }
 
@@ -335,6 +349,7 @@ export function useUpdateEstimate() {
         await supabase.from("estimate_materials").insert(materialsToInsert);
       }
 
+      // Legacy top-level priceWorks (orphans)
       if (estimate.priceWorks && estimate.priceWorks.length > 0) {
         const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
           estimate_id: id,
