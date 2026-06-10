@@ -1292,6 +1292,7 @@ export type Database = {
           description: string | null
           estimate_id: string
           id: string
+          mode: string
           sort_order: number | null
         }
         Insert: {
@@ -1299,6 +1300,7 @@ export type Database = {
           description?: string | null
           estimate_id: string
           id?: string
+          mode?: string
           sort_order?: number | null
         }
         Update: {
@@ -1306,6 +1308,7 @@ export type Database = {
           description?: string | null
           estimate_id?: string
           id?: string
+          mode?: string
           sort_order?: number | null
         }
         Relationships: [
