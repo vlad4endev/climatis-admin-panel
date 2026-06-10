@@ -37,7 +37,6 @@ const requestsItems = [
   { title: "Заявки", url: "/requests", icon: Inbox },
   { title: "Документы", url: "/documents", icon: ScrollText },
   { title: "Расчеты", url: "/estimates", icon: Coins },
-  { title: "Прайс работ", url: "/work-price-list", icon: ScrollText },
   { title: "Задания", url: "/assignments", icon: ClipboardCheck },
 ];
 
@@ -46,6 +45,8 @@ const staffItems = [
   { title: "Бригады", url: "/teams", icon: UsersRound },
   { title: "Задачи", url: "/tasks", icon: ListTodo },
 ];
+
+const warehousePriceItem = { title: "Прайс работ", url: "/work-price-list", icon: ScrollText };
 
 const warehouseItems = [
   { title: "Категории", url: "/warehouse-categories", icon: FolderTree },
