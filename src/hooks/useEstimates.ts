@@ -76,6 +76,17 @@ function mapEstimateRow(row: any): Estimate {
       quantity: Number(m.quantity) || 0,
       pricePerUnit: Number(m.price_per_unit) || 0,
     })) || [],
+    priceWorks: (row.price_works || [])
+      .slice()
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((p: any): PriceWork => ({
+        id: p.id,
+        priceItemId: p.price_item_id || undefined,
+        name: p.name,
+        unit: p.unit || "шт",
+        quantity: Number(p.quantity) || 0,
+        pricePerUnit: Number(p.price_per_unit) || 0,
+      })),
   };
 }
 
