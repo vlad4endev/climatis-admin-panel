@@ -23,6 +23,7 @@ import Assignments from "./pages/Assignments";
 import SpareParts from "./pages/SpareParts";
 import StockMovements from "./pages/StockMovements";
 import WarehouseCategories from "./pages/WarehouseCategories";
+import WorkPriceList from "./pages/WorkPriceList";
 import Tasks from "./pages/Tasks";
 import Trash from "./pages/Trash";
 import Users from "./pages/Users";
