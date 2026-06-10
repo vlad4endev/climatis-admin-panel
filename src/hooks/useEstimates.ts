@@ -32,7 +32,8 @@ const ESTIMATE_SELECT = `
     unit,
     quantity,
     price_per_unit,
-    sort_order
+    sort_order,
+    work_block_id
   ),
   work_blocks(
     id,
@@ -43,6 +44,27 @@ const ESTIMATE_SELECT = `
 `;
 
 function mapEstimateRow(row: any): Estimate {
+  const allPriceWorks: any[] = row.price_works || [];
+  const priceWorksByBlock = new Map<string, any[]>();
+  const orphanPriceWorks: any[] = [];
+  for (const p of allPriceWorks) {
+    if (p.work_block_id) {
+      const arr = priceWorksByBlock.get(p.work_block_id) || [];
+      arr.push(p);
+      priceWorksByBlock.set(p.work_block_id, arr);
+    } else {
+      orphanPriceWorks.push(p);
+    }
+  }
+  const mapPw = (p: any): PriceWork => ({
+    id: p.id,
+    priceItemId: p.price_item_id || undefined,
+    name: p.name,
+    unit: p.unit || "шт",
+    quantity: Number(p.quantity) || 0,
+    pricePerUnit: Number(p.price_per_unit) || 0,
+  });
+
   return {
     id: row.id,
     name: row.name,
@@ -68,6 +90,10 @@ function mapEstimateRow(row: any): Estimate {
         quantity: Number(r.quantity) || 0,
         rate: Number(r.rate) || 0,
       })) || [],
+      priceWorks: (priceWorksByBlock.get(wb.id) || [])
+        .slice()
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map(mapPw),
     })) || [],
     materials: row.materials?.map((m: any): Material => ({
       id: m.id,
@@ -76,17 +102,10 @@ function mapEstimateRow(row: any): Estimate {
       quantity: Number(m.quantity) || 0,
       pricePerUnit: Number(m.price_per_unit) || 0,
     })) || [],
-    priceWorks: (row.price_works || [])
+    priceWorks: orphanPriceWorks
       .slice()
-      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-      .map((p: any): PriceWork => ({
-        id: p.id,
-        priceItemId: p.price_item_id || undefined,
-        name: p.name,
-        unit: p.unit || "шт",
-        quantity: Number(p.quantity) || 0,
-        pricePerUnit: Number(p.price_per_unit) || 0,
-      })),
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(mapPw),
   };
 }
 
