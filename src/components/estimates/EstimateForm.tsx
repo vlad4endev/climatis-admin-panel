@@ -385,15 +385,32 @@ export function EstimateForm({
             </tr>
           </thead>
           <tbody>
-            ${workBlocks.map((block, index) => {
-              const blockBase = calculateWorkBlockTotal(block);
-              const blockCustomerPrice = blockBase * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-              return `<tr>
-                <td style="text-align: center;">${index + 1}</td>
-                <td>${block.description || "Работа"}</td>
-                <td style="text-align: right;">${formatCurrency(blockCustomerPrice)}</td>
-              </tr>`;
-            }).join("") || '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>'}
+            ${(() => {
+              const worksMarkup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
+              const rows: string[] = [];
+              let rowNum = 0;
+              workBlocks.forEach((block) => {
+                if (block.mode === "price") {
+                  const items = block.priceWorks || [];
+                  if (items.length === 0) {
+                    rowNum += 1;
+                    rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${block.description || "Работа"}</td><td style="text-align: right;">${formatCurrency(0)}</td></tr>`);
+                  } else {
+                    items.forEach((pw) => {
+                      rowNum += 1;
+                      const total = pw.quantity * pw.pricePerUnit * worksMarkup;
+                      rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${pw.name || "Работа"}</td><td style="text-align: right;">${formatCurrency(total)}</td></tr>`);
+                    });
+                  }
+                } else {
+                  rowNum += 1;
+                  const blockBase = calculateWorkBlockTotal(block);
+                  const blockCustomerPrice = blockBase * worksMarkup;
+                  rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${block.description || "Работа"}</td><td style="text-align: right;">${formatCurrency(blockCustomerPrice)}</td></tr>`);
+                }
+              });
+              return rows.length > 0 ? rows.join("") : '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>';
+            })()}
             <tr>
               <td></td>
               <td style="text-align: right; font-weight: bold;">ИТОГО:</td>
