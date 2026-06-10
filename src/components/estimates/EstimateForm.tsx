@@ -177,7 +177,7 @@ export function EstimateForm({
         }
       }
     }, 2 * 60 * 1000); // 2 minutes
-  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, customerCalc, selectedCompany]);
+  }, [estimate?.id, watch, createMutation, employees, workBlocks, materials, priceWorks, customerCalc, selectedCompany]);
 
   // Cleanup timer on unmount
   useEffect(() => {
