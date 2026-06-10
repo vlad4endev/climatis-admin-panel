@@ -124,6 +124,7 @@ export function createEmptyWorkBlock(): WorkBlock {
   return {
     id: Date.now().toString(),
     description: "",
+    mode: "manual",
     rows: WORKER_CATEGORIES.map(category => ({
       category,
       planHours: 0,
@@ -139,10 +140,12 @@ export function calculateWorkRowTotal(row: WorkRow): number {
 }
 
 export function calculateWorkBlockRowsTotal(block: WorkBlock): number {
+  if (block.mode === "price") return 0;
   return block.rows.reduce((sum, row) => sum + calculateWorkRowTotal(row), 0);
 }
 
 export function calculateWorkBlockPriceWorksTotal(block: WorkBlock): number {
+  if (block.mode && block.mode !== "price") return 0;
   return (block.priceWorks || []).reduce((sum, p) => sum + p.quantity * p.pricePerUnit, 0);
 }
 
