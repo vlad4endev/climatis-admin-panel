@@ -438,6 +438,7 @@ export type Database = {
           sort_order: number
           unit: string
           updated_at: string
+          work_block_id: string | null
         }
         Insert: {
           created_at?: string
@@ -450,6 +451,7 @@ export type Database = {
           sort_order?: number
           unit?: string
           updated_at?: string
+          work_block_id?: string | null
         }
         Update: {
           created_at?: string
@@ -462,6 +464,7 @@ export type Database = {
           sort_order?: number
           unit?: string
           updated_at?: string
+          work_block_id?: string | null
         }
         Relationships: [
           {
@@ -476,6 +479,13 @@ export type Database = {
             columns: ["price_item_id"]
             isOneToOne: false
             referencedRelation: "work_price_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_price_works_work_block_id_fkey"
+            columns: ["work_block_id"]
+            isOneToOne: false
+            referencedRelation: "work_blocks"
             referencedColumns: ["id"]
           },
         ]
