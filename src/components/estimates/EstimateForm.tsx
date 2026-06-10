@@ -161,6 +161,7 @@ export function EstimateForm({
               engineerComment: formValues.engineerComment,
               workBlocks,
               materials,
+              priceWorks,
               customerCalculation: { ...customerCalc, executorCompany: selectedCompany } as any,
             }, {
               onSuccess: (result: any) => {
