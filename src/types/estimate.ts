@@ -99,6 +99,7 @@ export interface Estimate {
   engineerComment?: string;
   workBlocks?: WorkBlock[];
   materials?: Material[];
+  priceWorks?: PriceWork[];
   customerCalculation?: CustomerCalculation;
 }
 
