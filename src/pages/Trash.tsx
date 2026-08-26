@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useTrashItems, useRestoreItem, usePermanentDelete, getTypeLabel, TrashItemType } from "@/hooks/useTrash";
-import { useCanEdit } from "@/hooks/useUserRoles";
+import {
+  useTrashItems,
+  useRestoreItem,
+  usePermanentDelete,
+  getTypeLabel,
+  TYPE_PERMISSION_SECTIONS,
+  TrashItemType,
+} from "@/hooks/useTrash";
+import { useMyPermissions } from "@/hooks/useUserRoles";
 import { Loader2, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +52,8 @@ const TYPE_OPTIONS: { value: TrashItemType | "all"; label: string }[] = [
   { value: "tasks", label: "Задачи" },
 ];
 
+const NO_ACCESS_HINT = "Нет прав на редактирование в этом разделе";
+
 function getTypeBadgeColor(type: TrashItemType): string {
   const colors: Record<TrashItemType, string> = {
     requests: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
@@ -61,6 +70,7 @@ function getTypeBadgeColor(type: TrashItemType): string {
 
 export default function Trash() {
   const { data: items = [], isLoading } = useTrashItems();
+  const { data: permissions } = useMyPermissions();
   const restoreItem = useRestoreItem();
   const permanentDelete = usePermanentDelete();
   
@@ -71,19 +81,32 @@ export default function Trash() {
     ? items 
     : items.filter(item => item.type === typeFilter);
 
-  const handleRestore = (id: string, type: TrashItemType) => {
-    restoreItem.mutate({ id, type });
+  // Восстановление и окончательное удаление — операции уровня "edit" в том
+  // разделе, к которому относится элемент. Раньше проверки не было вообще:
+  // любой пользователь мог безвозвратно удалить организацию вместе с каскадом
+  // её объектов, контактов и заявок.
+  const canModify = (type: TrashItemType): boolean =>
+    permissions?.get(TYPE_PERMISSION_SECTIONS[type]) === "edit";
+
+  const handleRestore = (id: string, type: TrashItemType, name: string) => {
+    if (!canModify(type)) return;
+    restoreItem.mutate({ id, type, name });
   };
 
   const handleDelete = (id: string, type: TrashItemType, name: string) => {
+    if (!canModify(type)) return;
     setDeleteConfirm({ id, type, name });
   };
 
   const confirmDelete = () => {
-    if (deleteConfirm) {
-      permanentDelete.mutate({ id: deleteConfirm.id, type: deleteConfirm.type });
-      setDeleteConfirm(null);
+    if (deleteConfirm && canModify(deleteConfirm.type)) {
+      permanentDelete.mutate({
+        id: deleteConfirm.id,
+        type: deleteConfirm.type,
+        name: deleteConfirm.name,
+      });
     }
+    setDeleteConfirm(null);
   };
 
   if (isLoading) {
@@ -153,8 +176,9 @@ export default function Trash() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleRestore(item.id, item.type)}
-                          disabled={restoreItem.isPending}
+                          onClick={() => handleRestore(item.id, item.type, item.name)}
+                          disabled={restoreItem.isPending || !canModify(item.type)}
+                          title={canModify(item.type) ? undefined : NO_ACCESS_HINT}
                         >
                           <RotateCcw className="h-4 w-4 mr-1" />
                           Восстановить
@@ -163,7 +187,8 @@ export default function Trash() {
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDelete(item.id, item.type, item.name)}
-                          disabled={permanentDelete.isPending}
+                          disabled={permanentDelete.isPending || !canModify(item.type)}
+                          title={canModify(item.type) ? undefined : NO_ACCESS_HINT}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Удалить

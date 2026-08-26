@@ -50,10 +50,11 @@ const REQUEST_SELECT = `
 `;
 
 /** Returns all requests (no pagination) - used by other pages for lookups */
-export function useRequests() {
+export function useRequests(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["requests"],
     ...listQueryOptions,
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("requests")

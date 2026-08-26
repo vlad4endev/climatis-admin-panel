@@ -66,12 +66,14 @@ export function useCreateServiceObject() {
 
       // Привязываем контакт, если указан
       if (contactId && data) {
-        await supabase
+        const { error: contactError } = await supabase
           .from("service_object_contacts")
           .insert({
             service_object_id: data.id,
             contact_id: contactId,
           });
+
+        if (contactError) throw contactError;
       }
 
       // Log activity
@@ -111,18 +113,22 @@ export function useUpdateServiceObject() {
       if (error) throw error;
 
       // Обновляем контакт: удаляем старые и добавляем новый
-      await supabase
+      const { error: deleteContactsError } = await supabase
         .from("service_object_contacts")
         .delete()
         .eq("service_object_id", id);
 
+      if (deleteContactsError) throw deleteContactsError;
+
       if (contactId) {
-        await supabase
+        const { error: contactError } = await supabase
           .from("service_object_contacts")
           .insert({
             service_object_id: id,
             contact_id: contactId,
           });
+
+        if (contactError) throw contactError;
       }
 
       // Log activity

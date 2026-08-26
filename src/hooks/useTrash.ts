@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errorMessages";
 import { listQueryOptions } from "@/lib/queryConfig";
+import { logActivity } from "@/lib/activityLogger";
 
 export type TrashItemType = 
   | "requests" 
@@ -36,6 +37,30 @@ const TYPE_LABELS: Record<TrashItemType, string> = {
 export function getTypeLabel(type: TrashItemType): string {
   return TYPE_LABELS[type];
 }
+
+/** Тип элемента корзины -> ключ раздела в журнале действий. */
+const TYPE_LOG_SECTIONS: Record<TrashItemType, string> = {
+  requests: "requests",
+  documents: "documents",
+  estimates: "estimates",
+  assignments: "assignments",
+  clients: "clients",
+  service_objects: "serviceObjects",
+  contacts: "contacts",
+  tasks: "tasks",
+};
+
+/** Тип элемента корзины -> ключ раздела в правах доступа (SECTIONS). */
+export const TYPE_PERMISSION_SECTIONS: Record<TrashItemType, string> = {
+  requests: "requests",
+  documents: "documents",
+  estimates: "estimates",
+  assignments: "assignments",
+  clients: "clients",
+  service_objects: "service-objects",
+  contacts: "contacts",
+  tasks: "tasks",
+};
 
 export function useTrashItems() {
   return useQuery({
@@ -83,13 +108,21 @@ export function useRestoreItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, type }: { id: string; type: TrashItemType }) => {
+    mutationFn: async ({ id, type, name }: { id: string; type: TrashItemType; name?: string }) => {
       const { error } = await supabase
         .from(type)
         .update({ deleted_at: null })
         .eq("id", id);
 
       if (error) throw error;
+
+      await logActivity({
+        section: TYPE_LOG_SECTIONS[type],
+        elementId: id,
+        elementName: name || getTypeLabel(type),
+        action: "update",
+        changes: { restoredFromTrash: name || id },
+      });
     },
     onSuccess: (_, { type }) => {
       queryClient.invalidateQueries({ queryKey: ["trash"] });
@@ -104,13 +137,22 @@ export function usePermanentDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, type }: { id: string; type: TrashItemType }) => {
+    mutationFn: async ({ id, type, name }: { id: string; type: TrashItemType; name?: string }) => {
       const { error } = await supabase
         .from(type)
         .delete()
         .eq("id", id);
 
       if (error) throw error;
+
+      // Самая необратимая операция в системе — она обязана попадать в журнал.
+      await logActivity({
+        section: TYPE_LOG_SECTIONS[type],
+        elementId: id,
+        elementName: name || getTypeLabel(type),
+        action: "delete",
+        changes: { permanentlyDeleted: name || id },
+      });
     },
     onSuccess: (_, { type }) => {
       queryClient.invalidateQueries({ queryKey: ["trash"] });

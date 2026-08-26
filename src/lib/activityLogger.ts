@@ -58,6 +58,8 @@ const FIELD_LABELS: Record<string, string> = {
   response_conditions: 'Условия реагирования',
   addedFile: 'Добавлен файл',
   removedFile: 'Удалён файл',
+  restoredFromTrash: 'Восстановлено из корзины',
+  permanentlyDeleted: 'Удалено навсегда',
   companyName: 'Название компании',
   company_name: 'Название компании',
   mainContactName: 'Контактное лицо',

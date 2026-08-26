@@ -49,6 +49,7 @@ export function useAutoSave<T extends Record<string, any>>({
   const pendingUpdateRef = useRef<Partial<T> | null>(null);
   const retryCountRef = useRef(0);
   const unmountedRef = useRef(false);
+  const onlineListenerRef = useRef<(() => void) | null>(null);
 
   const setCurrentId = useCallback((id: string | null) => {
     currentIdRef.current = id;
@@ -58,21 +59,31 @@ export function useAutoSave<T extends Record<string, any>>({
     formDataRef.current = data;
   }, []);
 
-  const performSave = useCallback(async () => {
-    if (isSavingRef.current || unmountedRef.current) {
+  // force = true используется при размонтировании: нужно дослать последние
+  // изменения, которые ещё лежат в debounce-очереди.
+  const performSave = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force === true;
+
+    if (isSavingRef.current || (unmountedRef.current && !force)) {
       return;
     }
 
     // Проверяем наличие сети перед отправкой
     if (!navigator.onLine) {
-      // Откладываем повторную попытку до восстановления сети
-      const onOnline = () => {
-        window.removeEventListener("online", onOnline);
-        if (!unmountedRef.current) {
-          performSave();
-        }
-      };
-      window.addEventListener("online", onOnline);
+      // Откладываем повторную попытку до восстановления сети.
+      // Слушатель регистрируем только один — иначе каждая неудачная попытка
+      // добавляла новый и они никогда не снимались.
+      if (!onlineListenerRef.current) {
+        const onOnline = () => {
+          window.removeEventListener("online", onOnline);
+          onlineListenerRef.current = null;
+          if (!unmountedRef.current) {
+            performSave();
+          }
+        };
+        onlineListenerRef.current = onOnline;
+        window.addEventListener("online", onOnline);
+      }
       return;
     }
 
@@ -112,7 +123,10 @@ export function useAutoSave<T extends Record<string, any>>({
 
       retryCountRef.current += 1;
 
-      if (retryCountRef.current <= MAX_RETRIES) {
+      if (unmountedRef.current) {
+        // Форма уже закрыта: повторять некому, сообщаем один раз.
+        toast.error("Не удалось сохранить последние изменения.", { duration: 6000 });
+      } else if (retryCountRef.current <= MAX_RETRIES) {
         const delay = Math.min(BASE_RETRY_DELAY * 2 ** (retryCountRef.current - 1), 30000);
         toast.error(`Ошибка сохранения. Повтор через ${Math.round(delay / 1000)} сек...`, {
           duration: delay,
@@ -168,9 +182,17 @@ export function useAutoSave<T extends Record<string, any>>({
       if (retryTimerRef.current) {
         clearTimeout(retryTimerRef.current);
       }
-      // Последняя попытка сохранить при уходе со страницы
+      if (onlineListenerRef.current) {
+        window.removeEventListener("online", onlineListenerRef.current);
+        onlineListenerRef.current = null;
+      }
+      // Последняя попытка сохранить при уходе со страницы.
+      // Нужен force: обычный вызов сразу выходил из-за unmountedRef, поэтому
+      // изменения последних debounceMs миллисекунд молча терялись.
+      // Новую запись здесь намеренно не создаём (нужен уже существующий id) —
+      // иначе закрытие пустой формы плодило бы черновики.
       if (pendingUpdateRef.current && currentIdRef.current && navigator.onLine) {
-        performSave();
+        performSave({ force: true });
       }
     };
   }, [performSave]);

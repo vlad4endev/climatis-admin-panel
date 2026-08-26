@@ -26,6 +26,11 @@ import { useToast } from "@/hooks/use-toast";
 import { logButtonClick } from "@/lib/monitoringLogger";
 import { useMinimizedForms } from "@/hooks/useMinimizedForms";
 
+// Пока в поиске меньше символов, страница работает с текущей страницей выдачи;
+// начиная с этого порога подгружается полный список, иначе поиск находил бы
+// совпадения только внутри загруженных 50 записей.
+const SEARCH_ALL_MIN_CHARS = 2;
+
 export default function Estimates() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,9 +39,16 @@ export default function Estimates() {
   const isMinimizingRef = React.useRef(false);
   
   const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: estimatesResult, isLoading } = usePaginatedEstimates(currentPage);
   const estimates = estimatesResult?.items || [];
   const totalCount = estimatesResult?.totalCount || 0;
+
+  // При поиске нужен полный список, а не только текущая страница
+  const isSearching = searchQuery.trim().length >= SEARCH_ALL_MIN_CHARS;
+  const { data: allEstimates = [] } = useEstimates({ enabled: isSearching });
+  const listItems = isSearching && allEstimates.length > 0 ? allEstimates : estimates;
+
   const { data: requestsData = [] } = useRequests();
   const { data: employeesData = [] } = useEmployees();
   const { data: sparePartsData = [] } = useSpareParts();
@@ -319,10 +331,11 @@ export default function Estimates() {
       />
 
       <EntityList
-        items={estimates}
+        items={listItems}
         config={config}
         defaultViewMode="table"
-        pagination={{
+        onSearchChange={setSearchQuery}
+        pagination={isSearching ? undefined : {
           page: currentPage,
           totalCount,
           pageSize: 50,

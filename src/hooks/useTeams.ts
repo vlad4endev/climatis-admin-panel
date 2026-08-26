@@ -104,7 +104,12 @@ export function useUpdateTeam() {
       if (error) throw error;
 
       // Update team members - delete old and insert new
-      await supabase.from("team_members").delete().eq("team_id", id);
+      const { error: deleteMembersError } = await supabase
+        .from("team_members")
+        .delete()
+        .eq("team_id", id);
+
+      if (deleteMembersError) throw deleteMembersError;
       
       if (team.memberIds.length > 0) {
         const { error: membersError } = await supabase

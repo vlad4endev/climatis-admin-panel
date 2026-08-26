@@ -89,7 +89,11 @@ export function useCreateTask() {
           sort_order: index,
         }));
 
-        await supabase.from("task_checklist_items").insert(itemsToInsert);
+        const { error: checklistError } = await supabase
+          .from("task_checklist_items")
+          .insert(itemsToInsert);
+
+        if (checklistError) throw checklistError;
       }
 
       await logActivity({
@@ -130,7 +134,12 @@ export function useUpdateTask() {
       if (error) throw error;
 
       if (task.checklist) {
-        await supabase.from("task_checklist_items").delete().eq("task_id", id);
+        const { error: deleteChecklistError } = await supabase
+          .from("task_checklist_items")
+          .delete()
+          .eq("task_id", id);
+
+        if (deleteChecklistError) throw deleteChecklistError;
 
         if (task.checklist.length > 0) {
           const itemsToInsert = task.checklist.map((item, index) => ({
@@ -140,7 +149,11 @@ export function useUpdateTask() {
             sort_order: index,
           }));
 
-          await supabase.from("task_checklist_items").insert(itemsToInsert);
+          const { error: checklistError } = await supabase
+            .from("task_checklist_items")
+            .insert(itemsToInsert);
+
+          if (checklistError) throw checklistError;
         }
       }
 

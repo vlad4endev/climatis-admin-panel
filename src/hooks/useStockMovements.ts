@@ -109,6 +109,18 @@ export function useUpdateStockMovement() {
 
   return useMutation({
     mutationFn: async ({ id, ...movement }: Partial<StockMovement> & { id: string }) => {
+      // ВАЖНО: старые материалы удаляются ДО обновления самой операции.
+      // Триггер adjust_stock_on_delete берёт operation_type из stock_movements,
+      // поэтому сторно должно пройти, пока там ещё СТАРЫЙ тип операции.
+      // При обратном порядке смена «приход» → «расход» сторнировала остаток
+      // не в ту сторону и остаток на складе расходился с фактом.
+      const { error: deleteMaterialsError } = await supabase
+        .from("stock_movement_materials")
+        .delete()
+        .eq("stock_movement_id", id);
+
+      if (deleteMaterialsError) throw deleteMaterialsError;
+
       const { error } = await supabase
         .from("stock_movements")
         .update({
@@ -121,12 +133,6 @@ export function useUpdateStockMovement() {
 
       if (error) throw error;
 
-      // Delete old materials and insert new ones
-      await supabase
-        .from("stock_movement_materials")
-        .delete()
-        .eq("stock_movement_id", id);
-
       if (movement.materials && movement.materials.length > 0) {
         const materialsToInsert = movement.materials
           .filter(m => m.materialId)
@@ -137,9 +143,11 @@ export function useUpdateStockMovement() {
           }));
 
         if (materialsToInsert.length > 0) {
-          await supabase
+          const { error: materialsError } = await supabase
             .from("stock_movement_materials")
             .insert(materialsToInsert);
+
+          if (materialsError) throw materialsError;
         }
       }
 
@@ -175,11 +183,13 @@ export function useDeleteStockMovement() {
         .eq("id", id)
         .single();
 
-      // Delete materials first
-      await supabase
+      // Материалы удаляем первыми — их триггер сторнирует остаток на складе.
+      const { error: deleteMaterialsError } = await supabase
         .from("stock_movement_materials")
         .delete()
         .eq("stock_movement_id", id);
+
+      if (deleteMaterialsError) throw deleteMaterialsError;
 
       const { error } = await supabase
         .from("stock_movements")

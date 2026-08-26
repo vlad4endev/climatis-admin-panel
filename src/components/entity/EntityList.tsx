@@ -18,9 +18,18 @@ interface EntityListProps<T> {
   defaultViewMode?: ViewMode;
   initialFilters?: FilterValue[];
   pagination?: PaginationConfig;
+  /**
+   * Вызывается с задержкой при изменении строки поиска.
+   * Нужен страницам с серверной пагинацией: поиск и фильтры работают по
+   * массиву `items`, поэтому пока строка непустая страница должна подставлять
+   * полный список — иначе совпадения ищутся только внутри текущей страницы.
+   */
+  onSearchChange?: (query: string) => void;
 }
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination }: EntityListProps<T>) {
+const SEARCH_NOTIFY_DEBOUNCE_MS = 300;
+
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination, onSearchChange }: EntityListProps<T>) {
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +43,14 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
       setViewMode('card');
     }
   }, [isMobile]);
+
+  // Сообщаем родителю строку поиска (с задержкой, чтобы не дёргать запросы
+  // на каждое нажатие клавиши)
+  useEffect(() => {
+    if (!onSearchChange) return;
+    const timer = setTimeout(() => onSearchChange(searchQuery), SEARCH_NOTIFY_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchQuery, onSearchChange]);
 
   // Фильтрация и поиск
   const filteredItems = useMemo(() => {

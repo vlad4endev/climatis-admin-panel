@@ -22,6 +22,11 @@ import { useMinimizedForms } from "@/hooks/useMinimizedForms";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Пока в поиске меньше символов, страница работает с текущей страницей выдачи;
+// начиная с этого порога подгружается полный список, иначе поиск находил бы
+// совпадения только внутри загруженных 50 записей.
+const SEARCH_ALL_MIN_CHARS = 2;
+
 export default function Requests() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,9 +34,15 @@ export default function Requests() {
   const isMinimizingRef = React.useRef(false);
 
   const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: requestsResult, isLoading: requestsLoading } = usePaginatedRequests(currentPage);
   const requests = requestsResult?.items || [];
   const totalCount = requestsResult?.totalCount || 0;
+
+  // При поиске нужен полный список, а не только текущая страница
+  const isSearching = searchQuery.trim().length >= SEARCH_ALL_MIN_CHARS;
+  const { data: allRequests = [] } = useRequests({ enabled: isSearching });
+  const listItems = isSearching && allRequests.length > 0 ? allRequests : requests;
   const { data: clients = [] } = useClients();
   const { data: serviceObjects = [] } = useServiceObjects();
   const { data: documents = [] } = useDocuments();
@@ -320,12 +331,13 @@ export default function Requests() {
       />
 
       <EntityList
-        items={requests}
+        items={listItems}
         config={config}
         emptyMessage="Нет заявок"
         kanbanGroupField="status"
         kanbanColumns={REQUEST_STATUSES}
-        pagination={{
+        onSearchChange={setSearchQuery}
+        pagination={isSearching ? undefined : {
           page: currentPage,
           totalCount,
           pageSize: 50,

@@ -1412,6 +1412,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      replace_estimate_children: {
+        Args: { p_estimate_id: string; p_payload: Json }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

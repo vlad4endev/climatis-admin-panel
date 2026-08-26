@@ -111,11 +111,67 @@ function mapEstimateRow(row: any): Estimate {
   };
 }
 
+/**
+ * Собирает payload для RPC `replace_estimate_children`.
+ * Порядок элементов массивов = sort_order (как было в клиентском коде).
+ */
+function buildChildrenPayload(estimate: Partial<Estimate>) {
+  const mapPriceWork = (p: PriceWork) => ({
+    price_item_id: p.priceItemId || null,
+    name: p.name,
+    unit: p.unit || "шт",
+    quantity: p.quantity,
+    price_per_unit: p.pricePerUnit,
+  });
+
+  return {
+    work_blocks: (estimate.workBlocks || []).map(wb => ({
+      description: wb.description,
+      mode: wb.mode || "manual",
+      rows: (wb.rows || []).map(r => ({
+        category: r.category,
+        plan_hours: r.planHours,
+        quantity: r.quantity,
+        rate: r.rate,
+      })),
+      price_works: (wb.priceWorks || []).map(mapPriceWork),
+    })),
+    materials: (estimate.materials || []).map(m => ({
+      material_name: m.materialName,
+      spare_part_id: m.materialId || null,
+      quantity: m.quantity,
+      price_per_unit: m.pricePerUnit,
+    })),
+    // Прайс-работы вне блоков (legacy: work_block_id IS NULL)
+    price_works: (estimate.priceWorks || []).map(mapPriceWork),
+  };
+}
+
+/** true, если в объекте есть хотя бы один массив дочерних записей. */
+function hasChildrenPayload(estimate: Partial<Estimate>): boolean {
+  return estimate.workBlocks !== undefined
+    || estimate.materials !== undefined
+    || estimate.priceWorks !== undefined;
+}
+
+/**
+ * Заменяет блоки работ, строки, прайс-работы и материалы расчёта.
+ * Одна транзакция на стороне БД: либо применяется всё, либо ничего.
+ */
+async function saveEstimateChildren(estimateId: string, estimate: Partial<Estimate>) {
+  const { error } = await supabase.rpc("replace_estimate_children", {
+    p_estimate_id: estimateId,
+    p_payload: buildChildrenPayload(estimate),
+  });
+  if (error) throw error;
+}
+
 /** Returns all estimates (no pagination) - used by other pages for lookups */
-export function useEstimates() {
+export function useEstimates(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["estimates"],
     ...listQueryOptions,
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("estimates")
@@ -174,77 +230,7 @@ export function useCreateEstimate() {
 
       if (estimateError) throw estimateError;
 
-      if (estimate.workBlocks && estimate.workBlocks.length > 0) {
-        for (let i = 0; i < estimate.workBlocks.length; i++) {
-          const wb = estimate.workBlocks[i];
-          const { data: blockData, error: blockError } = await supabase
-            .from("work_blocks")
-            .insert({
-              estimate_id: estimateData.id,
-              description: wb.description,
-              mode: wb.mode || "manual",
-              sort_order: i,
-            })
-            .select()
-            .single();
-
-          if (blockError) throw blockError;
-
-          if (wb.rows && wb.rows.length > 0) {
-            const rowsToInsert = wb.rows.map(r => ({
-              work_block_id: blockData.id,
-              category: r.category,
-              plan_hours: r.planHours,
-              quantity: r.quantity,
-              rate: r.rate,
-            }));
-
-            await supabase.from("work_rows").insert(rowsToInsert);
-          }
-
-          if (wb.priceWorks && wb.priceWorks.length > 0) {
-            const pwToInsert = wb.priceWorks.map((p, j) => ({
-              estimate_id: estimateData.id,
-              work_block_id: blockData.id,
-              price_item_id: p.priceItemId || null,
-              name: p.name,
-              unit: p.unit || "шт",
-              quantity: p.quantity,
-              price_per_unit: p.pricePerUnit,
-              sort_order: j,
-            }));
-            await supabase.from("estimate_price_works").insert(pwToInsert);
-          }
-        }
-      }
-
-      if (estimate.materials && estimate.materials.length > 0) {
-        const materialsToInsert = estimate.materials.map((m, i) => ({
-          estimate_id: estimateData.id,
-          material_name: m.materialName,
-          spare_part_id: m.materialId || null,
-          quantity: m.quantity,
-          price_per_unit: m.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_materials").insert(materialsToInsert);
-      }
-
-      // Legacy top-level priceWorks (orphans without work_block_id)
-      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
-        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
-          estimate_id: estimateData.id,
-          price_item_id: p.priceItemId || null,
-          name: p.name,
-          unit: p.unit || "шт",
-          quantity: p.quantity,
-          price_per_unit: p.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
-      }
+      await saveEstimateChildren(estimateData.id, estimate);
 
       await logActivity({
         section: 'estimates',
@@ -284,88 +270,14 @@ export function useUpdateEstimate() {
 
       if (error) throw error;
 
-      const { data: oldBlocks } = await supabase
-        .from("work_blocks")
-        .select("id")
-        .eq("estimate_id", id);
-
-      if (oldBlocks) {
-        for (const block of oldBlocks) {
-          await supabase.from("work_rows").delete().eq("work_block_id", block.id);
-        }
-      }
-      await supabase.from("work_blocks").delete().eq("estimate_id", id);
-      await supabase.from("estimate_materials").delete().eq("estimate_id", id);
-      await supabase.from("estimate_price_works").delete().eq("estimate_id", id);
-
-      if (estimate.workBlocks && estimate.workBlocks.length > 0) {
-        for (let i = 0; i < estimate.workBlocks.length; i++) {
-          const wb = estimate.workBlocks[i];
-          const { data: blockData } = await supabase
-            .from("work_blocks")
-            .insert({
-              estimate_id: id,
-              description: wb.description,
-              mode: wb.mode || "manual",
-              sort_order: i,
-            })
-            .select()
-            .single();
-
-          if (blockData && wb.rows && wb.rows.length > 0) {
-            const rowsToInsert = wb.rows.map(r => ({
-              work_block_id: blockData.id,
-              category: r.category,
-              plan_hours: r.planHours,
-              quantity: r.quantity,
-              rate: r.rate,
-            }));
-
-            await supabase.from("work_rows").insert(rowsToInsert);
-          }
-
-          if (blockData && wb.priceWorks && wb.priceWorks.length > 0) {
-            const pwToInsert = wb.priceWorks.map((p, j) => ({
-              estimate_id: id,
-              work_block_id: blockData.id,
-              price_item_id: p.priceItemId || null,
-              name: p.name,
-              unit: p.unit || "шт",
-              quantity: p.quantity,
-              price_per_unit: p.pricePerUnit,
-              sort_order: j,
-            }));
-            await supabase.from("estimate_price_works").insert(pwToInsert);
-          }
-        }
-      }
-
-      if (estimate.materials && estimate.materials.length > 0) {
-        const materialsToInsert = estimate.materials.map((m, i) => ({
-          estimate_id: id,
-          material_name: m.materialName,
-          spare_part_id: m.materialId || null,
-          quantity: m.quantity,
-          price_per_unit: m.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_materials").insert(materialsToInsert);
-      }
-
-      // Legacy top-level priceWorks (orphans)
-      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
-        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
-          estimate_id: id,
-          price_item_id: p.priceItemId || null,
-          name: p.name,
-          unit: p.unit || "шт",
-          quantity: p.quantity,
-          price_per_unit: p.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
+      // Дочерние записи заменяются одной транзакцией на стороне БД.
+      // Раньше здесь было 10-30 отдельных запросов: сначала удалялись все
+      // блоки/строки/материалы, потом вставлялись заново — обрыв на середине
+      // оставлял расчёт с удалённым содержимым и без возможности откатиться.
+      // Условие защищает от частичного апдейта (без дочерних массивов),
+      // который иначе стёр бы содержимое расчёта.
+      if (hasChildrenPayload(estimate)) {
+        await saveEstimateChildren(id, estimate);
       }
 
       await logActivity({
@@ -474,76 +386,7 @@ export function useCopyEstimate() {
 
       if (estimateError) throw estimateError;
 
-      if (estimate.workBlocks && estimate.workBlocks.length > 0) {
-        for (let i = 0; i < estimate.workBlocks.length; i++) {
-          const wb = estimate.workBlocks[i];
-          const { data: blockData, error: blockError } = await supabase
-            .from("work_blocks")
-            .insert({
-              estimate_id: estimateData.id,
-              description: wb.description,
-              mode: wb.mode || "manual",
-              sort_order: i,
-            })
-            .select()
-            .single();
-
-          if (blockError) throw blockError;
-
-          if (wb.rows && wb.rows.length > 0) {
-            const rowsToInsert = wb.rows.map(r => ({
-              work_block_id: blockData.id,
-              category: r.category,
-              plan_hours: r.planHours,
-              quantity: r.quantity,
-              rate: r.rate,
-            }));
-
-            await supabase.from("work_rows").insert(rowsToInsert);
-          }
-
-          if (wb.priceWorks && wb.priceWorks.length > 0) {
-            const pwToInsert = wb.priceWorks.map((p, j) => ({
-              estimate_id: estimateData.id,
-              work_block_id: blockData.id,
-              price_item_id: p.priceItemId || null,
-              name: p.name,
-              unit: p.unit || "шт",
-              quantity: p.quantity,
-              price_per_unit: p.pricePerUnit,
-              sort_order: j,
-            }));
-            await supabase.from("estimate_price_works").insert(pwToInsert);
-          }
-        }
-      }
-
-      if (estimate.materials && estimate.materials.length > 0) {
-        const materialsToInsert = estimate.materials.map((m, i) => ({
-          estimate_id: estimateData.id,
-          material_name: m.materialName,
-          spare_part_id: m.materialId || null,
-          quantity: m.quantity,
-          price_per_unit: m.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_materials").insert(materialsToInsert);
-      }
-
-      if (estimate.priceWorks && estimate.priceWorks.length > 0) {
-        const priceWorksToInsert = estimate.priceWorks.map((p, i) => ({
-          estimate_id: estimateData.id,
-          price_item_id: p.priceItemId || null,
-          name: p.name,
-          unit: p.unit || "шт",
-          quantity: p.quantity,
-          price_per_unit: p.pricePerUnit,
-          sort_order: i,
-        }));
-
-        await supabase.from("estimate_price_works").insert(priceWorksToInsert);
-      }
+      await saveEstimateChildren(estimateData.id, estimate);
 
       await logActivity({
         section: 'estimates',
