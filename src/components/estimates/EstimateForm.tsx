@@ -200,21 +200,28 @@ export function EstimateForm({
   const grandTotal = worksTotal + materialsTotal + priceWorksTotal;
 
   // Customer calculation totals
-  const worksOverhead = worksTotal * (customerCalc.overheadPercent / 100);
-  const worksProfit = worksTotal * (customerCalc.estimatedProfitPercent / 100);
-  const worksCustomerTotal = worksTotal + worksOverhead + worksProfit;
+  // Наценка (накладные + сметная прибыль) начисляется и на ручные работы,
+  // и на работы по прайсу. Раньше базой был только worksTotal (ручные блоки),
+  // из-за чего строки прайс-блоков попадали в таблицу документа, но не в её
+  // ИТОГО: при расчёте целиком по прайсу нижняя строка по работам была 0.
+  const worksBase = worksTotal + priceWorksTotal;
+  const worksOverhead = worksBase * (customerCalc.overheadPercent / 100);
+  const worksProfit = worksBase * (customerCalc.estimatedProfitPercent / 100);
+  const worksCustomerTotal = worksBase + worksOverhead + worksProfit;
 
   const materialsTransport = materialsTotal * (customerCalc.transportPercent / 100);
   const materialsWarehouse = materialsTotal * (customerCalc.warehousePercent / 100);
   const materialsCustomerTotal = materialsTotal + materialsTransport + materialsWarehouse;
 
-  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal + priceWorksTotal;
+  // priceWorksTotal уже внутри worksCustomerTotal — отдельным слагаемым не добавляется.
+  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal;
   const otherAmount = customerCalc.otherPercent ? customerSubtotal * (customerCalc.otherPercent / 100) : 0;
   const customerGrandTotal = customerSubtotal + otherAmount;
 
   // VAT calculations (дополнительный слой, не меняющий базовые расчёты)
   // НДС по работам начисляется и на работы по категориям, и на работы из прайса
-  const worksVat = calculateWorksVat(worksCustomerTotal + priceWorksTotal, customerCalc.vatRate);
+  // (обе части уже входят в worksCustomerTotal вместе с наценкой).
+  const worksVat = calculateWorksVat(worksCustomerTotal, customerCalc.vatRate);
   const materialsVat = calculateMaterialsVat(materialsCustomerTotal, customerCalc.vatRate);
   const totalVat = worksVat + materialsVat;
   const customerGrandTotalWithVat = calculateGrandTotalWithVat(customerGrandTotal, worksVat, customerCalc.vatRate);
@@ -1056,12 +1063,6 @@ export function EstimateForm({
                 <span className="text-muted-foreground">Материалы с транспортом и складом:</span>
                 <span className="font-medium">{Math.round(materialsCustomerTotal).toLocaleString("ru-RU")} ₽</span>
               </div>
-              {priceWorksTotal > 0 && (
-                <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
-                  <span className="text-muted-foreground">Прайс-работы (фикс. цены):</span>
-                  <span className="font-medium">{Math.round(priceWorksTotal).toLocaleString("ru-RU")} ₽</span>
-                </div>
-              )}
               {otherAmount > 0 && (
                 <div className="flex justify-between items-center py-2 px-3 bg-background/50 rounded">
                   <span className="text-muted-foreground">{customerCalc.otherName || "Другое"} ({customerCalc.otherPercent}%):</span>
