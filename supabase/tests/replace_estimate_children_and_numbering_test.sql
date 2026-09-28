@@ -85,6 +85,8 @@ END $r$;
 
 -- Применяем саму миграцию (путь относительно этого файла)
 \ir ../migrations/20260824120000_9f2b4c1e-5d76-4a83-b0e2-71c3f8a95d64.sql
+-- Количество блоков (пересоздаёт replace_estimate_children с полем quantity)
+\ir ../migrations/20260928120000_dd087136-24b4-42d2-b3f9-bdd67ebd83a3.sql
 
 \set ON_ERROR_STOP on
 -- Триггеры как в прод-схеме, включая исторические дубли имён
@@ -163,7 +165,7 @@ BEGIN
   payload := jsonb_build_object(
     'work_blocks', jsonb_build_array(
       jsonb_build_object(
-        'description','Блок 1','mode','manual',
+        'description','Блок 1','mode','manual','quantity',3,
         'rows', jsonb_build_array(
           jsonb_build_object('category','Инженер','plan_hours',1.5,'quantity',2,'rate',1000),
           jsonb_build_object('category','Мастер','plan_hours',0,'quantity',0,'rate',0)
@@ -196,6 +198,8 @@ BEGIN
   ASSERT (SELECT mode FROM work_blocks WHERE id=blk_manual)='manual', 'mode manual';
   ASSERT (SELECT mode FROM work_blocks WHERE id=blk_price)='price', 'mode price';
   ASSERT (SELECT description FROM work_blocks WHERE id=blk_price)='Блок 2', 'description';
+  ASSERT (SELECT quantity FROM work_blocks WHERE id=blk_manual)=3, 'block quantity from payload';
+  ASSERT (SELECT quantity FROM work_blocks WHERE id=blk_price)=1, 'block quantity default';
 
   ASSERT (SELECT count(*) FROM work_rows WHERE work_block_id=blk_manual)=2, 'work_rows count';
   ASSERT (SELECT plan_hours FROM work_rows WHERE work_block_id=blk_manual AND category='Инженер')=1.5, 'plan_hours';

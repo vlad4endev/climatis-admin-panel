@@ -39,6 +39,7 @@ const ESTIMATE_SELECT = `
     id,
     description,
     mode,
+    quantity,
     sort_order,
     rows:work_rows(*)
   )
@@ -86,6 +87,7 @@ function mapEstimateRow(row: any): Estimate {
       id: wb.id,
       description: wb.description || "",
       mode: (wb.mode as "manual" | "price") || "manual",
+      quantity: Number(wb.quantity) || 1,
       rows: wb.rows?.map((r: any) => ({
         category: r.category,
         planHours: Number(r.plan_hours) || 0,
@@ -128,6 +130,7 @@ function buildChildrenPayload(estimate: Partial<Estimate>) {
     work_blocks: (estimate.workBlocks || []).map(wb => ({
       description: wb.description,
       mode: wb.mode || "manual",
+      quantity: wb.quantity && wb.quantity > 0 ? wb.quantity : 1,
       rows: (wb.rows || []).map(r => ({
         category: r.category,
         plan_hours: r.planHours,

@@ -15,6 +15,7 @@ import {
   calculateWorkBlockRowsTotal,
   calculateWorkBlockPriceWorksTotal,
   calculateAllBlocksTotal,
+  getWorkBlockQuantity,
 } from "@/types/estimate";
 import { PriceWorkListEditor } from "./PriceWorkListEditor";
 
@@ -42,6 +43,10 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
 
   const updateBlockMode = (blockId: string, mode: WorkBlockMode) => {
     onChange(blocks.map((b) => (b.id === blockId ? { ...b, mode } : b)));
+  };
+
+  const updateBlockQuantity = (blockId: string, quantity: number) => {
+    onChange(blocks.map((b) => (b.id === blockId ? { ...b, quantity } : b)));
   };
 
   const updateRow = (
@@ -77,6 +82,7 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
     <div className="space-y-4">
       {blocks.map((block, blockIndex) => {
         const mode: WorkBlockMode = block.mode || "manual";
+        const blockQty = getWorkBlockQuantity(block);
         const rowsTotal = calculateWorkBlockRowsTotal(block);
         const priceWorksTotal = calculateWorkBlockPriceWorksTotal(block);
         const blockTotal = calculateWorkBlockTotal(block);
@@ -87,25 +93,41 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-form-label mb-1 block">
-                    Блок {blockIndex + 1}: способ расчёта
-                  </label>
-                  <RadioGroup
-                    value={mode}
-                    onValueChange={(v) => !readOnly && updateBlockMode(block.id, v as WorkBlockMode)}
-                    className="flex flex-row gap-4"
-                    disabled={readOnly}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="manual" id={`mode-manual-${block.id}`} />
-                      <Label htmlFor={`mode-manual-${block.id}`} className="cursor-pointer">Вручную</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="price" id={`mode-price-${block.id}`} />
-                      <Label htmlFor={`mode-price-${block.id}`} className="cursor-pointer">По прайсу</Label>
-                    </div>
-                  </RadioGroup>
+                <div className="flex items-start gap-4">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium text-form-label mb-1 block">
+                      Блок {blockIndex + 1}: способ расчёта
+                    </label>
+                    <RadioGroup
+                      value={mode}
+                      onValueChange={(v) => !readOnly && updateBlockMode(block.id, v as WorkBlockMode)}
+                      className="flex flex-row gap-4"
+                      disabled={readOnly}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="manual" id={`mode-manual-${block.id}`} />
+                        <Label htmlFor={`mode-manual-${block.id}`} className="cursor-pointer">Вручную</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="price" id={`mode-price-${block.id}`} />
+                        <Label htmlFor={`mode-price-${block.id}`} className="cursor-pointer">По прайсу</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  <div className="w-28">
+                    <label className="text-sm font-medium text-form-label mb-1 block" title="Сколько раз выполняется этот блок работ (например, одна и та же услуга на нескольких единицах оборудования) — сумма блока умножается на это число">
+                      Кол-во услуг
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={blockQty}
+                      onChange={(e) => updateBlockQuantity(block.id, Math.max(1, parseInt(e.target.value) || 1))}
+                      className={`h-9 text-center ${readOnly ? "bg-muted/50" : ""}`}
+                      readOnly={readOnly}
+                    />
+                  </div>
                 </div>
 
                 {mode === "manual" && (
@@ -194,7 +216,7 @@ export function WorkBlockEditor({ blocks, onChange, readOnly = false, availableP
                             />
                           </td>
                           <td className="py-2 px-2 text-right font-medium">
-                            {Math.round(rowTotal).toLocaleString("ru-RU")}
+                            {Math.round(rowTotal * blockQty).toLocaleString("ru-RU")}
                           </td>
                         </tr>
                       );

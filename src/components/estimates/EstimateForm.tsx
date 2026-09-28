@@ -30,13 +30,12 @@ import {
   CustomerCalculation,
   DEFAULT_CUSTOMER_CALCULATION,
   VatRate,
-  calculateAllBlocksTotal,
-  calculateAllBlocksRowsTotal,
-  calculateAllBlocksPriceWorksTotal,
   calculateWorkBlockTotal,
-  calculateWorksVat,
-  calculateMaterialsVat,
-  calculateGrandTotalWithVat,
+  calculateEstimateTotals,
+  getWorksMarkupMultiplier,
+  getCustomerWorkLines,
+  getCustomerMaterialLines,
+  getWorkBlockQuantity,
 } from "@/types/estimate";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MaterialListEditor } from "./MaterialListEditor";
@@ -188,43 +187,26 @@ export function EstimateForm({
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const worksTotal = calculateAllBlocksRowsTotal(workBlocks);
-
-  const materialsTotal = materials.reduce(
-    (sum, material) => sum + material.quantity * material.pricePerUnit,
-    0
-  );
-
-  const priceWorksTotal = calculateAllBlocksPriceWorksTotal(workBlocks);
-
-  const grandTotal = worksTotal + materialsTotal + priceWorksTotal;
-
-  // Customer calculation totals
-  // Наценка (накладные + сметная прибыль) начисляется и на ручные работы,
-  // и на работы по прайсу. Раньше базой был только worksTotal (ручные блоки),
-  // из-за чего строки прайс-блоков попадали в таблицу документа, но не в её
-  // ИТОГО: при расчёте целиком по прайсу нижняя строка по работам была 0.
-  const worksBase = worksTotal + priceWorksTotal;
-  const worksOverhead = worksBase * (customerCalc.overheadPercent / 100);
-  const worksProfit = worksBase * (customerCalc.estimatedProfitPercent / 100);
-  const worksCustomerTotal = worksBase + worksOverhead + worksProfit;
-
-  const materialsTransport = materialsTotal * (customerCalc.transportPercent / 100);
-  const materialsWarehouse = materialsTotal * (customerCalc.warehousePercent / 100);
-  const materialsCustomerTotal = materialsTotal + materialsTransport + materialsWarehouse;
-
-  // priceWorksTotal уже внутри worksCustomerTotal — отдельным слагаемым не добавляется.
-  const customerSubtotal = worksCustomerTotal + materialsCustomerTotal;
-  const otherAmount = customerCalc.otherPercent ? customerSubtotal * (customerCalc.otherPercent / 100) : 0;
-  const customerGrandTotal = customerSubtotal + otherAmount;
-
-  // VAT calculations (дополнительный слой, не меняющий базовые расчёты)
-  // НДС по работам начисляется и на работы по категориям, и на работы из прайса
-  // (обе части уже входят в worksCustomerTotal вместе с наценкой).
-  const worksVat = calculateWorksVat(worksCustomerTotal, customerCalc.vatRate);
-  const materialsVat = calculateMaterialsVat(materialsCustomerTotal, customerCalc.vatRate);
-  const totalVat = worksVat + materialsVat;
-  const customerGrandTotalWithVat = calculateGrandTotalWithVat(customerGrandTotal, worksVat, customerCalc.vatRate);
+  // Единая формула итогов — src/types/estimate.ts:calculateEstimateTotals.
+  // Раньше пересчитывалась отдельно здесь, отдельно в getDocumentContent()
+  // (Word) и отдельно в generateCustomerEstimatePDF.ts — правка в одном месте
+  // не долетала до других (см. коммит ca48608).
+  const totals = calculateEstimateTotals(workBlocks, materials, customerCalc);
+  const {
+    worksTotal,
+    priceWorksTotal,
+    materialsTotal,
+    grandTotal,
+    worksCustomerTotal,
+    materialsTransport,
+    materialsWarehouse,
+    materialsCustomerTotal,
+    worksVat,
+    materialsVat,
+    totalVat,
+    otherAmount,
+    grandTotalWithVat: customerGrandTotalWithVat,
+  } = totals;
 
   const handleFormSubmit = async (data: any) => {
     if (isSaving) return;
@@ -283,13 +265,7 @@ export function EstimateForm({
     const estimateDate = watch("estimateDate");
     
     const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
-    const worksWithVat = worksCustomerTotal + worksVat;
-    const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-    const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
-    const otherAmountDoc = customerCalc.otherPercent
-      ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
-      : 0;
-    const grandTotalWithoutVat = subtotalWithoutVat + otherAmountDoc;
+    const { worksWithVat, grandTotalWithoutVat, otherAmount: otherAmountDoc } = totals;
 
     return `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -393,30 +369,13 @@ export function EstimateForm({
           </thead>
           <tbody>
             ${(() => {
-              const worksMarkup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
-              const rows: string[] = [];
-              let rowNum = 0;
-              workBlocks.forEach((block) => {
-                if (block.mode === "price") {
-                  const items = block.priceWorks || [];
-                  if (items.length === 0) {
-                    rowNum += 1;
-                    rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${block.description || "Работа"}</td><td style="text-align: right;">${formatCurrency(0)}</td></tr>`);
-                  } else {
-                    items.forEach((pw) => {
-                      rowNum += 1;
-                      const total = pw.quantity * pw.pricePerUnit * worksMarkup;
-                      rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${pw.name || "Работа"}</td><td style="text-align: right;">${formatCurrency(total)}</td></tr>`);
-                    });
-                  }
-                } else {
-                  rowNum += 1;
-                  const blockBase = calculateWorkBlockTotal(block);
-                  const blockCustomerPrice = blockBase * worksMarkup;
-                  rows.push(`<tr><td style="text-align: center;">${rowNum}</td><td>${block.description || "Работа"}</td><td style="text-align: right;">${formatCurrency(blockCustomerPrice)}</td></tr>`);
-                }
-              });
-              return rows.length > 0 ? rows.join("") : '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>';
+              const lines = getCustomerWorkLines(workBlocks, customerCalc);
+              if (lines.length === 0) {
+                return '<tr><td colspan="3" style="text-align: center; font-style: italic;">Работы не указаны</td></tr>';
+              }
+              return lines
+                .map((line, index) => `<tr><td style="text-align: center;">${index + 1}</td><td>${line.label}</td><td style="text-align: right;">${formatCurrency(line.amount)}</td></tr>`)
+                .join("");
             })()}
             <tr>
               <td></td>
@@ -450,18 +409,14 @@ export function EstimateForm({
             </tr>
           </thead>
           <tbody>
-            ${materials.map((material, index) => {
-              const unitPriceWithMarkup = material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-              const materialPrice = material.quantity * unitPriceWithMarkup;
-              return `<tr>
+            ${getCustomerMaterialLines(materials, customerCalc).map((line, index) => `<tr>
                 <td style="text-align: center;">${index + 1}</td>
-                <td>${material.materialName}</td>
-                <td style="text-align: center;">шт</td>
-                <td style="text-align: center;">${material.quantity}</td>
-                <td style="text-align: right;">${formatCurrency(unitPriceWithMarkup)}</td>
-                <td style="text-align: right;">${formatCurrency(materialPrice)}</td>
-              </tr>`;
-            }).join("") || '<tr><td colspan="6" style="text-align: center; font-style: italic;">Материалы не указаны</td></tr>'}
+                <td>${line.name}</td>
+                <td style="text-align: center;">${line.unit}</td>
+                <td style="text-align: center;">${line.quantity}</td>
+                <td style="text-align: right;">${formatCurrency(line.unitPrice)}</td>
+                <td style="text-align: right;">${formatCurrency(line.amount)}</td>
+              </tr>`).join("") || '<tr><td colspan="6" style="text-align: center; font-style: italic;">Материалы не указаны</td></tr>'}
             <tr>
               <td></td>
               <td colspan="4" style="text-align: right; font-weight: bold;">ВСЕГО по статье МАТЕРИАЛЫ:</td>
@@ -840,31 +795,32 @@ export function EstimateForm({
             <div className="bg-background/50 p-3 rounded space-y-3 text-sm">
               {workBlocks.map((block, index) => {
                 const blockBase = calculateWorkBlockTotal(block);
-                const markup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
+                const markup = getWorksMarkupMultiplier(customerCalc);
                 const blockCustomerPrice = blockBase * markup;
                 const mode = block.mode || "manual";
+                const blockQty = getWorkBlockQuantity(block);
                 return (
                   <div key={block.id} className="space-y-1">
                     <div className="flex justify-between font-medium">
-                      <span>{index + 1}. {mode === "price" ? "Работы по прайсу" : (block.description || "Работа без названия")}</span>
+                      <span>{index + 1}. {mode === "price" ? "Работы по прайсу" : (block.description || "Работа без названия")}{blockQty > 1 ? ` (×${blockQty})` : ""}</span>
                       <span>{Math.round(blockCustomerPrice).toLocaleString("ru-RU")} ₽</span>
                     </div>
                     {mode === "price" ? (
                       <div className="pl-4 space-y-0.5 text-xs text-muted-foreground">
                         {(block.priceWorks || []).filter(p => p.name || p.quantity).map((p) => (
                           <div key={p.id} className="flex justify-between gap-2">
-                            <span className="truncate">— {p.name || "Без названия"} ({p.quantity} {p.unit} × {Math.round(p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽)</span>
-                            <span className="whitespace-nowrap">{Math.round(p.quantity * p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽</span>
+                            <span className="truncate">— {p.name || "Без названия"} ({p.quantity} {p.unit} × {Math.round(p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽{blockQty > 1 ? ` × ${blockQty}` : ""})</span>
+                            <span className="whitespace-nowrap">{Math.round(p.quantity * p.pricePerUnit * markup * blockQty).toLocaleString("ru-RU")} ₽</span>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="pl-4 space-y-0.5 text-xs text-muted-foreground">
                         {block.rows.filter(r => r.planHours && r.quantity && r.rate).map((r) => {
-                          const rowTotal = r.planHours * r.quantity * r.rate * markup;
+                          const rowTotal = r.planHours * r.quantity * r.rate * markup * blockQty;
                           return (
                             <div key={r.category} className="flex justify-between gap-2">
-                              <span>— {r.category} ({r.planHours} ч × {r.quantity} чел × {Math.round(r.rate * markup).toLocaleString("ru-RU")} ₽)</span>
+                              <span>— {r.category} ({r.planHours} ч × {r.quantity} чел × {Math.round(r.rate * markup).toLocaleString("ru-RU")} ₽{blockQty > 1 ? ` × ${blockQty}` : ""})</span>
                               <span className="whitespace-nowrap">{Math.round(rowTotal).toLocaleString("ru-RU")} ₽</span>
                             </div>
                           );

@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { Estimate, calculateWorkBlockTotal, calculateAllBlocksTotal } from "@/types/estimate";
+import { Estimate, calculateWorkBlockTotal, calculateAllBlocksTotal, getWorkBlockQuantity } from "@/types/estimate";
 
 interface EstimatePrintViewProps {
   estimate: Estimate;
@@ -62,10 +62,12 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
         {estimate.workBlocks && estimate.workBlocks.length > 0 && (
           <div style={{ marginBottom: '12px' }}>
             <h2 style={{ fontSize: '11pt', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #ddd', paddingBottom: '2px' }}>Перечень работ</h2>
-            {estimate.workBlocks.map((block, blockIndex) => (
+            {estimate.workBlocks.map((block, blockIndex) => {
+              const blockQty = getWorkBlockQuantity(block);
+              return (
               <div key={block.id} style={{ marginBottom: '8px' }}>
                 <h3 style={{ fontWeight: 500, marginBottom: '4px', fontSize: '9pt' }}>
-                  {blockIndex + 1}. {block.description || "Без описания"}
+                  {blockIndex + 1}. {block.description || "Без описания"}{blockQty > 1 ? ` (×${blockQty})` : ""}
                 </h3>
                 <table style={{ width: '100%', fontSize: '8pt', borderCollapse: 'collapse', marginBottom: '4px' }}>
                   <thead>
@@ -85,7 +87,7 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
                         <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{row.quantity}</td>
                         <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>{row.rate.toLocaleString('ru-RU')}</td>
                         <td style={{ border: '1px solid #ddd', padding: '2px 4px', textAlign: 'right' }}>
-                          {Math.round(row.planHours * row.quantity * row.rate).toLocaleString('ru-RU')}
+                          {Math.round(row.planHours * row.quantity * row.rate * blockQty).toLocaleString('ru-RU')}
                         </td>
                       </tr>
                     ))}
@@ -100,7 +102,8 @@ export const EstimatePrintView = forwardRef<HTMLDivElement, EstimatePrintViewPro
                   </tfoot>
                 </table>
               </div>
-            ))}
+              );
+            })}
             <div style={{ fontWeight: 'bold', backgroundColor: '#f3f4f6', padding: '4px 8px', textAlign: 'right', fontSize: '9pt' }}>
               Итого по работам: {Math.round(worksTotal).toLocaleString('ru-RU')} ₽
             </div>

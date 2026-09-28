@@ -29,6 +29,7 @@ export function useAssignments() {
             work_blocks(
               id,
               description,
+              quantity,
               rows:work_rows(*)
             ),
             materials:estimate_materials(*)
@@ -55,6 +56,7 @@ export function useAssignments() {
         workBlocks: row.estimate?.work_blocks?.map((wb: any) => ({
           id: wb.id,
           description: wb.description || "",
+          quantity: Number(wb.quantity) || 1,
           rows: wb.rows?.map((r: any) => ({
             category: r.category,
             planHours: Number(r.plan_hours) || 0,

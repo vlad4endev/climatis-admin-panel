@@ -89,14 +89,19 @@ export function PriceWorkListEditor({
     return availableItems.filter((a) => a.name.toLowerCase().includes(q));
   };
 
-  const total = items.reduce((s, i) => s + (i.quantity || 1) * i.pricePerUnit, 0);
+  // Без учёта количества блоков — блок может повторяться (см. WorkBlockEditor),
+  // итоговая сумма блока с учётом этого множителя показана в его футере "Итого блок".
+  const total = items.reduce((s, i) => s + i.quantity * i.pricePerUnit, 0);
+  const gridCols = readOnly ? "grid-cols-[1fr_80px_120px_120px]" : "grid-cols-[1fr_80px_120px_120px_80px]";
 
   return (
     <div className="space-y-4">
       {items.length > 0 && (
-        <div className={`grid gap-3 text-sm font-medium text-muted-foreground ${readOnly ? "grid-cols-[1fr_140px]" : "grid-cols-[1fr_140px_80px]"}`}>
+        <div className={`grid gap-3 text-sm font-medium text-muted-foreground ${gridCols}`}>
           <div>Операция</div>
+          <div>Кол-во</div>
           <div>Цена, ₽</div>
+          <div>Сумма, ₽</div>
           {!readOnly && <div></div>}
         </div>
       )}
@@ -105,10 +110,11 @@ export function PriceWorkListEditor({
         {items.map((item) => {
           const filtered = getFiltered(item.id);
           const showDropdown = activeDropdown === item.id && filtered.length > 0 && !readOnly;
+          const lineTotal = (item.quantity || 0) * item.pricePerUnit;
           return (
             <div
               key={item.id}
-              className={`grid gap-3 items-center ${readOnly ? "grid-cols-[1fr_140px]" : "grid-cols-[1fr_140px_80px]"}`}
+              className={`grid gap-3 items-center ${gridCols}`}
             >
               <div className="relative" ref={(el) => (dropdownRefs.current[item.id] = el)}>
                 <Input
@@ -142,12 +148,28 @@ export function PriceWorkListEditor({
                 type="number"
                 min="0"
                 step="0.01"
+                value={item.quantity || ""}
+                onChange={(e) => updateItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
+                placeholder="1"
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50 text-right" : "text-right"}
+              />
+
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
                 value={item.pricePerUnit || ""}
                 onChange={(e) => updateItem(item.id, "pricePerUnit", parseFloat(e.target.value) || 0)}
                 placeholder="0"
                 readOnly={readOnly}
                 className={readOnly ? "bg-muted/50 text-right" : "text-right"}
               />
+
+              <div className="text-right text-sm font-medium px-3">
+                {Math.round(lineTotal).toLocaleString("ru-RU")}
+              </div>
+
               {!readOnly && (
                 <div className="flex gap-1">
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(item.id)}>
@@ -169,6 +191,12 @@ export function PriceWorkListEditor({
             <Plus className="h-4 w-4 mr-2" />
             Добавить позицию из прайса
           </Button>
+        </div>
+      )}
+
+      {items.length > 0 && (
+        <div className="flex justify-end text-sm font-semibold pt-1 border-t">
+          Итого по прайсу: {Math.round(total).toLocaleString("ru-RU")} ₽
         </div>
       )}
 

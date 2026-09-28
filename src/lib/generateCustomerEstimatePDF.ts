@@ -4,9 +4,9 @@ import {
   WorkBlock,
   Material,
   CustomerCalculation,
-  calculateWorkBlockTotal,
-  calculateWorksVat,
-  calculateMaterialsVat,
+  calculateEstimateTotals,
+  getCustomerWorkLines,
+  getCustomerMaterialLines,
 } from "@/types/estimate";
 
 // Import fonts (Noto Serif - similar to Times New Roman with Cyrillic support)
@@ -82,28 +82,19 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     loadFontAsBase64(NotoSerifItalic),
   ]);
 
-  // Calculate totals
-  const worksTotal = workBlocks.reduce((sum, block) => sum + calculateWorkBlockTotal(block), 0);
-  const worksCustomerTotal = worksTotal * (1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100);
-  
-  const materialsTotal = materials.reduce((sum, m) => sum + m.quantity * m.pricePerUnit, 0);
-  const materialsCustomerTotal = materialsTotal * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-
-  // VAT calculations
-  const worksVat = calculateWorksVat(worksCustomerTotal, customerCalc.vatRate);
-  const materialsVat = calculateMaterialsVat(materialsCustomerTotal, customerCalc.vatRate);
-
-  // Grand totals
-  const worksWithVat = worksCustomerTotal + worksVat;
-  const materialsWithoutVat = materialsCustomerTotal - materialsVat;
-  const subtotalWithoutVat = worksCustomerTotal + materialsWithoutVat;
-  // Дополнительные расходы (процент от подытога без НДС)
-  const otherAmount = customerCalc.otherPercent
-    ? subtotalWithoutVat * (customerCalc.otherPercent / 100)
-    : 0;
-  const grandTotalWithoutVat = subtotalWithoutVat + otherAmount;
-  const grandTotalVat = worksVat + materialsVat;
-  const grandTotalWithVat = grandTotalWithoutVat + grandTotalVat;
+  // Единая формула итогов — src/types/estimate.ts:calculateEstimateTotals
+  // (та же, что использует EstimateForm.tsx для вкладки "Для заказчика" и Word).
+  const {
+    worksCustomerTotal,
+    materialsCustomerTotal,
+    worksVat,
+    materialsVat,
+    worksWithVat,
+    otherAmount,
+    grandTotalWithoutVat,
+    totalVat: grandTotalVat,
+    grandTotalWithVat,
+  } = calculateEstimateTotals(workBlocks, materials, customerCalc);
 
   const vatRateLabel = customerCalc.vatRate === 22 ? "22%" : "";
   const objectFull = objectAddress ? `${objectName}, ${objectAddress}` : objectName;
@@ -202,41 +193,11 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // Works table data
   const worksBodyData: (string | { content: string; styles?: any })[][] = [];
-  const worksMarkup = 1 + customerCalc.overheadPercent / 100 + customerCalc.estimatedProfitPercent / 100;
-  let workRowNum = 0;
+  const workLines = getCustomerWorkLines(workBlocks, customerCalc);
 
-  if (workBlocks.length > 0) {
-    workBlocks.forEach((block) => {
-      if (block.mode === "price") {
-        const items = block.priceWorks || [];
-        if (items.length === 0) {
-          workRowNum += 1;
-          worksBodyData.push([
-            workRowNum.toString(),
-            block.description || "Работа",
-            formatCurrency(0),
-          ]);
-        } else {
-          items.forEach((pw) => {
-            workRowNum += 1;
-            const total = pw.quantity * pw.pricePerUnit * worksMarkup;
-            worksBodyData.push([
-              workRowNum.toString(),
-              pw.name || "Работа",
-              formatCurrency(total),
-            ]);
-          });
-        }
-      } else {
-        workRowNum += 1;
-        const blockBase = calculateWorkBlockTotal(block);
-        const blockCustomerPrice = blockBase * worksMarkup;
-        worksBodyData.push([
-          workRowNum.toString(),
-          block.description || "Работа",
-          formatCurrency(blockCustomerPrice),
-        ]);
-      }
+  if (workLines.length > 0) {
+    workLines.forEach((line, index) => {
+      worksBodyData.push([(index + 1).toString(), line.label, formatCurrency(line.amount)]);
     });
   } else {
     worksBodyData.push(["", "Работы не указаны", ""]);
@@ -298,18 +259,17 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
 
   // Materials table data
   const materialsBodyData: (string | { content: string; styles?: any })[][] = [];
-  
-  if (materials.length > 0) {
-    materials.forEach((material, index) => {
-      const unitPriceWithMarkup = material.pricePerUnit * (1 + customerCalc.transportPercent / 100 + customerCalc.warehousePercent / 100);
-      const materialPrice = material.quantity * unitPriceWithMarkup;
+  const materialLines = getCustomerMaterialLines(materials, customerCalc);
+
+  if (materialLines.length > 0) {
+    materialLines.forEach((line, index) => {
       materialsBodyData.push([
         (index + 1).toString(),
-        material.materialName,
-        "шт",
-        material.quantity.toString(),
-        formatCurrency(unitPriceWithMarkup),
-        formatCurrency(materialPrice),
+        line.name,
+        line.unit,
+        line.quantity.toString(),
+        formatCurrency(line.unitPrice),
+        formatCurrency(line.amount),
       ]);
     });
   } else {
