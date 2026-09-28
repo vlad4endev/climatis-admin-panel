@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutGrid, Table2, Kanban, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, LayoutGrid, Table2, Kanban, ChevronLeft, ChevronRight, Printer } from "lucide-react";
 import { EntityTableView } from "./EntityTableView";
 import { EntityCardView } from "./EntityCardView";
 import { EntityKanbanView } from "./EntityKanbanView";
@@ -18,6 +19,8 @@ interface EntityListProps<T> {
   defaultViewMode?: ViewMode;
   initialFilters?: FilterValue[];
   pagination?: PaginationConfig;
+  /** Заголовок печатной версии списка (что видно на экране). По умолчанию "Список". */
+  printTitle?: string;
   /**
    * Вызывается с задержкой при изменении строки поиска.
    * Нужен страницам с серверной пагинацией: поиск и фильтры работают по
@@ -29,13 +32,18 @@ interface EntityListProps<T> {
 
 const SEARCH_NOTIFY_DEBOUNCE_MS = 300;
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination, onSearchChange }: EntityListProps<T>) {
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination, onSearchChange, printTitle }: EntityListProps<T>) {
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterValue[]>(initialFilters);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrintList = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: printTitle || "Список",
+  });
 
   // На мобильных по умолчанию карточный вид
   useEffect(() => {
@@ -173,6 +181,15 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
               <Kanban className="h-4 w-4" />
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handlePrintList()}
+            disabled={filteredItems.length === 0}
+            title="Печать списка"
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -211,6 +228,44 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           config={config}
         />
       )}
+
+      {/* Печатная версия списка (скрыта, используется только при печати) */}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef} style={{ fontFamily: 'Arial, sans-serif', fontSize: '8pt', color: 'black', background: 'white', padding: '10mm' }}>
+          <h1 style={{ fontSize: '12pt', margin: '0 0 1mm 0' }}>{printTitle || 'Список'}</h1>
+          <p style={{ fontSize: '8pt', color: '#666', margin: '0 0 3mm 0' }}>
+            {new Date().toLocaleDateString('ru-RU')} · {filteredItems.length} записей
+          </p>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#f3f3f3' }}>
+                {config.fields.map(field => (
+                  <th key={field.key} style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'left' }}>
+                    {field.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map(item => {
+                const id = config.getItemId(item);
+                return (
+                  <tr key={id}>
+                    {config.fields.map(field => {
+                      const value = field.getValue ? field.getValue(item) : (item as any)[field.key];
+                      return (
+                        <td key={field.key} style={{ border: '0.5pt solid #999', padding: '1mm' }}>
+                          {field.render ? field.render(value, item) : String(value ?? '')}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Пагинация */}
       {pagination && pagination.totalCount > pagination.pageSize && (

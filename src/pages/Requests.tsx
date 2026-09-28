@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig, CardAction } from "@/components/entity/types";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
-import { Loader2, Copy } from "lucide-react";
+import { RequestPrintView } from "@/components/requests/RequestPrintView";
+import { Loader2, Copy, Printer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -58,8 +60,22 @@ export default function Requests() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | undefined>();
   const [viewingRequest, setViewingRequest] = useState<Request | null>(null);
+  const [printingRequest, setPrintingRequest] = useState<Request | undefined>();
   const [restoredFormData, setRestoredFormData] = useState<any>(null);
   const minimizeFormDataRef = React.useRef<any>(null);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: printingRequest ? `Заявка_${printingRequest.requestNumber}` : "Заявка",
+    onAfterPrint: () => setPrintingRequest(undefined),
+  });
+
+  const handlePrintRequest = (request: Request) => {
+    logButtonClick("requests", "Печать заявки");
+    setPrintingRequest(request);
+    setTimeout(() => handlePrint(), 100);
+  };
 
   // Restore form from global context or open request by ID from navigation state
   useEffect(() => {
@@ -177,14 +193,19 @@ export default function Requests() {
     }
   }, [requests, navigate]);
 
-  const cardActions: CardAction<Request>[] = canEdit ? [
-    {
+  const cardActions: CardAction<Request>[] = [
+    ...(canEdit ? [{
       icon: Copy,
       label: "Копировать",
-      onClick: (item) => { logButtonClick("requests", "Копировать заявку"); copyRequest.mutate(item); },
+      onClick: (item: Request) => { logButtonClick("requests", "Копировать заявку"); copyRequest.mutate(item); },
       disabled: copyRequest.isPending,
+    }] : []),
+    {
+      icon: Printer,
+      label: "Печать",
+      onClick: (item) => handlePrintRequest(item),
     },
-  ] : [];
+  ];
 
   const config: EntityListConfig<Request> = {
     fields: [
@@ -285,20 +306,35 @@ export default function Requests() {
     onDelete: canEdit ? (id) => { logButtonClick("requests", "Удалить заявку"); deleteRequest.mutate(id); } : undefined,
     onEdit: canEdit ? (item) => { setEditingRequest(item); setIsFormOpen(true); } : undefined,
     cardActions,
-    customActions: canEdit ? (item) => (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={(e) => {
-          e.stopPropagation();
-          copyRequest.mutate(item);
-        }}
-        title="Копировать заявку"
-        disabled={copyRequest.isPending}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-    ) : undefined,
+    customActions: (item) => (
+      <>
+        {canEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyRequest.mutate(item);
+            }}
+            title="Копировать заявку"
+            disabled={copyRequest.isPending}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrintRequest(item);
+          }}
+          title="Печать заявки"
+        >
+          <Printer className="h-4 w-4" />
+        </Button>
+      </>
+    ),
   };
 
   const handleSubmit = async (data: Partial<Request>) => {
@@ -334,6 +370,8 @@ export default function Requests() {
         items={listItems}
         config={config}
         emptyMessage="Нет заявок"
+        defaultViewMode="table"
+        printTitle="Заявки"
         kanbanGroupField="status"
         kanbanColumns={REQUEST_STATUSES}
         onSearchChange={setSearchQuery}
@@ -369,7 +407,19 @@ export default function Requests() {
         request={viewingRequest}
         open={!!viewingRequest}
         onOpenChange={(open) => !open && setViewingRequest(null)}
+        serviceObject={serviceObjects.find(o => o.id === viewingRequest?.objectId)}
+        onPrint={handlePrintRequest}
       />
+
+      <div style={{ display: 'none' }}>
+        {printingRequest && (
+          <RequestPrintView
+            ref={printRef}
+            request={printingRequest}
+            serviceObject={serviceObjects.find(o => o.id === printingRequest.objectId)}
+          />
+        )}
+      </div>
     </div>
   );
 }

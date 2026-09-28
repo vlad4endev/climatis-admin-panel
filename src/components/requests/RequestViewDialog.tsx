@@ -1,20 +1,26 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
+import { ServiceObject } from "@/types/serviceObject";
 import { Separator } from "@/components/ui/separator";
 
 interface RequestViewDialogProps {
   request: Request | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  serviceObject?: ServiceObject;
+  onPrint?: (request: Request) => void;
 }
 
-export function RequestViewDialog({ request, open, onOpenChange }: RequestViewDialogProps) {
+export function RequestViewDialog({ request, open, onOpenChange, serviceObject, onPrint }: RequestViewDialogProps) {
   if (!request) return null;
 
   const status = REQUEST_STATUSES.find(s => s.value === request.status);
   const type = REQUEST_TYPES.find(t => t.value === request.type);
   const priority = REQUEST_PRIORITIES.find(p => p.value === request.priority);
+  const mainContact = serviceObject?.assignedContacts?.find(c => c.isMain) || serviceObject?.assignedContacts?.[0];
 
   const variantMap: Record<string, { bg: string; text: string }> = {
     new: { bg: "bg-blue-500", text: "text-white" },
@@ -35,6 +41,17 @@ export function RequestViewDialog({ request, open, onOpenChange }: RequestViewDi
             <span>Заявка {request.requestNumber}</span>
             {request.priority === "urgent" && (
               <Badge variant="destructive">Срочная</Badge>
+            )}
+            {onPrint && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto mr-6 h-8 w-8"
+                onClick={() => onPrint(request)}
+                title="Печать заявки"
+              >
+                <Printer className="h-4 w-4" />
+              </Button>
             )}
           </DialogTitle>
         </DialogHeader>
@@ -59,6 +76,23 @@ export function RequestViewDialog({ request, open, onOpenChange }: RequestViewDi
               <div className="font-medium">{request.objectName}</div>
             </div>
           </div>
+
+          {(serviceObject?.address || mainContact) && (
+            <div className="grid grid-cols-2 gap-4">
+              {serviceObject?.address && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Адрес объекта</div>
+                  <div>{serviceObject.address}</div>
+                </div>
+              )}
+              {mainContact && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Контактное лицо</div>
+                  <div>{mainContact.name}{mainContact.phone && ` · ${mainContact.phone}`}</div>
+                </div>
+              )}
+            </div>
+          )}
 
           {request.contractNumber && (
             <div>
