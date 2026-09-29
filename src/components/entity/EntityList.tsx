@@ -132,10 +132,10 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
 
   return (
     <div className="space-y-4 min-w-0">
-      {/* Панель управления - поиск 2/3, фильтры 1/3, кнопки видов */}
-      <div className="flex items-center gap-3">
-        {/* Поиск - 2/3 */}
-        <div className="relative flex-[2] min-w-0">
+      {/* Панель управления - поиск, фильтры, кнопки видов */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Поиск */}
+        <div className="relative flex-[2] min-w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={config.searchPlaceholder || "Поиск..."}
@@ -145,9 +145,9 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
           />
         </div>
 
-        {/* Фильтры - 1/3 */}
+        {/* Фильтры */}
         {filterableFields.length > 0 && (
-          <div className="flex-1 min-w-0">
+          <div className="flex-[1_1_260px] min-w-0">
             <EntityFilters
               fields={filterableFields}
               filters={filters}

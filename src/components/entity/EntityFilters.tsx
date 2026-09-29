@@ -35,34 +35,37 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
   };
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div className="flex flex-wrap items-center gap-2 w-full">
       {selectFields.map(field => {
         const currentValue = filters.find(f => f.field === field.key)?.value || '';
         const displayValue = getDisplayValue(field, currentValue);
         const abbreviation = getAbbreviation(field.label);
 
         if (field.options) {
+          const isActive = !!currentValue;
           return (
-            <div key={field.key} className="flex-1 min-w-0">
+            <div key={field.key} className="min-w-[140px] flex-1 basis-[140px]">
               <Select
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
                 {/* Desktop version */}
-                <SelectTrigger className="h-9 px-3 hidden sm:flex">
+                <SelectTrigger
+                  className={`h-9 px-3 hidden sm:flex ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "text-muted-foreground"}`}
+                >
                   <span className="truncate">
                     {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
                   </span>
                 </SelectTrigger>
                 {/* Mobile version - custom button without chevron */}
                 <SelectPrimitive.Trigger
-                  className="h-8 w-full flex sm:hidden items-center justify-center rounded-md border border-input bg-background text-xs font-bold uppercase ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2"
+                  className={`h-8 w-full flex sm:hidden items-center justify-center rounded-md border ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2 text-xs font-bold uppercase ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "border-input bg-background text-muted-foreground"}`}
                   title={displayValue}
                 >
                   {abbreviation}
                 </SelectPrimitive.Trigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Все {field.label}</SelectItem>
+                  <SelectItem value="__all__">Все</SelectItem>
                   {field.options.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
