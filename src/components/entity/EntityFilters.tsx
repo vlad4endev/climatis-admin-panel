@@ -1,4 +1,3 @@
-import * as SelectPrimitive from "@radix-ui/react-select";
 import {
   Select,
   SelectContent,
@@ -7,6 +6,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { EntityField, FilterValue } from "./types";
 
 interface EntityFiltersProps {
@@ -16,6 +16,7 @@ interface EntityFiltersProps {
 }
 
 export function EntityFilters({ fields, filters, onFilterChange }: EntityFiltersProps) {
+  const isMobile = useIsMobile();
   const selectFields = fields.filter(f => f.type === 'select' && f.options);
 
   if (selectFields.length === 0) {
@@ -44,26 +45,27 @@ export function EntityFilters({ fields, filters, onFilterChange }: EntityFilters
         if (field.options) {
           const isActive = !!currentValue;
           return (
-            <div key={field.key} className="min-w-[140px] flex-1 basis-[140px]">
+            <div key={field.key} className={isMobile ? "w-9 shrink-0" : "min-w-[140px] flex-1 basis-[140px]"}>
               <Select
                 value={currentValue || "__all__"}
                 onValueChange={(value) => onFilterChange(field.key, value === "__all__" ? "" : value)}
               >
-                {/* Desktop version */}
-                <SelectTrigger
-                  className={`h-9 px-3 hidden sm:flex ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "text-muted-foreground"}`}
-                >
-                  <span className="truncate">
-                    {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
-                  </span>
-                </SelectTrigger>
-                {/* Mobile version - custom button without chevron */}
-                <SelectPrimitive.Trigger
-                  className={`h-8 w-full flex sm:hidden items-center justify-center rounded-md border ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring/60 focus:ring-offset-2 text-xs font-bold uppercase ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "border-input bg-background text-muted-foreground"}`}
-                  title={displayValue}
-                >
-                  {abbreviation}
-                </SelectPrimitive.Trigger>
+                {isMobile ? (
+                  <SelectTrigger
+                    className={`h-8 px-0 justify-center gap-0 [&>svg]:hidden text-xs font-bold uppercase ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "text-muted-foreground"}`}
+                    title={displayValue}
+                  >
+                    <span>{abbreviation}</span>
+                  </SelectTrigger>
+                ) : (
+                  <SelectTrigger
+                    className={`h-9 px-3 ${isActive ? "border-primary/50 bg-primary/5 text-foreground" : "text-muted-foreground"}`}
+                  >
+                    <span className="truncate">
+                      {currentValue ? (field.options?.find(o => o.value === currentValue)?.label || currentValue) : field.label}
+                    </span>
+                  </SelectTrigger>
+                )}
                 <SelectContent>
                   <SelectItem value="__all__">Все</SelectItem>
                   {field.options.map(opt => (
