@@ -1,18 +1,15 @@
 import { forwardRef } from "react";
 import { Assignment } from "@/types/assignment";
-import { calculateWorkBlockTotal, calculateAllBlocksTotal, WorkBlock } from "@/types/estimate";
+import { getAssignmentWorkLines } from "@/types/estimate";
 
 interface AssignmentPrintViewProps {
   assignment: Assignment;
 }
 
-const calculateBlockHours = (block: WorkBlock): number => {
-  return block.rows.reduce((sum, row) => sum + (row.planHours * row.quantity), 0);
-};
-
 export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintViewProps>(
   ({ assignment }, ref) => {
-    const worksTotal = assignment.workBlocks ? calculateAllBlocksTotal(assignment.workBlocks) : 0;
+    const workLines = (assignment.workBlocks || []).flatMap(getAssignmentWorkLines);
+    const worksTotal = workLines.reduce((sum, line) => sum + line.amount, 0);
 
     return (
       <div ref={ref} style={{ fontFamily: 'Arial, sans-serif', fontSize: '9pt', lineHeight: '1.2', width: '210mm', minHeight: '297mm', boxSizing: 'border-box', padding: '10mm 15mm', background: 'white', color: 'black' }}>
@@ -64,16 +61,16 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
                   <th style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'left', width: '6mm' }}>№</th>
                   <th style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'left' }}>Описание работ</th>
                   <th style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'center', width: '14mm' }}>Время, ч</th>
-                  <th style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'right', width: '22mm' }}>Фонд оплаты, руб.</th>
+                  <th style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'right', width: '22mm' }}>Оплата бригаде, руб.</th>
                 </tr>
               </thead>
               <tbody>
-                {assignment.workBlocks.map((block, blockIndex) => (
-                  <tr key={block.id}>
-                    <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{blockIndex + 1}</td>
-                    <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{block.description || "Без описания"}</td>
-                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'center' }}>{calculateBlockHours(block)}</td>
-                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'right' }}>{Math.round(calculateWorkBlockTotal(block)).toLocaleString('ru-RU')}</td>
+                {workLines.map((line, index) => (
+                  <tr key={index}>
+                    <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{index + 1}</td>
+                    <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{line.label}</td>
+                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'center' }}>{line.hours || ''}</td>
+                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'right' }}>{Math.round(line.amount).toLocaleString('ru-RU')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -102,7 +99,7 @@ export const AssignmentPrintView = forwardRef<HTMLDivElement, AssignmentPrintVie
                   <tr key={material.id || index}>
                     <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{index + 1}</td>
                     <td style={{ border: '0.5pt solid #999', padding: '1mm' }}>{material.materialName}</td>
-                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'center' }}>шт</td>
+                    <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'center' }}>{material.unit || 'шт'}</td>
                     <td style={{ border: '0.5pt solid #999', padding: '1mm', textAlign: 'right' }}>{material.quantity}</td>
                   </tr>
                 ))}

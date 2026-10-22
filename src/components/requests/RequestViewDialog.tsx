@@ -2,9 +2,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { Request, REQUEST_STATUSES, REQUEST_TYPES, REQUEST_PRIORITIES } from "@/types/request";
+import { Request, REQUEST_TYPES, REQUEST_PRIORITIES, getRequestStatusLabel } from "@/types/request";
 import { ServiceObject } from "@/types/serviceObject";
 import { Separator } from "@/components/ui/separator";
+import { useElementActivityLogs } from "@/hooks/useActivityLogs";
 
 interface RequestViewDialogProps {
   request: Request | null;
@@ -15,16 +16,19 @@ interface RequestViewDialogProps {
 }
 
 export function RequestViewDialog({ request, open, onOpenChange, serviceObject, onPrint }: RequestViewDialogProps) {
+  const { data: logs = [] } = useElementActivityLogs(request?.id);
+
   if (!request) return null;
 
-  const status = REQUEST_STATUSES.find(s => s.value === request.status);
   const type = REQUEST_TYPES.find(t => t.value === request.type);
   const priority = REQUEST_PRIORITIES.find(p => p.value === request.priority);
   const mainContact = serviceObject?.assignedContacts?.find(c => c.isMain) || serviceObject?.assignedContacts?.[0];
+  const statusChanges = logs.filter(l => l.action === 'update' && l.changes && 'status' in l.changes);
 
   const variantMap: Record<string, { bg: string; text: string }> = {
     new: { bg: "bg-blue-500", text: "text-white" },
     needs_calculation: { bg: "bg-purple-500", text: "text-white" },
+    awaiting_approval: { bg: "bg-indigo-500", text: "text-white" },
     awaiting_materials: { bg: "bg-orange-500", text: "text-white" },
     in_progress: { bg: "bg-cyan-500", text: "text-white" },
     partially_completed: { bg: "bg-yellow-500", text: "text-white" },
@@ -59,7 +63,7 @@ export function RequestViewDialog({ request, open, onOpenChange, serviceObject, 
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <Badge className={`${statusVariant?.bg} ${statusVariant?.text} border-transparent`}>
-              {status?.label}
+              {getRequestStatusLabel(request.status)}
             </Badge>
             <span className="text-muted-foreground">{type?.label}</span>
           </div>
@@ -184,6 +188,23 @@ export function RequestViewDialog({ request, open, onOpenChange, serviceObject, 
                     <div>{request.hoursSpent}</div>
                   </div>
                 )}
+              </div>
+            </>
+          )}
+
+          {statusChanges.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <div className="text-xs text-muted-foreground mb-2">История изменений статуса</div>
+                <div className="space-y-1 text-sm">
+                  {statusChanges.map(log => (
+                    <div key={log.id} className="flex justify-between">
+                      <span>{getRequestStatusLabel(log.changes!.status)}</span>
+                      <span className="text-muted-foreground">{new Date(log.createdAt).toLocaleString("ru-RU")}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}

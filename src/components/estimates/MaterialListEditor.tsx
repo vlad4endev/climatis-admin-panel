@@ -7,7 +7,7 @@ import { Material } from "@/types/estimate";
 interface MaterialListEditorProps {
   materials: Material[];
   onChange: (value: SetStateAction<Material[]>) => void;
-  availableMaterials: Array<{ id: string; name: string; price?: number }>;
+  availableMaterials: Array<{ id: string; name: string; price?: number; unit?: string }>;
   readOnly?: boolean;
 }
 
@@ -64,6 +64,7 @@ export function MaterialListEditor({
     const newMaterial: Material = {
       id: newId,
       materialName: "",
+      unit: "шт",
       quantity: 0,
       pricePerUnit: 0,
     };
@@ -94,7 +95,7 @@ export function MaterialListEditor({
 
   const selectMaterial = (
     materialId: string,
-    selectedMaterial: { id: string; name: string; price?: number }
+    selectedMaterial: { id: string; name: string; price?: number; unit?: string }
   ) => {
     // Atomic update: set all fields in one call to avoid stale state issues
     onChange((prev) =>
@@ -104,6 +105,7 @@ export function MaterialListEditor({
               ...material,
               materialId: selectedMaterial.id,
               materialName: selectedMaterial.name,
+              unit: selectedMaterial.unit || material.unit || "шт",
               pricePerUnit:
                 selectedMaterial.price != null
                   ? selectedMaterial.price
@@ -145,9 +147,10 @@ export function MaterialListEditor({
   return (
     <div className="space-y-4">
       {materials.length > 0 && (
-        <div className={`grid gap-3 text-sm font-medium text-muted-foreground ${readOnly ? "grid-cols-[1fr_80px_100px_100px]" : "grid-cols-[1fr_80px_100px_100px_80px]"}`}>
+        <div className={`grid gap-3 text-sm font-medium text-muted-foreground ${readOnly ? "grid-cols-[1fr_80px_80px_100px_100px]" : "grid-cols-[1fr_80px_80px_100px_100px_80px]"}`}>
           <div>Материал</div>
           <div>Кол-во</div>
+          <div>Ед. изм.</div>
           <div>Цена/ед.</div>
           <div>Сумма</div>
           {!readOnly && <div></div>}
@@ -164,7 +167,7 @@ export function MaterialListEditor({
           return (
             <div
               key={material.id}
-              className={`grid gap-3 items-center ${readOnly ? "grid-cols-[1fr_80px_100px_100px]" : "grid-cols-[1fr_80px_100px_100px_80px]"}`}
+              className={`grid gap-3 items-center ${readOnly ? "grid-cols-[1fr_80px_80px_100px_100px]" : "grid-cols-[1fr_80px_80px_100px_100px_80px]"}`}
             >
               <div className="relative" ref={(el) => (dropdownRefs.current[material.id] = el)}>
                 <Input
@@ -208,6 +211,14 @@ export function MaterialListEditor({
                   )
                 }
                 placeholder="0"
+                readOnly={readOnly}
+                className={readOnly ? "bg-muted/50" : ""}
+              />
+
+              <Input
+                value={material.unit || ""}
+                onChange={(e) => updateMaterial(material.id, "unit", e.target.value)}
+                placeholder="шт"
                 readOnly={readOnly}
                 className={readOnly ? "bg-muted/50" : ""}
               />

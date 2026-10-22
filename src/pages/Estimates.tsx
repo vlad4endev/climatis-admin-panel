@@ -114,6 +114,7 @@ export default function Estimates() {
     id: p.id,
     name: p.name,
     price: p.retailPrice,
+    unit: p.unit,
   }));
 
   const handlePrint = useReactToPrint({

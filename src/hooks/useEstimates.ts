@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listQueryOptions } from "@/lib/queryConfig";
-import { Estimate, WorkBlock, Material, PriceWork, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
+import { Estimate, WorkBlock, WorkBlockMode, Material, PriceWork, CustomerCalculation, DEFAULT_CUSTOMER_CALCULATION } from "@/types/estimate";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
@@ -20,6 +20,7 @@ const ESTIMATE_SELECT = `
   materials:estimate_materials(
     id,
     material_name,
+    unit,
     quantity,
     price_per_unit,
     spare_part_id,
@@ -45,27 +46,48 @@ const ESTIMATE_SELECT = `
   )
 `;
 
-function mapEstimateRow(row: any): Estimate {
-  const allPriceWorks: any[] = row.price_works || [];
-  const priceWorksByBlock = new Map<string, any[]>();
-  const orphanPriceWorks: any[] = [];
-  for (const p of allPriceWorks) {
-    if (p.work_block_id) {
-      const arr = priceWorksByBlock.get(p.work_block_id) || [];
-      arr.push(p);
-      priceWorksByBlock.set(p.work_block_id, arr);
-    } else {
-      orphanPriceWorks.push(p);
-    }
-  }
-  const mapPw = (p: any): PriceWork => ({
+export function mapPriceWorkRow(p: any): PriceWork {
+  return {
     id: p.id,
     priceItemId: p.price_item_id || undefined,
     name: p.name,
     unit: p.unit || "шт",
     quantity: Number(p.quantity) || 0,
     pricePerUnit: Number(p.price_per_unit) || 0,
-  });
+  };
+}
+
+/** Группирует прайс-работы по work_block_id и собирает блоки с rows+priceWorks. */
+export function mapWorkBlocksWithPriceWorks(workBlocksRaw: any[], priceWorksRaw: any[]): WorkBlock[] {
+  const priceWorksByBlock = new Map<string, any[]>();
+  for (const p of priceWorksRaw || []) {
+    if (p.work_block_id) {
+      const arr = priceWorksByBlock.get(p.work_block_id) || [];
+      arr.push(p);
+      priceWorksByBlock.set(p.work_block_id, arr);
+    }
+  }
+  return (workBlocksRaw || []).map((wb: any): WorkBlock => ({
+    id: wb.id,
+    description: wb.description || "",
+    mode: (wb.mode as WorkBlockMode) || "manual",
+    quantity: Number(wb.quantity) || 1,
+    rows: wb.rows?.map((r: any) => ({
+      category: r.category,
+      planHours: Number(r.plan_hours) || 0,
+      quantity: Number(r.quantity) || 0,
+      rate: Number(r.rate) || 0,
+    })) || [],
+    priceWorks: (priceWorksByBlock.get(wb.id) || [])
+      .slice()
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map(mapPriceWorkRow),
+  }));
+}
+
+function mapEstimateRow(row: any): Estimate {
+  const allPriceWorks: any[] = row.price_works || [];
+  const orphanPriceWorks: any[] = allPriceWorks.filter((p) => !p.work_block_id);
 
   return {
     id: row.id,
@@ -83,33 +105,19 @@ function mapEstimateRow(row: any): Estimate {
     createdByName: row.creator?.full_name || "",
     engineerComment: row.engineer_comment || undefined,
     customerCalculation: (row.customer_calculation as unknown as CustomerCalculation) || DEFAULT_CUSTOMER_CALCULATION,
-    workBlocks: row.work_blocks?.map((wb: any): WorkBlock => ({
-      id: wb.id,
-      description: wb.description || "",
-      mode: (wb.mode as "manual" | "price") || "manual",
-      quantity: Number(wb.quantity) || 1,
-      rows: wb.rows?.map((r: any) => ({
-        category: r.category,
-        planHours: Number(r.plan_hours) || 0,
-        quantity: Number(r.quantity) || 0,
-        rate: Number(r.rate) || 0,
-      })) || [],
-      priceWorks: (priceWorksByBlock.get(wb.id) || [])
-        .slice()
-        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-        .map(mapPw),
-    })) || [],
+    workBlocks: mapWorkBlocksWithPriceWorks(row.work_blocks, allPriceWorks),
     materials: row.materials?.map((m: any): Material => ({
       id: m.id,
       materialId: m.spare_part_id || undefined,
       materialName: m.material_name,
+      unit: m.unit || "шт",
       quantity: Number(m.quantity) || 0,
       pricePerUnit: Number(m.price_per_unit) || 0,
     })) || [],
     priceWorks: orphanPriceWorks
       .slice()
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      .map(mapPw),
+      .map(mapPriceWorkRow),
   };
 }
 
@@ -142,6 +150,7 @@ function buildChildrenPayload(estimate: Partial<Estimate>) {
     materials: (estimate.materials || []).map(m => ({
       material_name: m.materialName,
       spare_part_id: m.materialId || null,
+      unit: m.unit || "шт",
       quantity: m.quantity,
       price_per_unit: m.pricePerUnit,
     })),

@@ -28,11 +28,13 @@ interface EntityListProps<T> {
    * полный список — иначе совпадения ищутся только внутри текущей страницы.
    */
   onSearchChange?: (query: string) => void;
+  /** Вызывается при изменении select-фильтров — та же причина, что и у onSearchChange. */
+  onFiltersChange?: (filters: FilterValue[]) => void;
 }
 
 const SEARCH_NOTIFY_DEBOUNCE_MS = 300;
 
-export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination, onSearchChange, printTitle }: EntityListProps<T>) {
+export function EntityList<T>({ items, config, emptyMessage = "Нет данных", kanbanGroupField, kanbanColumns, defaultViewMode = 'card', initialFilters = [], pagination, onSearchChange, onFiltersChange, printTitle }: EntityListProps<T>) {
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,6 +61,12 @@ export function EntityList<T>({ items, config, emptyMessage = "Нет данны
     const timer = setTimeout(() => onSearchChange(searchQuery), SEARCH_NOTIFY_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchQuery, onSearchChange]);
+
+  // Фильтры меняются по дискретным событиям Select, а не по нажатиям клавиш —
+  // дебаунс здесь не нужен.
+  useEffect(() => {
+    onFiltersChange?.(filters);
+  }, [filters, onFiltersChange]);
 
   // Фильтрация и поиск
   const filteredItems = useMemo(() => {

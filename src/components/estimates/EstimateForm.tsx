@@ -455,6 +455,10 @@ export function EstimateForm({
           </tr>
         </table>
 
+        ${watch("engineerComment") ? `
+        <p style="font-weight: bold; font-size: 10pt; margin-top: 4mm;">Комментарий инженера:</p>
+        <p style="font-size: 10pt; white-space: pre-wrap;">${watch("engineerComment")}</p>` : ""}
+
         <!-- SIGNATURE -->
         <p style="text-align: center; font-size: 10pt; margin-top: 14mm;">Расчет составил ___________________ ${getEngineerNameWithInitials()}</p>
       </body>
@@ -476,6 +480,7 @@ export function EstimateForm({
         engineerName: getEngineerNameWithInitials(),
         executorCompany: getExecutorName(),
         estimateName: watch("name") || "",
+        engineerComment: watch("engineerComment"),
       });
     } catch (e: any) {
       console.error("PDF generation failed:", e);

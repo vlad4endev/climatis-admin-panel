@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listQueryOptions } from "@/lib/queryConfig";
 import { Assignment } from "@/types/assignment";
+import { mapWorkBlocksWithPriceWorks } from "@/hooks/useEstimates";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLogger";
 import { getErrorMessage } from "@/lib/errorMessages";
@@ -29,9 +30,11 @@ export function useAssignments() {
             work_blocks(
               id,
               description,
+              mode,
               quantity,
               rows:work_rows(*)
             ),
+            price_works:estimate_price_works(id, price_item_id, name, unit, quantity, price_per_unit, sort_order, work_block_id),
             materials:estimate_materials(*)
           )
         `)
@@ -53,21 +56,12 @@ export function useAssignments() {
         teamName: row.team?.name || "",
         clientName: row.request?.client?.company_name || "",
         objectName: row.request?.object?.object_name || "",
-        workBlocks: row.estimate?.work_blocks?.map((wb: any) => ({
-          id: wb.id,
-          description: wb.description || "",
-          quantity: Number(wb.quantity) || 1,
-          rows: wb.rows?.map((r: any) => ({
-            category: r.category,
-            planHours: Number(r.plan_hours) || 0,
-            quantity: Number(r.quantity) || 0,
-            rate: Number(r.rate) || 0,
-          })) || [],
-        })) || [],
+        workBlocks: mapWorkBlocksWithPriceWorks(row.estimate?.work_blocks, row.estimate?.price_works),
         materials: row.estimate?.materials?.map((m: any) => ({
           id: m.id,
           materialId: m.spare_part_id || undefined,
           materialName: m.material_name,
+          unit: m.unit || "шт",
           quantity: Number(m.quantity) || 0,
           pricePerUnit: Number(m.price_per_unit) || 0,
         })) || [],

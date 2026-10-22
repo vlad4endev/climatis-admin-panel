@@ -26,6 +26,7 @@ interface GeneratePDFParams {
   engineerName: string;
   executorCompany?: string;
   estimateName?: string;
+  engineerComment?: string;
 }
 
 // Format number with 2 decimal places and space as thousands separator
@@ -73,6 +74,7 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
     engineerName,
     executorCompany = 'ООО "Климатис"',
     estimateName,
+    engineerComment,
   } = params;
 
   // Load fonts
@@ -370,6 +372,14 @@ export async function generateCustomerEstimatePDF(params: GeneratePDFParams): Pr
   doc.setFontSize(10);
   doc.text("ВСЕГО по расчету:", totalsLabelX, yPos, { align: "right" });
   doc.text(formatCurrency(grandTotalWithVat), totalsValueX, yPos, { align: "right" });
+
+  // === Комментарий инженера ===
+  if (engineerComment) {
+    yPos += 8;
+    addText("Комментарий инженера:", marginLeft, yPos, { fontStyle: "bold", fontSize: 10 });
+    yPos += 4;
+    yPos = addWrappedText(engineerComment, marginLeft, yPos, pageWidth - marginLeft - marginRight, { fontSize: 9 });
+  }
 
   // === SIGNATURE ===
   yPos += 25;

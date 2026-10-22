@@ -4,7 +4,7 @@ import { useReactToPrint } from "react-to-print";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityList } from "@/components/entity/EntityList";
 import { EntityListConfig, CardAction } from "@/components/entity/types";
-import { Request, REQUEST_STATUSES, REQUEST_TYPES } from "@/types/request";
+import { Request, REQUEST_STATUSES, REQUEST_TYPES, getRequestStatusLabel } from "@/types/request";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestViewDialog } from "@/components/requests/RequestViewDialog";
 import { RequestPrintView } from "@/components/requests/RequestPrintView";
@@ -24,9 +24,10 @@ import { useMinimizedForms } from "@/hooks/useMinimizedForms";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Пока в поиске меньше символов, страница работает с текущей страницей выдачи;
-// начиная с этого порога подгружается полный список, иначе поиск находил бы
-// совпадения только внутри загруженных 50 записей.
+// Пока в поиске меньше символов и не активен ни один select-фильтр, страница
+// работает с текущей страницей выдачи; начиная с этого порога или при любом
+// активном фильтре подгружается полный список — иначе поиск/фильтр находили
+// бы совпадения только внутри загруженных 50 записей.
 const SEARCH_ALL_MIN_CHARS = 2;
 
 export default function Requests() {
@@ -37,14 +38,16 @@ export default function Requests() {
 
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
   const { data: requestsResult, isLoading: requestsLoading } = usePaginatedRequests(currentPage);
   const requests = requestsResult?.items || [];
   const totalCount = requestsResult?.totalCount || 0;
 
-  // При поиске нужен полный список, а не только текущая страница
+  // При поиске или активном фильтре нужен полный список, а не только текущая страница
   const isSearching = searchQuery.trim().length >= SEARCH_ALL_MIN_CHARS;
-  const { data: allRequests = [] } = useRequests({ enabled: isSearching });
-  const listItems = isSearching && allRequests.length > 0 ? allRequests : requests;
+  const needsFullList = isSearching || hasActiveFilters;
+  const { data: allRequests = [] } = useRequests({ enabled: needsFullList });
+  const listItems = needsFullList && allRequests.length > 0 ? allRequests : requests;
   const { data: clients = [] } = useClients();
   const { data: serviceObjects = [] } = useServiceObjects();
   const { data: documents = [] } = useDocuments();
@@ -228,10 +231,10 @@ export default function Requests() {
         filterable: true,
         editable: false,
         render: (value) => {
-          const status = REQUEST_STATUSES.find(s => s.value === value);
           const variantMap: Record<string, { bg: string; text: string }> = {
             new: { bg: "bg-blue-500", text: "text-white" },
             needs_calculation: { bg: "bg-purple-500", text: "text-white" },
+            awaiting_approval: { bg: "bg-indigo-500", text: "text-white" },
             awaiting_materials: { bg: "bg-orange-500", text: "text-white" },
             in_progress: { bg: "bg-cyan-500", text: "text-white" },
             partially_completed: { bg: "bg-yellow-500", text: "text-white" },
@@ -241,7 +244,7 @@ export default function Requests() {
           const variant = variantMap[value as string];
           return (
             <Badge className={`${variant?.bg} ${variant?.text} border-transparent px-2 text-xs`}>
-              {status?.label}
+              {getRequestStatusLabel(value)}
             </Badge>
           );
         }
@@ -294,11 +297,20 @@ export default function Requests() {
         editable: false,
         render: (value) => value ? new Date(value).toLocaleDateString("ru-RU") : "-"
       },
-      { 
-        key: "assignedTeamName", 
-        label: "Бригада", 
+      {
+        key: "assignedTeamName",
+        label: "Бригада",
         type: "text",
         editable: false
+      },
+      {
+        key: "assignedEngineerId",
+        label: "Инженер",
+        type: "select",
+        options: employees.map(e => ({ value: e.id, label: e.fullName })),
+        filterable: true,
+        editable: false,
+        render: (_, item) => item.assignedEngineerName || "-",
       },
     ],
     getItemId: (item) => item.id,
@@ -375,7 +387,8 @@ export default function Requests() {
         kanbanGroupField="status"
         kanbanColumns={REQUEST_STATUSES}
         onSearchChange={setSearchQuery}
-        pagination={isSearching ? undefined : {
+        onFiltersChange={(filters) => setHasActiveFilters(filters.some(f => f.value))}
+        pagination={needsFullList ? undefined : {
           page: currentPage,
           totalCount,
           pageSize: 50,

@@ -1,7 +1,8 @@
-export type RequestStatus = 
+export type RequestStatus =
   | "draft"
   | "new"
   | "needs_calculation"
+  | "awaiting_approval"
   | "awaiting_materials"
   | "in_progress"
   | "partially_completed"
@@ -15,12 +16,24 @@ export const REQUEST_STATUSES: { value: RequestStatus; label: string }[] = [
   { value: "draft", label: "Черновик" },
   { value: "new", label: "Новая" },
   { value: "needs_calculation", label: "Требует расчёта" },
+  { value: "awaiting_approval", label: "Ожидает согласования" },
   { value: "awaiting_materials", label: "Ожидает материалов" },
   { value: "in_progress", label: "В работе" },
-  { value: "partially_completed", label: "Частично выполнена" },
   { value: "completed", label: "Выполнена" },
   { value: "closed", label: "Закрыта" },
 ];
+
+// Старый статус оставлен в БД для совместимости со старыми заявками, но не
+// предлагается при создании/редактировании — нужен только для вывода метки.
+const LEGACY_REQUEST_STATUS_LABELS: Partial<Record<RequestStatus, string>> = {
+  partially_completed: "Частично выполнена",
+};
+
+export function getRequestStatusLabel(status: RequestStatus): string {
+  return REQUEST_STATUSES.find(s => s.value === status)?.label
+    ?? LEGACY_REQUEST_STATUS_LABELS[status]
+    ?? status;
+}
 
 export const REQUEST_TYPES: { value: RequestType; label: string }[] = [
   { value: "repair", label: "Ремонт" },

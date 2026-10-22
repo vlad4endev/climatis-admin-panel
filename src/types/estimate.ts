@@ -34,6 +34,7 @@ export interface Material {
   id: string;
   materialId?: string;
   materialName: string;
+  unit: string;
   quantity: number;
   pricePerUnit: number;
 }
@@ -174,6 +175,45 @@ export function calculateAllBlocksTotal(blocks: WorkBlock[]): number {
   return blocks.reduce((sum, block) => sum + calculateWorkBlockTotal(block), 0);
 }
 
+// Оплата бригаде за работы по прайсу — фиксированный процент от суммы по
+// прайс-листу (п.8 фидбэка заказчика). Ручные (почасовые) блоки бригаде
+// оплачиваются полностью, как раньше — правило касается только прайса.
+export const BRIGADE_PRICE_WORK_RATE = 0.3;
+
+export function calculateWorkBlockBrigadeTotal(block: WorkBlock): number {
+  return calculateWorkBlockRowsTotal(block) + calculateWorkBlockPriceWorksTotal(block) * BRIGADE_PRICE_WORK_RATE;
+}
+
+export function calculateAllBlocksBrigadeTotal(blocks: WorkBlock[]): number {
+  return blocks.reduce((sum, block) => sum + calculateWorkBlockBrigadeTotal(block), 0);
+}
+
+export interface AssignmentWorkLine {
+  label: string;
+  hours: number;
+  amount: number;
+}
+
+// Построчная раскладка для бланка задания бригаде: именованные позиции
+// прайса вместо одной строки на блок (аналог getCustomerWorkLines, но без
+// наценки для заказчика — с коэффициентом оплаты бригаде вместо неё).
+export function getAssignmentWorkLines(block: WorkBlock): AssignmentWorkLine[] {
+  if (block.mode === "price") {
+    const items = block.priceWorks || [];
+    const blockQty = getWorkBlockQuantity(block);
+    if (items.length === 0) {
+      return [{ label: block.description || "Работа", hours: 0, amount: 0 }];
+    }
+    return items.map((pw) => ({
+      label: pw.name || "Работа",
+      hours: 0,
+      amount: pw.quantity * pw.pricePerUnit * blockQty * BRIGADE_PRICE_WORK_RATE,
+    }));
+  }
+  const hours = block.rows.reduce((sum, row) => sum + row.planHours * row.quantity, 0);
+  return [{ label: block.description || "Без описания", hours, amount: calculateWorkBlockTotal(block) }];
+}
+
 // Единая формула "Итого для заказчика": раньше независимо считалась в
 // EstimateForm.tsx (вкладка "Для заказчика" + отдельно в getDocumentContent
 // для Word) и в generateCustomerEstimatePDF.ts — три места легко было
@@ -303,7 +343,7 @@ export function getCustomerMaterialLines(
   const markup = 1 + (customerCalc.transportPercent + customerCalc.warehousePercent) / 100;
   return materials.map((m) => ({
     name: m.materialName,
-    unit: "шт",
+    unit: m.unit || "шт",
     quantity: m.quantity,
     unitPrice: m.pricePerUnit * markup,
     amount: m.quantity * m.pricePerUnit * markup,
