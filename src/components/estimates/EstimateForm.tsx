@@ -509,7 +509,7 @@ export function EstimateForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 min-w-0">
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">Основное</TabsTrigger>
