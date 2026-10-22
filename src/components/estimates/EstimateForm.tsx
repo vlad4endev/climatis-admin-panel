@@ -813,9 +813,9 @@ export function EstimateForm({
                     {mode === "price" ? (
                       <div className="pl-4 space-y-0.5 text-xs text-muted-foreground">
                         {(block.priceWorks || []).filter(p => p.name || p.quantity).map((p) => (
-                          <div key={p.id} className="flex justify-between gap-2">
-                            <span className="truncate">— {p.name || "Без названия"} ({p.quantity} {p.unit} × {Math.round(p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽{blockQty > 1 ? ` × ${blockQty}` : ""})</span>
-                            <span className="whitespace-nowrap">{Math.round(p.quantity * p.pricePerUnit * markup * blockQty).toLocaleString("ru-RU")} ₽</span>
+                          <div key={p.id} className="flex justify-between gap-2 min-w-0">
+                            <span className="truncate min-w-0">— {p.name || "Без названия"} ({p.quantity} {p.unit} × {Math.round(p.pricePerUnit * markup).toLocaleString("ru-RU")} ₽{blockQty > 1 ? ` × ${blockQty}` : ""})</span>
+                            <span className="whitespace-nowrap shrink-0">{Math.round(p.quantity * p.pricePerUnit * markup * blockQty).toLocaleString("ru-RU")} ₽</span>
                           </div>
                         ))}
                       </div>

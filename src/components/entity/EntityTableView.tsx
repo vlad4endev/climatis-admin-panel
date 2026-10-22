@@ -25,6 +25,7 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
         <Table className="w-max min-w-full">
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]">№</TableHead>
             {config.fields.map(field => (
               <TableHead key={field.key}>
                 <div className="flex items-center gap-2">
@@ -46,14 +47,15 @@ export function EntityTableView<T>({ items, config, sortField, sortDirection, on
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map(item => {
+          {items.map((item, index) => {
             const id = config.getItemId(item);
             return (
-              <TableRow 
-                key={id} 
+              <TableRow
+                key={id}
                 className={config.onRowClick ? "cursor-pointer" : ""}
                 onClick={() => config.onRowClick?.(item)}
               >
+                <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                 {config.fields.map(field => {
                   const value = field.getValue ? field.getValue(item) : (item as any)[field.key];
                   return (
