@@ -373,7 +373,7 @@ export default function Estimates() {
       </Dialog>
 
       <Dialog open={!!viewingEstimate} onOpenChange={(open) => !open && setViewingEstimate(undefined)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Просмотр расчёта</DialogTitle>
           </DialogHeader>
